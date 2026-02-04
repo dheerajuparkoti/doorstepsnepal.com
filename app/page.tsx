@@ -15,6 +15,12 @@ import { ServicesSkeleton } from "@/components/home/skeleton/services-skeleton";
 import { ServicesSection } from '@/components/home/services-section-ssr';
 import { ProfessionalsSkeleton } from "@/components/home/skeleton/professional-skeleton";
 import { ProfessionalsSections } from "@/components/home/professional-section-ssr";
+import { FeaturedServicesSection } from "@/components/home/featured-services-section";
+import { FeaturedServicesSkeleton } from "@/components/home/skeleton/feateured-services-skeleton";
+import { FeaturedServicesSections } from "@/components/home/featured-services-section-ssr";
+import { FeaturedServicesCarouselSkeleton } from "@/components/home/skeleton/featured-services-carousel-skeleton";
+import { FeaturedServicesCarouselSection } from "@/components/home/featured-services-carousel-ssr";
+
 
 
 
@@ -29,6 +35,19 @@ export default function HomePage() {
             <HeroCarousel />
           </section>
           <SearchSection />
+
+                     {/* featured services Section with Suspense boundary */}
+      <Suspense fallback={<FeaturedServicesCarouselSkeleton/>}>
+        <FeaturedServicesCarouselSection />
+      </Suspense>
+
+
+           {/* featured services Section with Suspense boundary */}
+      <Suspense fallback={<FeaturedServicesSkeleton />}>
+        <FeaturedServicesSections />
+      </Suspense>
+
+
   {/* Categories Section with Suspense boundary */}
       <Suspense fallback={<CategoriesSkeleton />}>
         <CategoriesSection />
