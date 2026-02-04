@@ -1,12 +1,13 @@
+
 export class ApiConstants {
-  // Pull from the single .env via process.env
-  static localBaseUrl = process.env.NEXT_PUBLIC_API_URL_LOCAL || "http://localhost:8000";
-  static prodBaseUrl = process.env.NEXT_PUBLIC_API_URL_PROD || "https://api.prod.com";
-
-  // Automatically true when you build for production
-  static isProduction = process.env.NODE_ENV === 'production';
-
+  static useProduction = true; 
+  
   static get baseUrl(): string {
-    return this.isProduction ? this.prodBaseUrl : this.localBaseUrl;
+    const url = this.useProduction 
+      ? "https://hrtgwbtnq9.execute-api.ap-south-1.amazonaws.com/api/v1"
+      : "http://192.168.1.72:8000/api/v1";
+    
+    console.log(' API URL:', url); 
+    return url;
   }
 }

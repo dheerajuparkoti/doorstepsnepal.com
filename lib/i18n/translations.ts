@@ -25,6 +25,7 @@ export const translations = {
       searchButton: "Search",
       filterByLocation: "Filter by Location",
       filterActive : "Active",
+  
       province: "Province",
       district: "District",
       municipality: "Municipality",
@@ -88,6 +89,80 @@ export const translations = {
       easyBooking: "Easy Online Booking",
       easyBookingDesc: "Book services in just a few clicks from your phone or computer.",
     },
+
+
+
+     about: {
+      heroTitle: 'Transforming Home Services',
+      heroDescription: 'We connect trusted professionals with homeowners, making quality services accessible, reliable, and convenient for everyone.',
+      happyCustomers: 'Happy Customers',
+      verifiedPros: 'Verified Professionals',
+      services: 'Services',
+      
+      missionVisionTitle: 'Our Mission & Vision',
+      missionVisionSubtitle: 'Building a platform that empowers both service providers and homeowners.',
+      
+      missionTitle: 'Our Mission',
+      missionDescription: 'To make quality home services accessible to every household by connecting them with verified, skilled professionals.',
+      
+      visionTitle: 'Our Vision',
+      visionDescription: 'To become the most trusted platform for home services across Nepal, setting new standards in reliability and customer satisfaction.',
+      
+      valuesTitle: 'Our Values',
+      valuesDescription: 'Integrity, reliability, innovation, and customer-centric approach guide everything we do.',
+      
+      teamTitle: 'Meet Our Team',
+      teamSubtitle: 'Passionate individuals dedicated to revolutionizing home services.',
+      
+      teamMember1Name: 'Dheeraj Uparkoti',
+      teamMember1Role: 'CEO & Founder',
+      teamMember1Bio: '10+ years in tech and service industry',
+      
+      teamMember2Name: 'Reverse Minded',
+      teamMember2Role: 'Head of Operations',
+      teamMember2Bio: 'Expert in service management',
+      
+      teamMember3Name: 'Lok Uparkoti',
+      teamMember3Role: 'CTO',
+      teamMember3Bio: 'Technology visionary',
+      
+      teamMember4Name: 'Nischal Uparkoti',
+      teamMember4Role: 'Customer Success',
+      teamMember4Bio: 'Ensuring customer satisfaction',
+      
+      statsCustomers: 'Happy Customers',
+      statsServices: 'Services Delivered',
+      statsRating: 'Customer Rating',
+      statsSupport: 'Support Available',
+      
+      contactTitle: 'Get In Touch',
+      contactSubtitle: 'Have questions? We\'d love to hear from you.',
+      contactEmail: 'Email',
+      contactPhone: 'Phone',
+      contactAddress: 'Address',
+      
+      formName: 'Your Name',
+      formNamePlaceholder: 'Enter your name',
+      formEmail: 'Email Address',
+      formEmailPlaceholder: 'Enter your email',
+      formMessage: 'Message',
+      formMessagePlaceholder: 'Tell us how we can help...',
+      formSubmit: 'Send Message',
+    },
+    
+    // whyChoose: {
+    //   title: 'Why Choose Doorstep Services',
+    //   verified: 'Verified Professionals',
+    //   verifiedDesc: 'All service providers undergo strict verification and background checks.',
+    //   affordable: 'Affordable Pricing',
+    //   affordableDesc: 'Transparent pricing with no hidden charges. Pay only for what you need.',
+    //   onTime: 'On-Time Service',
+    //   onTimeDesc: 'We value your time. Our professionals arrive as scheduled.',
+    //   satisfaction: 'Satisfaction Guaranteed',
+    //   satisfactionDesc: 'If you\'re not happy with the service, we\'ll make it right.',
+    //   easyBooking: 'Easy Booking',
+    //   easyBookingDesc: 'Book services in just a few clicks from our website or app.',
+    // },
     // Footer
     footer: {
       about: "About Doorsteps Nepal",
@@ -246,6 +321,7 @@ export const translations = {
       placeholder: "तपाईंलाई कुन सेवा चाहिन्छ?",
       searchButton: "खोज्नुहोस्",
       filterByLocation: "स्थान अनुसार फिल्टर",
+      filterActive: "सक्रिय फिल्टरहरू",
       province: "प्रदेश",
       district: "जिल्ला",
       municipality: "नगरपालिका",
@@ -296,18 +372,90 @@ export const translations = {
       hireNow: "अहिले नियुक्त गर्नुहोस्",
     },
     // Why Choose Us
+    // whyChoose: {
+    //   title: "Doorsteps Nepal किन छान्ने",
+    //   verified: "प्रमाणित पेशेवरहरू",
+    //   verifiedDesc: "हाम्रा सबै पेशेवरहरू तपाईंको सुरक्षाको लागि पृष्ठभूमि जाँच र प्रमाणित छन्।",
+    //   affordable: "सस्तो मूल्य",
+    //   affordableDesc: "पारदर्शी बिलिङको साथ प्रतिस्पर्धी मूल्यमा गुणस्तरीय सेवाहरू पाउनुहोस्।",
+    //   onTime: "समयमै सेवा",
+    //   onTimeDesc: "हाम्रा पेशेवरहरू समयमा आइपुग्छन् र काम कुशलतापूर्वक पूरा गर्छन्।",
+    //   satisfaction: "ग्राहक सन्तुष्टि",
+    //   satisfactionDesc: "हामी हाम्रो सेवाहरूसँग १००% ग्राहक सन्तुष्टि सुनिश्चित गर्छौं।",
+    //   easyBooking: "सजिलो अनलाइन बुकिङ",
+    //   easyBookingDesc: "आफ्नो फोन वा कम्प्युटरबाट केही क्लिकमा सेवाहरू बुक गर्नुहोस्।",
+    // },
+
+      about: {
+      heroTitle: 'घर सेवाहरू रूपान्तरण गर्दै',
+      heroDescription: 'हामी विश्वसनीय पेशेवरहरूलाई घरधनीहरूसँग जोड्छौं, गुणस्तरीय सेवाहरू सबैका लागि पहुँचयोग्य, विश्वसनीय र सुविधाजनक बनाउँदै।',
+      happyCustomers: 'खुसी ग्राहकहरू',
+      verifiedPros: 'प्रमाणित पेशेवरहरू',
+      services: 'सेवाहरू',
+      
+      missionVisionTitle: 'हाम्रो मिशन र भिजन',
+      missionVisionSubtitle: 'सेवा प्रदायक र घरधनी दुवैलाई सशक्त बनाउने प्लेटफर्म निर्माण गर्दै।',
+      
+      missionTitle: 'हाम्रो मिशन',
+      missionDescription: 'प्रमाणित, कुशल पेशेवरहरूसँग जोडेर प्रत्येक घरपरिवारलाई गुणस्तरीय घर सेवा पहुँचयोग्य बनाउनु।',
+      
+      visionTitle: 'हाम्रो भिजन',
+      visionDescription: 'नेपालभरि घर सेवाको लागि सबैभन्दा विश्वसनीय प्लेटफर्म बन्नु, विश्वसनीयता र ग्राहक सन्तुष्टिमा नयाँ मानक स्थापना गर्नु।',
+      
+      valuesTitle: 'हाम्रा मूल्यहरू',
+      valuesDescription: 'ईमान्दारिता, विश्वसनीयता, नवीनता, र ग्राहक-केन्द्रित दृष्टिकोणले हाम्रो सबै कार्यहरू मार्गनिर्देशन गर्दछ।',
+      
+      teamTitle: 'हाम्रो टोलीसँग भेटहोस्',
+      teamSubtitle: 'घर सेवाहरू क्रान्तिकारी बनाउन समर्पित उत्साही व्यक्तिहरू।',
+      
+      teamMember1Name: 'धिरज उपरकोटी',
+      teamMember1Role: 'सीईओ र संस्थापक',
+      teamMember1Bio: '१०+ वर्षको टेक र सेवा उद्योगमा अनुभव',
+      
+      teamMember2Name: 'रिभर्स माइन्डेड',
+      teamMember2Role: 'अपरेसन्स प्रमुख',
+      teamMember2Bio: 'सेवा प्रबन्धनमा विशेषज्ञ',
+      
+      teamMember3Name: 'लोक उपरकोटी',
+      teamMember3Role: 'सीटिओ',
+      teamMember3Bio: 'प्रविधि द्रष्टा',
+      
+      teamMember4Name: 'निस्चल उपरकोटी',
+      teamMember4Role: 'ग्राहक सफलता',
+      teamMember4Bio: 'ग्राहक सन्तुष्टि सुनिश्चित गर्दै',
+      
+      statsCustomers: 'खुसी ग्राहकहरू',
+      statsServices: 'प्रदान गरिएका सेवाहरू',
+      statsRating: 'ग्राहक रेटिंग',
+      statsSupport: 'उपलब्ध समर्थन',
+      
+      contactTitle: 'सम्पर्क गर्नुहोस्',
+      contactSubtitle: 'प्रश्नहरू छन्? हामी तपाईंबाट सुन्न चाहन्छौं।',
+      contactEmail: 'इमेल',
+      contactPhone: 'फोन',
+      contactAddress: 'ठेगाना',
+      
+      formName: 'तपाईंको नाम',
+      formNamePlaceholder: 'आफ्नो नाम प्रविष्ट गर्नुहोस्',
+      formEmail: 'इमेल ठेगाना',
+      formEmailPlaceholder: 'आफ्नो इमेल प्रविष्ट गर्नुहोस्',
+      formMessage: 'सन्देश',
+      formMessagePlaceholder: 'हामीले कसरी मद्दत गर्न सक्छौं भन्नुहोस्...',
+      formSubmit: 'सन्देश पठाउनुहोस्',
+    },
+    
     whyChoose: {
-      title: "Doorsteps Nepal किन छान्ने",
-      verified: "प्रमाणित पेशेवरहरू",
-      verifiedDesc: "हाम्रा सबै पेशेवरहरू तपाईंको सुरक्षाको लागि पृष्ठभूमि जाँच र प्रमाणित छन्।",
-      affordable: "सस्तो मूल्य",
-      affordableDesc: "पारदर्शी बिलिङको साथ प्रतिस्पर्धी मूल्यमा गुणस्तरीय सेवाहरू पाउनुहोस्।",
-      onTime: "समयमै सेवा",
-      onTimeDesc: "हाम्रा पेशेवरहरू समयमा आइपुग्छन् र काम कुशलतापूर्वक पूरा गर्छन्।",
-      satisfaction: "ग्राहक सन्तुष्टि",
-      satisfactionDesc: "हामी हाम्रो सेवाहरूसँग १००% ग्राहक सन्तुष्टि सुनिश्चित गर्छौं।",
-      easyBooking: "सजिलो अनलाइन बुकिङ",
-      easyBookingDesc: "आफ्नो फोन वा कम्प्युटरबाट केही क्लिकमा सेवाहरू बुक गर्नुहोस्।",
+      title: 'डोरस्टेप सेवा किन छनौट गर्नुहोस्',
+      verified: 'प्रमाणित पेशेवरहरू',
+      verifiedDesc: 'सबै सेवा प्रदायकहरू कडा प्रमाणीकरण र पृष्ठभूमि जाँच हुन्छन्।',
+      affordable: 'सस्तो मूल्य',
+      affordableDesc: 'पारदर्शी मूल्य निर्धारण, कुनै लुकेको शुल्क छैन। आवश्यकताको लागि मात्र तिर्नुहोस्।',
+      onTime: 'समयमै सेवा',
+      onTimeDesc: 'हामी तपाईंको समयको कदर गर्छौं। हाम्रा पेशेवरहरू निर्धारित समयमै आउँछन्।',
+      satisfaction: 'सन्तुष्टि ग्यारेन्टी',
+      satisfactionDesc: 'यदि तपाईं सेवाबाट खुसी हुनुहुन्न भने, हामी सच्याउँछौं।',
+      easyBooking: 'सजिलो बुकिङ',
+      easyBookingDesc: 'हाम्रो वेबसाइट वा एपबाट केही क्लिकमा सेवाहरू बुक गर्नुहोस्।',
     },
     // Footer
     footer: {

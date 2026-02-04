@@ -29,9 +29,9 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import {
-  serviceCategories,
-  professionals,
-  getAllServices,
+  // serviceCategories,
+  // professionals,
+  // getAllServices,
 } from "@/lib/data/services";
 import {
   provinces,

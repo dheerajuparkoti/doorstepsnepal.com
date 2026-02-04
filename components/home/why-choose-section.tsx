@@ -1,10 +1,11 @@
 "use client";
-
 import { useI18n } from "@/lib/i18n/context";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShieldCheck, Wallet, Clock, ThumbsUp, MousePointer2 } from "lucide-react";
-
-export function WhyChooseSection() {
+interface SectionProps {
+  id?: string;
+}
+export function WhyChooseSection({ id }: SectionProps) {
   const { t } = useI18n();
 
   const features = [
@@ -36,7 +37,7 @@ export function WhyChooseSection() {
   ];
 
   return (
-    <section className="py-16 md:py-24">
+    <section id={id} className="py-16 md:py-24">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mb-12 text-center">
