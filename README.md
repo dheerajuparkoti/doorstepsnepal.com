@@ -12,6 +12,9 @@ yarn dev
 pnpm dev
 # or
 bun dev
+
+add below key on .env 
+RESEND_API_KEY=re_DRKwXQy7_9cELKQr6Jp9uPg6Xh3rXn2vD  
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
