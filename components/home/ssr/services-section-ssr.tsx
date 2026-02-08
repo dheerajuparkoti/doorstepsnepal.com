@@ -1,6 +1,6 @@
 
 import { fetchServices } from '@/lib/api/services';
-import { ServicesClient } from './services-section';
+import { ServicesClient } from '../services-section';
 
 export async function ServicesSection() {
   //  SSR: Fetches data on SERVER

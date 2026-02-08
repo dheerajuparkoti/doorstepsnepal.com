@@ -30,6 +30,7 @@ import {
   Info,
   UserPlus,
   LogIn,
+  HomeIcon,
 } from "lucide-react";
 
 export function Navbar() {
@@ -38,6 +39,7 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
+    { href: "/", label: t.nav.home, icon: HomeIcon },
     { href: "/services", label: t.nav.services, icon: Briefcase },
     { href: "/professionals", label: t.nav.professionals, icon: Users },
     { href: "/about", label: t.nav.aboutUs, icon: Info },

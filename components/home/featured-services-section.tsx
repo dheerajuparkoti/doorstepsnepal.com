@@ -58,8 +58,10 @@ export function FeaturedServicesSection({
             return (
               <Link
                 key={ps.id}
-                href={`/services/${service.id}`}
+                href={`/services/${service.id}/professionals`}
               >
+  
+
     <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
   {/* Service Image */}
   <div className="relative h-40 w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -104,10 +106,10 @@ export function FeaturedServicesSection({
                 <span className="font-medium text-gray-900 dark:text-white">
                   {discountedPrice !== null ? (
                     <>
-                      <span className="line-through text-gray-400 dark:text-gray-500 mr-2">
+                      <span className="line-through text-amber-400 dark:text-amber-500 mr-2">
                         Rs. {price.price}
                       </span>
-                      <span className="text-red-600 dark:text-red-400 font-semibold">
+                      <span className="text-white-600 dark:text-white-400 font-semibold">
                         Rs. {discountedPrice}
                       </span>
                     </>

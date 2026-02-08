@@ -4,7 +4,7 @@ import { CategoriesResponse, Category } from '@/lib/data/categories';
 
 export async function fetchCategories(
   page: number = 1,
-  size: number = 8
+  size: number = 1000
 ): Promise<CategoriesResponse> {
   try {
     const params = new URLSearchParams({
@@ -25,7 +25,7 @@ export async function fetchCategories(
 
 export async function fetchCategoryById(id: number): Promise<Category | null> {
   try {
-    return await apiFetch<Category>(`/api/v1/categories/${id}`, {
+    return await apiFetch<Category>(`/categories/${id}`, {
       cache: 'force-cache',
       next: { revalidate: 3600 }
     });

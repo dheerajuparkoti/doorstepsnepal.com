@@ -61,7 +61,8 @@ export function CategoriesClient({ categoriesData }: CategoriesClientProps) {
           </div>
 
           <Button variant="outline" className="gap-2" asChild>
-            <Link href="/services">
+ 
+            <Link href="/subcategories">
               {language === "ne" ? "सबै हेर्नुहोस्" : "View All"}
               <ArrowRight className="h-4 w-4" />
             </Link>
@@ -71,7 +72,11 @@ export function CategoriesClient({ categoriesData }: CategoriesClientProps) {
         {/* Categories Grid - Updates INSTANTLY */}
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {categories.map((category) => (
-            <Link key={category.id} href={`/services/${category.id}`}>
+            <Link key={category.id} href={`/subcategories/${category.id}`}>
+              
+            {/* // <Link href={`/subcategories/${category.id}`}> */}
+
+
               <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
                 {/* Image */}
                 <div className="relative h-40 w-full overflow-hidden bg-muted">

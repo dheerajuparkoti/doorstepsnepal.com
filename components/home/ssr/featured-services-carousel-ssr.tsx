@@ -14,7 +14,7 @@
 // }
 
 
-import { FeaturedServicesCarousel } from "./featured-services-carousel";
+import { FeaturedServicesCarousel } from "../featured-services-carousel";
 import { fetchProfessionalServices } from "@/lib/api/professional-services";
 import type { ProfessionalService } from "@/lib/data/professional-services";
 

@@ -4,7 +4,7 @@ import { Service, ServicesResponse } from '@/lib/data/services';
 
 export async function fetchServices(
   page: number = 1,
-  size: number = 10,
+  size: number = 10000,
   options?: {
     category_id?: number;
     sub_category_id?: number;

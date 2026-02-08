@@ -49,12 +49,18 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
             </p>
           </div>
 
-          <Button variant="outline" className="gap-2" asChild>
+          {/* <Button variant="outline" className="gap-2" asChild>
             <Link href="/professionals">
               {language === "ne" ? "सबै हेर्नुहोस्" : "View All"}
               <ArrowRight className="h-4 w-4" />
             </Link>
-          </Button>
+          </Button> */}
+          <Button variant="outline" className="gap-2" asChild>
+  <Link href="/professionals">
+    {language === "ne" ? "सबै व्यावसायिक हेर्नुहोस्" : "View All Professionals"}
+    <ArrowRight className="h-4 w-4" />
+  </Link>
+</Button>
         </div>
 
         {/* Professionals Grid */}
@@ -63,7 +69,8 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
             const user = ps.professional.user;
 
             return (
-              <Link key={ps.professional.id} href={`/professionals/${ps.professional.id}`}>
+              // <Link key={ps.professional.id} href={`/professionals/${ps.professional.id}`}>
+              <Link key={ps.professional.id} href={`/professionals?professionalId=${ps.professional.id}`}>
                 <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
                   {/* Circular Avatar */}
                   <div className="relative mx-auto mt-6 h-36 w-36 overflow-hidden rounded-full bg-muted">

@@ -61,7 +61,7 @@ export function FeaturedServicesCarousel({
                 return (
                   <Link
                     key={ps.id}
-                    href={`/services/${service.id}`}
+                    href={`/services/${service.id}/professionals`}
                     className="flex-shrink-0 w-[380px] md:w-[480px] lg:w-[520px]"
                   >
                     <div className="relative h-[420px] rounded-lg overflow-hidden shadow-lg group">
@@ -101,7 +101,7 @@ export function FeaturedServicesCarousel({
                                   Rs. {discountedPrice.toFixed(2)}
                                 </span>
                                 {price.discount_percentage > 0 && (
-                                  <span className="line-through text-gray-400 text-xs">
+                                  <span className="line-through text-amber-400 text-xs">
                                     Rs. {price.price}
                                   </span>
                                 )}

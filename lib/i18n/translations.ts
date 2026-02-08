@@ -2,6 +2,7 @@ export const translations = {
   en: {
     // Navigation
     nav: {
+      home: "Home",
       services: "Services",
       professionals: "Professionals",
       aboutUs: "About Us",
@@ -22,7 +23,7 @@ export const translations = {
     // Search
     search: {
       placeholder: "What service do you need?",
-      searchButton: "Search",
+      searchButton: "Search Now",
       filterByLocation: "Filter by Location",
       filterActive : "Active",
   
@@ -33,6 +34,11 @@ export const translations = {
       street: "Street",
       apply: "Apply Filters",
       clear: "Clear",
+
+      advancedFilter: "Advanced Filter",
+      byService: "By Service",
+      byLocation: "By Location",
+      locationPlaceholder: "Enter area name (e.g., Kathmandu, Lalitpur)",
     },
     // Services
     services: {
@@ -299,6 +305,7 @@ export const translations = {
   ne: {
     // Navigation
     nav: {
+      home: "होम",
       services: "सेवाहरू",
       professionals: "पेशेवरहरू",
       aboutUs: "हाम्रो बारेमा",
@@ -329,6 +336,11 @@ export const translations = {
       street: "गल्ली",
       apply: "फिल्टर लागू गर्नुहोस्",
       clear: "खाली गर्नुहोस्",
+      advancedFilter: "एडभान्स फिल्टर",
+      byService: "सेवाबाट खोज्नुहोस्",
+      byLocation: "स्थानबाट खोज्नुहोस्",
+    locationPlaceholder: "स्थानको नाम लेख्नुहोस् (जस्तै: काठमाडौं, ललितपुर)",
+
     },
     // Services
     services: {

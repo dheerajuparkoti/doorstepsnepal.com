@@ -1,4 +1,4 @@
-import { FeaturedServicesSection } from "./featured-services-section";
+import { FeaturedServicesSection } from "../featured-services-section";
 import { fetchProfessionalServices } from "@/lib/api/professional-services";
 import type { ProfessionalService } from "@/lib/data/professional-services";
 

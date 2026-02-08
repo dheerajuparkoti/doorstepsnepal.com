@@ -1,4 +1,4 @@
-import { ProfessionalsSection } from './professionals-section';
+import { ProfessionalsSection } from '../professionals-section';
 import { fetchProfessionalServices } from '@/lib/api/professional-services';
 import type { ProfessionalService } from '@/lib/data/professional-services';
 

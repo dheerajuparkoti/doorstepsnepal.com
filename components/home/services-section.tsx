@@ -73,7 +73,8 @@ export function ServicesClient({ servicesData }: ServicesClientProps) {
         {/* Services Grid */}
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {services.map((service, index) => (
-            <Link key={service.id} href={`/services/${service.id}`}>
+            <Link key={service.id} href={`/services/${service.id}/professionals`}>
+              
               <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
                 {/* Image */}
                 <div className="relative h-40 w-full overflow-hidden bg-muted">
