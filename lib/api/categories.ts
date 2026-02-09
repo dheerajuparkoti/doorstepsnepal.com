@@ -1,4 +1,3 @@
-// lib/api/categories.ts
 import { apiFetch } from '@/config/api-client';
 import { CategoriesResponse, Category } from '@/lib/data/categories';
 

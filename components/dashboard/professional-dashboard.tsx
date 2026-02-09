@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/context";
-import { useUser } from "@/lib/context/user-context";
+import { useAuth } from "@/lib/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -84,7 +84,7 @@ const earningsData = [
 
 export function ProfessionalDashboard() {
   const { t, language } = useI18n();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   const stats = [
     {

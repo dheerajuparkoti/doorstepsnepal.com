@@ -2,15 +2,15 @@
 
 import React from "react"
 
-import { UserProvider } from "@/lib/context/user-context";
+import { AuthProvider } from "@/lib/context/auth-context";
 import { DashboardTopbar } from "@/components/dashboard/topbar";
 import { CustomerSidebar } from "@/components/dashboard/customer-sidebar";
 import { ProfessionalSidebar } from "@/components/dashboard/professional-sidebar";
 import { MobileBottomNav } from "@/components/dashboard/mobile-bottom-nav";
-import { useUser } from "@/lib/context/user-context";
+import { useAuth } from "@/lib/context/auth-context";
 
 function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
-  const { mode } = useUser();
+  const { mode } = useAuth();
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/30">
@@ -39,8 +39,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <UserProvider>
+    <AuthProvider>
       <DashboardLayoutContent>{children}</DashboardLayoutContent>
-    </UserProvider>
+    </AuthProvider>
   );
 }

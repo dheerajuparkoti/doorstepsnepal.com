@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
-import { useUser } from "@/lib/context/user-context";
+import { useAuth } from "@/lib/context/auth-context";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -16,7 +16,7 @@ import {
 export function MobileBottomNav() {
   const { t } = useI18n();
   const pathname = usePathname();
-  const { mode } = useUser();
+  const { mode } = useAuth();
 
   const customerNavItems = [
     { label: t.customer.sidebar.dashboard, href: "/dashboard", icon: LayoutDashboard },

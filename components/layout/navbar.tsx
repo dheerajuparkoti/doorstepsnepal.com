@@ -105,12 +105,15 @@ export function Navbar() {
 
           {/* Auth Buttons - Desktop */}
           <div className="hidden items-center gap-2 sm:flex">
-            <Button variant="ghost" size="sm" asChild>
+            {/* <Button variant="ghost" size="sm" asChild>
+              <Link href="/login">{t.nav.login}</Link>
+            </Button> */}
+            <Button size="sm" asChild>
               <Link href="/login">{t.nav.login}</Link>
             </Button>
-            <Button size="sm" asChild>
+            {/* <Button size="sm" asChild>
               <Link href="/signup">{t.nav.signUp}</Link>
-            </Button>
+            </Button> */}
           </div>
 
           {/* Mobile Menu */}
@@ -143,19 +146,24 @@ export function Navbar() {
                   </Link>
                 ))}
                 <div className="my-4 h-px bg-border" />
-                <Link
+                {/* <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
                 >
                   <LogIn className="h-5 w-5" />
                   {t.nav.login}
-                </Link>
-                <Button asChild className="mt-2">
+                </Link> */}
+                  <Button asChild className="mt-2">
+                  <Link href="/login" onClick={() => setIsOpen(false)}>
+                    {t.nav.login}
+                  </Link>
+                </Button>
+                {/* <Button asChild className="mt-2">
                   <Link href="/signup" onClick={() => setIsOpen(false)}>
                     {t.nav.signUp}
                   </Link>
-                </Button>
+                </Button> */}
               </nav>
             </SheetContent>
           </Sheet>

@@ -301,6 +301,16 @@ export const translations = {
       perService: "per service",
       startingFrom: "Starting from",
     },
+
+      dialog: {
+      cancel: "Cancel",
+      logout: {
+        title: "Confirm Logout",
+        description: "Are you sure you want to logout? You'll need to login again to access your dashboard.",
+        confirm: "Logout",
+        loggingOut: "Logging out...",
+      },
+    },
   },
   ne: {
     // Navigation
@@ -601,6 +611,16 @@ export const translations = {
       perService: "प्रति सेवा",
       startingFrom: "बाट सुरु",
     },
+     dialog: {
+      cancel: "रद्द गर्नुहोस्",
+      logout: {
+        title: "लगआउट पुष्टि गर्नुहोस्",
+        description: "के तपाईं निश्चित हुनुहुन्छ कि तपाईं लगआउट गर्न चाहनुहुन्छ? तपाईंको ड्यासबोर्ड पहुँच गर्न फेरि लगइन गर्नुपर्नेछ।",
+        confirm: "लगआउट गर्नुहोस्",
+        loggingOut: "लगआउट हुँदैछ...",
+      },
+    },
+    
   },
 };
 

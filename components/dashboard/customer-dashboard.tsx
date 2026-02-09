@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n/context";
-import { useUser } from "@/lib/context/user-context";
+import { useAuth } from "@/lib/context/auth-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { serviceCategories, promotions } from "@/lib/data/services";
+import { CategoriesResponse } from "@/lib/data/categories";
+import {promotions} from "@/lib/data/promotions";
 import {
   Plus,
   Search,
@@ -53,7 +54,7 @@ const statusConfig: Record<string, { label: string; labelNe: string; className: 
 
 export function CustomerDashboard() {
   const { t, language } = useI18n();
-  const { user } = useUser();
+  const { user } = useAuth();
 
   return (
     <div className="space-y-6">
@@ -202,7 +203,7 @@ export function CustomerDashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {serviceCategories.slice(0, 4).map((category) => (
+            {/* {serviceCategories.slice(0, 4).map((category) => (
               <Link key={category.id} href={`/services/${category.id}`}>
                 <Card className="group cursor-pointer transition-all hover:border-primary hover:shadow-md">
                   <CardContent className="p-4">
@@ -223,7 +224,7 @@ export function CustomerDashboard() {
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+            ))} */}
           </div>
         </CardContent>
       </Card>

@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useI18n } from "@/lib/i18n/context";
-import { serviceCategories } from "@/lib/data/services";
+import { CategoriesResponse } from "@/lib/data/categories";
 import { nepalLocations } from "@/lib/data/nepal-locations";
 import {
   ArrowLeft,
