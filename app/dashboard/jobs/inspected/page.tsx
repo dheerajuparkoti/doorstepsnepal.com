@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useI18n } from '@/lib/i18n/context';
 import { useOrderStore } from '@/stores/order-store';
 import { OrderStatus, PaymentStatus } from '@/lib/data/order';
-import { OrderCard } from '@/components/orders/customer-order-card';
+import { ProfessionalOrderCard } from '@/components/orders/professional-order-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,15 +15,14 @@ import {
   RefreshCw,
   AlertCircle,
   Eye,
-  Package,
   X,
-  FileText,
-  Calendar,
   DollarSign,
-  Phone,
+  Calendar,
   User,
   CheckCircle,
-  MessageSquare
+  FileText,
+  Clock,
+  Calculator
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,52 +37,36 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-const paymentStatusConfig = {
-  [PaymentStatus.UNPAID]: {
-    label: "Unpaid",
-    labelNp: "भुक्तानी बाँकी",
-    color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  },
-  [PaymentStatus.PARTIAL]: {
-    label: "Partial",
-    labelNp: "आंशिक भुक्तानी",
-    color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  },
-  [PaymentStatus.PAID]: {
-    label: "Paid",
-    labelNp: "भुक्तानी भयो",
-    color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  },
-};
-
-export default function InspectedBookingsPage() {
+export default function InspectedJobsPage() {
   const { t, locale } = useI18n();
   const {
     orders,
     isLoading,
     error,
-    fetchCustomerOrders,
+    fetchOrders,
   } = useOrderStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock customer ID - in real app, get from auth
-  const mockCustomerId = 49;
+  const mockProfessionalId = 24; // Replace with actual professional ID
 
   useEffect(() => {
-    loadOrders();
+    loadJobs();
   }, []);
 
-  const loadOrders = async () => {
+  const loadJobs = async () => {
     try {
       setIsRefreshing(true);
-      await fetchCustomerOrders(mockCustomerId);
+      await fetchOrders({
+        professional_id: mockProfessionalId,
+        status: OrderStatus.INSPECTED,
+      });
     } catch (err) {
       toast({
         title: 'Error',
-        description: 'Failed to load bookings',
+        description: 'Failed to load jobs',
         variant: 'destructive',
       });
     } finally {
@@ -92,7 +75,7 @@ export default function InspectedBookingsPage() {
   };
 
   const handleRefresh = () => {
-    loadOrders();
+    loadJobs();
   };
 
   const handleSearch = (value: string) => {
@@ -103,8 +86,8 @@ export default function InspectedBookingsPage() {
     setSearchQuery('');
   };
 
-  // Filter and sort inspected orders
-  const inspectedOrders = orders
+  // Filter and sort inspected jobs
+  const inspectedJobs = orders
     .filter(order => order.order_status === OrderStatus.INSPECTED)
     .filter(order => {
       if (!searchQuery.trim()) return true;
@@ -113,12 +96,13 @@ export default function InspectedBookingsPage() {
       return (
         order.service_name_en.toLowerCase().includes(query) ||
         order.service_name_np.toLowerCase().includes(query) ||
-        order.professional_name?.toLowerCase().includes(query) ||
+        order.customer_name.toLowerCase().includes(query) ||
         order.id.toString().includes(query) ||
         order.customer_address?.municipality.toLowerCase().includes(query) ||
         order.customer_address?.district.toLowerCase().includes(query) ||
         order.total_price.toString().includes(query) ||
-        order.inspection_notes?.toLowerCase().includes(query)
+        order.inspection_notes?.toLowerCase().includes(query) ||
+        order.order_notes?.toLowerCase().includes(query)
       );
     })
     .sort((a, b) => {
@@ -135,29 +119,30 @@ export default function InspectedBookingsPage() {
           return new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime();
         case 'scheduled_asc':
           return new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime();
+        // case 'inspection_desc':
+        //   return new Date(b.inspection_date || b.order_date).getTime() - new Date(a.inspection_date || a.order_date).getTime();
+        // case 'inspection_asc':
+        //   return new Date(a.inspection_date || a.order_date).getTime() - new Date(b.inspection_date || b.order_date).getTime();
         default:
           return 0;
       }
     });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  const getTotalInspectedValue = () => {
+    return inspectedJobs.reduce((sum, order) => sum + order.total_price, 0);
   };
 
-  const handleMakePayment = (orderId: number) => {
-    window.location.href = `/payment/${orderId}`;
+  const getAverageInspectedPrice = () => {
+    if (inspectedJobs.length === 0) return 0;
+    return getTotalInspectedValue() / inspectedJobs.length;
   };
 
-  const handleCallProfessional = (phone: string) => {
-    window.open(`tel:${phone}`);
+  const getJobsWithPayment = () => {
+    return inspectedJobs.filter(order => order.payment_status === PaymentStatus.PAID || order.payment_status === PaymentStatus.PARTIAL).length;
   };
 
-  const handleViewDetails = (orderId: number) => {
-    window.location.href = `/orders/${orderId}`;
+  const getJobsReadyForCompletion = () => {
+    return inspectedJobs.filter(order => order.payment_status === PaymentStatus.PAID).length;
   };
 
   if (isLoading && !isRefreshing) {
@@ -165,18 +150,18 @@ export default function InspectedBookingsPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">
-            {locale === 'ne' ? 'निरीक्षण गरिएका बुकिंगहरू' : 'Inspected Bookings'}
+            {locale === 'ne' ? 'निरीक्षण गरिएका जबहरू' : 'Inspected Jobs'}
           </h1>
           <p className="text-muted-foreground">
             {locale === 'ne' 
-              ? 'साइट निरीक्षण पछिका बुकिंगहरू'
-              : 'Bookings after site inspection'
+              ? 'साइट निरीक्षण पछिका जबहरू'
+              : 'Jobs after site inspection'
             }
           </p>
         </div>
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <Card key={i} className="overflow-hidden">
+            <Card key={i}>
               <CardContent className="p-6">
                 <div className="space-y-3">
                   <Skeleton className="h-6 w-[250px]" />
@@ -198,7 +183,7 @@ export default function InspectedBookingsPage() {
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              {locale === 'ne' ? 'बुकिंगहरू लोड गर्न त्रुटि' : 'Error Loading Bookings'}
+              {locale === 'ne' ? 'जबहरू लोड गर्न त्रुटि' : 'Error Loading Jobs'}
             </h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={handleRefresh}>
@@ -217,12 +202,12 @@ export default function InspectedBookingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              {locale === 'ne' ? 'निरीक्षण गरिएका बुकिंगहरू' : 'Inspected Bookings'}
+              {locale === 'ne' ? 'निरीक्षण गरिएका जबहरू' : 'Inspected Jobs'}
             </h1>
             <p className="text-muted-foreground">
               {locale === 'ne' 
-                ? 'साइट निरीक्षण पछिका बुकिंगहरू - अन्तिम मूल्य निश्चित भयो'
-                : 'Bookings after site inspection - Final price confirmed'
+                ? 'साइट निरीक्षण पछिका जबहरू - अन्तिम मूल्य निश्चित भयो'
+                : 'Jobs after site inspection - Final price confirmed'
               }
             </p>
           </div>
@@ -233,10 +218,6 @@ export default function InspectedBookingsPage() {
                 ? (locale === 'ne' ? 'ताजा पार्दै...' : 'Refreshing...') 
                 : (locale === 'ne' ? 'ताजा पार्नुहोस्' : 'Refresh')
               }
-            </Button>
-            <Button onClick={() => window.location.href = '/services'}>
-              <Package className="w-4 h-4 mr-2" />
-              {locale === 'ne' ? 'नयाँ सेवा बुक गर्नुहोस्' : 'Book New Service'}
             </Button>
           </div>
         </div>
@@ -249,8 +230,8 @@ export default function InspectedBookingsPage() {
               <Input
                 placeholder={
                   locale === 'ne' 
-                    ? 'सेवा, पेशेवर, स्थान, आईडी, मूल्य, वा निरीक्षण नोट द्वारा खोज्नुहोस्...'
-                    : 'Search by service, professional, location, ID, price, or inspection notes...'
+                    ? 'सेवा, ग्राहक, स्थान, आईडी, मूल्य, निरीक्षण नोट, वा नोटहरू द्वारा खोज्नुहोस्...'
+                    : 'Search by service, customer, location, ID, price, inspection notes, or notes...'
                 }
                 className="pl-10 pr-10"
                 value={searchQuery}
@@ -278,13 +259,13 @@ export default function InspectedBookingsPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  {locale === 'ne' ? 'बुकिंग क्रमबद्ध गर्नुहोस्' : 'Sort Bookings'}
+                  {locale === 'ne' ? 'जबहरू क्रमबद्ध गर्नुहोस्' : 'Sort Jobs'}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setSortBy('date_desc')}>
+                <DropdownMenuItem onClick={() => setSortBy('inspection_desc')}>
                   {locale === 'ne' ? 'निरीक्षण मिति (नयाँ देखि पुरानो)' : 'Inspection Date (Newest First)'}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('date_asc')}>
+                <DropdownMenuItem onClick={() => setSortBy('inspection_asc')}>
                   {locale === 'ne' ? 'निरीक्षण मिति (पुरानो देखि नयाँ)' : 'Inspection Date (Oldest First)'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('scheduled_desc')}>
@@ -303,12 +284,12 @@ export default function InspectedBookingsPage() {
             </DropdownMenu>
             
             {/* Clear Filters Button */}
-            {(searchQuery || sortBy !== 'date_desc') && (
+            {(searchQuery || sortBy !== 'inspection_desc') && (
               <Button
                 variant="outline"
                 onClick={() => {
                   clearSearch();
-                  setSortBy('date_desc');
+                  setSortBy('inspection_desc');
                 }}
               >
                 {locale === 'ne' ? 'फिल्टरहरू हटाउनुहोस्' : 'Clear Filters'}
@@ -322,8 +303,8 @@ export default function InspectedBookingsPage() {
           <div className="flex items-center justify-between text-sm mb-4">
             <p className="text-muted-foreground">
               {locale === 'ne' 
-                ? `${inspectedOrders.length} वटा निरीक्षण गरिएको बुकिंग "${searchQuery}" सँग मिल्दो`
-                : `Found ${inspectedOrders.length} inspected booking${inspectedOrders.length !== 1 ? 's' : ''} matching "${searchQuery}"`
+                ? `${inspectedJobs.length} वटा निरीक्षण गरिएको जब "${searchQuery}" सँग मिल्दो`
+                : `Found ${inspectedJobs.length} inspected job${inspectedJobs.length !== 1 ? 's' : ''} matching "${searchQuery}"`
               }
             </p>
             <Button
@@ -337,29 +318,26 @@ export default function InspectedBookingsPage() {
         )}
       </div>
 
-      {inspectedOrders.length === 0 ? (
+      {inspectedJobs.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
             <div className="mx-auto w-24 h-24 mb-4 flex items-center justify-center rounded-full bg-purple-50">
               <Eye className="w-12 h-12 text-purple-500" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              {locale === 'ne' ? 'कुनै निरीक्षण गरिएका बुकिंगहरू छैनन्' : 'No Inspected Bookings'}
+              {locale === 'ne' ? 'कुनै निरीक्षण गरिएका जबहरू छैनन्' : 'No Inspected Jobs'}
             </h3>
             <p className="text-muted-foreground mb-6">
               {searchQuery
                 ? (locale === 'ne' 
-                  ? 'तपाईंको खोजसँग मिल्ने कुनै निरीक्षण गरिएका बुकिंगहरू फेला परेन'
-                  : 'No inspected bookings match your search')
+                  ? 'तपाईंको खोजसँग मिल्ने कुनै निरीक्षण गरिएका जबहरू फेला परेन'
+                  : 'No inspected jobs match your search')
                 : (locale === 'ne'
-                  ? 'तपाईंसँग हाल कुनै निरीक्षण गरिएका बुकिंगहरू छैनन्'
-                  : 'You have no inspected bookings at the moment')
+                  ? 'तपाईंसँग हाल कुनै निरीक्षण गरिएका जबहरू छैनन्'
+                  : 'You have no inspected jobs at the moment')
               }
             </p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button onClick={() => window.location.href = '/services'}>
-                {locale === 'ne' ? 'सेवाहरू ब्राउज गर्नुहोस्' : 'Browse Services'}
-              </Button>
               {searchQuery && (
                 <Button variant="outline" onClick={clearSearch}>
                   {locale === 'ne' ? 'सबै खोज हटाउनुहोस्' : 'Clear all search'}
@@ -373,21 +351,21 @@ export default function InspectedBookingsPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {locale === 'ne'
-                ? `कुल ${orders.filter(o => o.order_status === OrderStatus.INSPECTED).length} मध्ये ${inspectedOrders.length} वटा निरीक्षण गरिएका बुकिंगहरू देखाइएको`
-                : `Showing ${inspectedOrders.length} of ${orders.filter(o => o.order_status === OrderStatus.INSPECTED).length} inspected bookings`
+                ? `कुल ${orders.filter(o => o.order_status === OrderStatus.INSPECTED).length} मध्ये ${inspectedJobs.length} वटा निरीक्षण गरिएका जबहरू देखाइएको`
+                : `Showing ${inspectedJobs.length} of ${orders.filter(o => o.order_status === OrderStatus.INSPECTED).length} inspected jobs`
               }
             </p>
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-purple-50">
                 <Eye className="w-3 h-3 mr-1" />
-                {inspectedOrders.length} {locale === 'ne' ? 'निरीक्षण गरियो' : 'Inspected'}
+                {inspectedJobs.length} {locale === 'ne' ? 'निरीक्षण गरियो' : 'Inspected'}
               </Badge>
             </div>
           </div>
 
           <Separator className="my-2" />
 
-          {/* Stats Summary for Inspected Bookings */}
+          {/* Inspected Jobs Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4">
@@ -396,8 +374,8 @@ export default function InspectedBookingsPage() {
                     <p className="text-sm text-muted-foreground">
                       {locale === 'ne' ? 'कुल अन्तिम मूल्य' : 'Total Final Price'}
                     </p>
-                    <p className="text-2xl font-bold">
-                      Rs. {inspectedOrders.reduce((sum, order) => sum + order.total_price, 0)}
+                    <p className="text-2xl font-bold text-purple-600">
+                      Rs. {getTotalInspectedValue().toLocaleString()}
                     </p>
                   </div>
                   <DollarSign className="w-8 h-8 text-purple-500" />
@@ -410,13 +388,13 @@ export default function InspectedBookingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {locale === 'ne' ? 'भुक्तानी बाँकी' : 'Payment Required'}
+                      {locale === 'ne' ? 'सम्पन्नको लागि तयार' : 'Ready for Completion'}
                     </p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {inspectedOrders.filter(o => o.payment_status !== PaymentStatus.PAID).length}
+                    <p className="text-2xl font-bold text-green-600">
+                      {getJobsReadyForCompletion()}
                     </p>
                   </div>
-                  <AlertCircle className="w-8 h-8 text-orange-500" />
+                  <CheckCircle className="w-8 h-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>
@@ -426,45 +404,146 @@ export default function InspectedBookingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {locale === 'ne' ? 'भुक्तानी भयो' : 'Payment Done'}
+                      {locale === 'ne' ? 'भुक्तानीको प्रतिक्षा' : 'Awaiting Payment'}
                     </p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {inspectedOrders.filter(o => o.payment_status === PaymentStatus.PAID).length}
+                    <p className="text-2xl font-bold text-orange-600">
+                      {inspectedJobs.length - getJobsWithPayment()}
                     </p>
                   </div>
-                  <CheckCircle className="w-8 h-8 text-green-500" />
+                  <Clock className="w-8 h-8 text-orange-500" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Use your existing OrderCard component */}
+          {/* Payment Reminder Section */}
+          <Card className="mb-4 border-orange-200 bg-orange-50 dark:bg-orange-950/20">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <DollarSign className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-orange-800 dark:text-orange-300 mb-1">
+                    {locale === 'ne' ? 'भुक्तानी अनुस्मारक' : 'Payment Reminder'}
+                  </p>
+                  <p className="text-sm text-orange-700 dark:text-orange-400">
+                    {locale === 'ne' 
+                      ? 'भुक्तानी प्राप्त भएपछि मात्र सेवा सम्पन्न गर्नुहोस्। ग्राहकहरूलाई भुक्तानी गर्न अनुरोध गर्नुहोस्।'
+                      : 'Complete services only after receiving payment. Request customers to make payment.'
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inspection Notes Summary */}
+          <Card className="mb-4">
+            <CardContent className="p-4">
+              <h3 className="font-semibold mb-3">
+                {locale === 'ne' ? 'निरीक्षण नोटहरू' : 'Inspection Notes'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <FileText className="w-4 h-4 text-blue-500" />
+                    <span className="text-sm font-medium">
+                      {locale === 'ne' ? 'निरीक्षण नोटहरू' : 'Inspection Notes'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {locale === 'ne' 
+                      ? `${inspectedJobs.filter(o => o.inspection_notes).length} जबहरूमा निरीक्षण नोटहरू छन्`
+                      : `${inspectedJobs.filter(o => o.inspection_notes).length} jobs have inspection notes`
+                    }
+                  </p>
+                </div>
+                <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calculator className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium">
+                      {locale === 'ne' ? 'मूल्य परिवर्तन' : 'Price Changes'}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {locale === 'ne' 
+                      ? 'निरीक्षण पछि मूल्य निश्चित भयो'
+                      : 'Prices finalized after inspection'
+                    }
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Professional Order Cards */}
           <div className="space-y-4">
-            {inspectedOrders.map((order) => (
-              <OrderCard
+            {inspectedJobs.map((order) => (
+              <ProfessionalOrderCard
                 key={order.id}
                 order={order}
-                isProfessional={false}
                 showActions={true}
               />
             ))}
           </div>
 
-          {/* Important Note for Inspected Bookings */}
-          <Card className="mt-6 border-purple-200 bg-purple-50 dark:bg-purple-950/20">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-purple-800 dark:text-purple-300 mb-1">
-                    {locale === 'ne' ? 'महत्त्वपूर्ण जानकारी' : 'Important Information'}
-                  </p>
-                  <p className="text-sm text-purple-700 dark:text-purple-400">
-                    {locale === 'ne' 
-                      ? 'निरीक्षण गरिएका बुकिंगहरूमा अन्तिम मूल्य निश्चित भइसकेको छ। सेवा सुरु गर्नुअघि भुक्तानी गर्नुपर्ने हुनसक्छ।'
-                      : 'Inspected bookings have confirmed final prices. Payment may be required before service can begin.'
-                    }
-                  </p>
+          {/* Inspected Jobs Summary */}
+          <Card className="mt-6">
+            <CardContent className="p-6">
+              <h3 className="font-semibold mb-4">
+                {locale === 'ne' ? 'निरीक्षण गरिएका जब विश्लेषण' : 'Inspected Jobs Analysis'}
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'औसत अन्तिम मूल्य' : 'Average Final Price'}
+                    </span>
+                    <span className="font-medium">
+                      Rs. {getAverageInspectedPrice().toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'भुक्तानी भएका जबहरू' : 'Jobs with Payment'}
+                    </span>
+                    <span className="font-medium text-green-600">
+                      {getJobsWithPayment()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'भुक्तानी बाँकी' : 'Payment Pending'}
+                    </span>
+                    <span className="font-medium text-orange-600">
+                      {inspectedJobs.length - getJobsWithPayment()}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'उच्चतम अन्तिम मूल्य' : 'Highest Final Price'}
+                    </span>
+                    <span className="font-medium">
+                      Rs. {inspectedJobs.length > 0 ? Math.max(...inspectedJobs.map(o => o.total_price)).toLocaleString() : '0'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'न्यूनतम अन्तिम मूल्य' : 'Lowest Final Price'}
+                    </span>
+                    <span className="font-medium">
+                      Rs. {inspectedJobs.length > 0 ? Math.min(...inspectedJobs.map(o => o.total_price)).toLocaleString() : '0'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'कुल निरीक्षण नोटहरू' : 'Total Inspection Notes'}
+                    </span>
+                    <span className="font-medium">
+                      {inspectedJobs.filter(o => o.inspection_notes).length}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>

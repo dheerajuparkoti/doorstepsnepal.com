@@ -1,39 +1,36 @@
+
 'use client';
 
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
+import { useEffect, useState, useCallback } from 'react';
 import { useI18n } from '@/lib/i18n/context';
 import { useOrderStore } from '@/stores/order-store';
 import { OrderStatus, PaymentStatus } from '@/lib/data/order';
+import { OrderCard } from '@/components/orders/customer-order-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Phone,
-  MessageSquare,
-  Star,
-  XCircle,
-  AlertCircle,
-  Eye,
-  DollarSign,
-  User,
-  Package,
+  Search,
+  Filter,
   RefreshCw,
+  AlertCircle,
+  Clock,
+  Package,
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
 const paymentStatusConfig = {
@@ -63,8 +60,9 @@ export default function PendingBookingsPage() {
     fetchCustomerOrders,
   } = useOrderStore();
 
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewText, setReviewText] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('date_desc');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Mock customer ID - in real app, get from auth
   const mockCustomerId = 49;
@@ -75,6 +73,7 @@ export default function PendingBookingsPage() {
 
   const loadOrders = async () => {
     try {
+      setIsSearching(true);
       await fetchCustomerOrders(mockCustomerId);
     } catch (err) {
       toast({
@@ -82,6 +81,8 @@ export default function PendingBookingsPage() {
         description: 'Failed to load bookings',
         variant: 'destructive',
       });
+    } finally {
+      setIsSearching(false);
     }
   };
 
@@ -89,47 +90,46 @@ export default function PendingBookingsPage() {
     loadOrders();
   };
 
-  // Filter only pending orders
-  const pendingOrders = orders.filter(order => order.order_status === OrderStatus.PENDING);
+  const handleSearch = (value: string) => {
+    setSearchQuery(value);
+  };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
+  // Filter and sort orders
+  const filteredOrders = orders
+    .filter(order => order.order_status === OrderStatus.PENDING)
+    .filter(order => {
+      if (!searchQuery.trim()) return true;
+      
+      const query = searchQuery.toLowerCase();
+      return (
+        order.service_name_en.toLowerCase().includes(query) ||
+        order.service_name_np.toLowerCase().includes(query) ||
+        order.professional_name?.toLowerCase().includes(query) ||
+        order.id.toString().includes(query) ||
+        order.customer_address?.municipality.toLowerCase().includes(query) ||
+        order.customer_address?.district.toLowerCase().includes(query)
+      );
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'date_desc':
+          return new Date(b.order_date).getTime() - new Date(a.order_date).getTime();
+        case 'date_asc':
+          return new Date(a.order_date).getTime() - new Date(b.order_date).getTime();
+        case 'price_desc':
+          return b.total_price - a.total_price;
+        case 'price_asc':
+          return a.total_price - b.total_price;
+        default:
+          return 0;
+      }
     });
-  };
 
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: true
-    });
-  };
-
-  const handleCancelOrder = async (orderId: number) => {
-    try {
-      // Implement cancel order logic
-      toast({
-        title: 'Booking Cancelled',
-        description: `Booking #${orderId} has been cancelled`,
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to cancel booking',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleMakePayment = (orderId: number) => {
-    // Navigate to payment page
-    window.location.href = `/payment/${orderId}`;
-  };
-
-  if (isLoading) {
+  if (isLoading && !isSearching) {
     return (
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-6">
@@ -174,206 +174,211 @@ export default function PendingBookingsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Pending Bookings</h1>
-            <p className="text-muted-foreground">Bookings waiting for professional acceptance</p>
+            <h1 className="text-2xl font-bold text-foreground">
+              {locale === 'ne' ? 'बाँकी बुकिंगहरू' : 'Pending Bookings'}
+            </h1>
+            <p className="text-muted-foreground">
+              {locale === 'ne' 
+                ? 'पेशेवर स्वीकृतिको लागि पर्खिरहेका बुकिंगहरू'
+                : 'Bookings waiting for professional acceptance'
+              }
+            </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={handleRefresh}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
+            <Button variant="outline" onClick={handleRefresh} disabled={isSearching}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isSearching ? 'animate-spin' : ''}`} />
+              {isSearching ? 'Refreshing...' : 'Refresh'}
             </Button>
             <Button onClick={() => window.location.href = '/services'}>
               <Package className="w-4 h-4 mr-2" />
-              Book New Service
+              {locale === 'ne' ? 'नयाँ सेवा बुक गर्नुहोस्' : 'Book New Service'}
             </Button>
           </div>
         </div>
+
+        {/* Search and Filters - Similar to jobs/pending/page.tsx */}
+        <div className="flex flex-col md:flex-row gap-3 mb-6">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                placeholder={
+                  locale === 'ne' 
+                    ? 'सेवा, पेशेवर, स्थान, वा आईडी द्वारा खोज्नुहोस्...'
+                    : 'Search by service, professional, location, or ID...'
+                }
+                className="pl-10 pr-10"
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+              />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7"
+                  onClick={clearSearch}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <Filter className="w-4 h-4 mr-2" />
+                  {locale === 'ne' ? 'क्रमबद्ध गर्नुहोस्' : 'Sort By'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  {locale === 'ne' ? 'बुकिंग क्रमबद्ध गर्नुहोस्' : 'Sort Bookings'}
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setSortBy('date_desc')}>
+                  {locale === 'ne' ? 'मिति (नयाँ देखि पुरानो)' : 'Date (Newest First)'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('date_asc')}>
+                  {locale === 'ne' ? 'मिति (पुरानो देखि नयाँ)' : 'Date (Oldest First)'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('price_desc')}>
+                  {locale === 'ne' ? 'मूल्य (उच्च देखि न्यून)' : 'Price (High to Low)'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('price_asc')}>
+                  {locale === 'ne' ? 'मूल्य (न्यून देखि उच्च)' : 'Price (Low to High)'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            
+            {/* Clear Filters Button */}
+            {(searchQuery || sortBy !== 'date_desc') && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  clearSearch();
+                  setSortBy('date_desc');
+                }}
+              >
+                {locale === 'ne' ? 'फिल्टरहरू हटाउनुहोस्' : 'Clear Filters'}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Search Results Info */}
+        {searchQuery && (
+          <div className="flex items-center justify-between text-sm mb-4">
+            <p className="text-muted-foreground">
+              {locale === 'ne' 
+                ? `${filteredOrders.length} वटा बुकिंग "${searchQuery}" सँग मिल्दो`
+                : `Found ${filteredOrders.length} booking${filteredOrders.length !== 1 ? 's' : ''} matching "${searchQuery}"`
+              }
+            </p>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearSearch}
+            >
+              {locale === 'ne' ? 'खोज हटाउनुहोस्' : 'Clear search'}
+            </Button>
+          </div>
+        )}
       </div>
 
-      {pendingOrders.length === 0 ? (
+      {filteredOrders.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
             <div className="mx-auto w-24 h-24 mb-4 flex items-center justify-center rounded-full bg-yellow-50">
               <Clock className="w-12 h-12 text-yellow-500" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No Pending Bookings</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              {locale === 'ne' ? 'कुनै बाँकी बुकिंगहरू छैनन्' : 'No Pending Bookings'}
+            </h3>
             <p className="text-muted-foreground mb-6">
-              You have no pending bookings at the moment
+              {searchQuery
+                ? (locale === 'ne' 
+                  ? 'तपाईंको खोजसँग मिल्ने कुनै बुकिंगहरू फेला परेन'
+                  : 'No pending bookings match your search')
+                : (locale === 'ne'
+                  ? 'तपाईंसँग हाल कुनै बाँकी बुकिंगहरू छैनन्'
+                  : 'You have no pending bookings at the moment')
+              }
             </p>
-            <Button onClick={() => window.location.href = '/services'}>
-              Browse Services
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <Button onClick={() => window.location.href = '/services'}>
+                {locale === 'ne' ? 'सेवाहरू ब्राउज गर्नुहोस्' : 'Browse Services'}
+              </Button>
+              {searchQuery && (
+                <Button variant="outline" onClick={clearSearch}>
+                  {locale === 'ne' ? 'सबै खोज हटाउनुहोस्' : 'Clear all search'}
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {pendingOrders.map((order) => {
-            const paymentStatus = order.payment_status as PaymentStatus;
-            const paymentInfo = paymentStatusConfig[paymentStatus];
-            const remainingAmount = order.payment_summary.remaining_amount;
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              {locale === 'ne'
+                ? `कुल ${orders.length} मध्ये ${filteredOrders.length} वटा बुकिंगहरू देखाइएको`
+                : `Showing ${filteredOrders.length} of ${orders.length} bookings`
+              }
+            </p>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-yellow-50">
+                <Clock className="w-3 h-3 mr-1" />
+                {filteredOrders.length} {locale === 'ne' ? 'बाँकी' : 'Pending'}
+              </Badge>
+            </div>
+          </div>
 
-            return (
-              <Card key={order.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                <CardContent className="p-0">
-                  <div className="flex flex-col lg:flex-row">
-                    {/* Booking Info */}
-                    <div className="p-4 sm:p-6 flex-1">
-                      <div className="flex items-start gap-4 mb-4">
-                        <div className="w-16 h-16 relative rounded-lg overflow-hidden shrink-0 bg-muted">
-                          <div className="w-full h-full flex items-center justify-center">
-                            <User className="w-8 h-8 text-muted-foreground" />
-                          </div>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <h3 className="font-semibold text-foreground">
-                                {locale === 'ne' ? order.service_name_np : order.service_name_en}
-                              </h3>
-                              <p className="text-sm text-muted-foreground">
-                                {locale === 'ne' ? order.service_description_np : order.service_description_en}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                <Clock className="w-3 h-3 mr-1" />
-                                Pending
-                              </Badge>
-                              <Badge className={paymentInfo.color}>
-                                {locale === 'ne' ? paymentInfo.labelNp : paymentInfo.label}
-                              </Badge>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-1 mt-2">
-                            <User className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-sm">
-                              Professional: {order.professional_name}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+          <Separator className="my-2" />
 
-                      <div className="grid sm:grid-cols-2 gap-3 text-sm mb-4">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          {formatDate(order.scheduled_date)}
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          {formatTime(order.scheduled_time)}
-                        </div>
-                        <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2">
-                          <MapPin className="w-4 h-4 shrink-0" />
-                          <span className="truncate">
-                            {order.customer_address?.street_address}, {order.customer_address?.municipality}
-                          </span>
-                        </div>
-                      </div>
+          {/* Use your existing OrderCard component */}
+          <div className="space-y-4">
+            {filteredOrders.map((order) => (
+              <OrderCard
+                key={order.id}
+                order={order}
+                isProfessional={false}
+                showActions={true}
+              />
+            ))}
+          </div>
 
-                      <div className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
-                        <div>
-                          <p className="text-sm font-medium">Order ID: #{order.id}</p>
-                          <p className="text-sm text-muted-foreground">
-                            Placed on {formatDate(order.order_date)}
-                          </p>
-                        </div>
-                        <p className="text-2xl font-bold text-primary">
-                          Rs. {order.total_price}
-                        </p>
-                      </div>
-
-                      {order.order_notes && (
-                        <p className="text-sm text-muted-foreground mt-3 p-3 bg-muted/50 rounded-lg">
-                          <span className="font-medium">Notes:</span> {order.order_notes}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Actions */}
-                    <div className="p-4 sm:p-6 lg:w-64 border-t lg:border-t-0 lg:border-l border-border bg-muted/30 flex flex-col justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">Booking Details</p>
-                        <div className="space-y-2 mb-4">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Quantity:</span>
-                            <span className="font-medium">{order.quantity}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Quality Type:</span>
-                            <span className="font-medium">{order.quality_type_id}</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Price Unit:</span>
-                            <span className="font-medium">{order.price_unit_id}</span>
-                          </div>
-                        </div>
-
-                        {remainingAmount > 0 && (
-                          <div className="mb-4 p-2 bg-orange-50 dark:bg-orange-950/20 rounded">
-                            <p className="text-sm font-medium text-orange-700 dark:text-orange-300">
-                              Balance Due: Rs. {remainingAmount}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="flex flex-col gap-2 mt-4">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-2"
-                          onClick={() => window.location.href = `/orders/${order.id}`}
-                        >
-                          <Eye className="w-4 h-4" />
-                          View Details
-                        </Button>
-                        
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="gap-2"
-                          onClick={() => {
-                            // Handle message
-                            toast({
-                              title: 'Message Sent',
-                              description: 'Message sent to professional',
-                            });
-                          }}
-                        >
-                          <MessageSquare className="w-4 h-4" />
-                          Send Message
-                        </Button>
-
-                        {paymentStatus !== PaymentStatus.PAID && (
-                          <Button
-                            size="sm"
-                            className="gap-2 bg-green-600 hover:bg-green-700"
-                            onClick={() => handleMakePayment(order.id)}
-                          >
-                            <DollarSign className="w-4 h-4" />
-                            Make Payment
-                          </Button>
-                        )}
-
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          className="gap-2"
-                          onClick={() => handleCancelOrder(order.id)}
-                        >
-                          <XCircle className="w-4 h-4" />
-                          Cancel Booking
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {/* Optional: Add pagination if you have many orders */}
+          {filteredOrders.length > 10 && (
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex-1 text-sm text-muted-foreground">
+                {locale === 'ne'
+                  ? `पृष्ठ १ को ${Math.ceil(filteredOrders.length / 10)}`
+                  : `Page 1 of ${Math.ceil(filteredOrders.length / 10)}`
+                }
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={true} // You can implement pagination later
+                >
+                  <ChevronLeft className="w-4 h-4 mr-2" />
+                  {locale === 'ne' ? 'अघिल्लो' : 'Previous'}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={true} // You can implement pagination later
+                >
+                  {locale === 'ne' ? 'अर्को' : 'Next'}
+                  <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

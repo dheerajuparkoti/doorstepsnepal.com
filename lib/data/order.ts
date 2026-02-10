@@ -58,7 +58,7 @@ export enum OrderStatus {
   ACCEPTED = 'accepted',
   INSPECTED = 'inspected',
   COMPLETED = 'completed',
-  CANCELLED = 'cancelled'
+  CANCELLED = 'canceled'
 }
 
 // Payment Status Enum

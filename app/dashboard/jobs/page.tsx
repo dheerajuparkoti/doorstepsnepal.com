@@ -131,29 +131,29 @@ export default function JobsPage() {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t("jobRequests")}</h1>
-        <p className="text-muted-foreground">{t("manageJobRequests")}</p>
+        <h1 className="text-2xl font-bold text-foreground">{("jobRequests")}</h1>
+        <p className="text-muted-foreground">{("manageJobRequests")}</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6 flex-wrap h-auto gap-2">
           <TabsTrigger value="new">
-            {t("newRequests")}
+            {("newRequests")}
             <Badge variant="secondary" className="ml-2">
               {jobs.filter((j) => j.status === "new").length}
             </Badge>
           </TabsTrigger>
-          <TabsTrigger value="accepted">{t("accepted")}</TabsTrigger>
-          <TabsTrigger value="inProgress">{t("inProgress")}</TabsTrigger>
-          <TabsTrigger value="completed">{t("completed")}</TabsTrigger>
-          <TabsTrigger value="all">{t("all")}</TabsTrigger>
+          <TabsTrigger value="accepted">{("accepted")}</TabsTrigger>
+          <TabsTrigger value="inProgress">{("inProgress")}</TabsTrigger>
+          <TabsTrigger value="completed">{("completed")}</TabsTrigger>
+          <TabsTrigger value="all">{("all")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="space-y-4">
           {filteredJobs.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
-                <p className="text-muted-foreground">{t("noJobsFound")}</p>
+                <p className="text-muted-foreground">{("noJobsFound")}</p>
               </CardContent>
             </Card>
           ) : (
@@ -188,7 +188,7 @@ export default function JobsPage() {
                               </p>
                               {job.urgency === "urgent" && (
                                 <Badge variant="destructive" className="mt-1">
-                                  {t("urgent")}
+                                  {("urgent")}
                                 </Badge>
                               )}
                             </div>
@@ -219,7 +219,7 @@ export default function JobsPage() {
 
                         <div className="p-3 bg-muted/50 rounded-lg">
                           <p className="text-sm font-medium mb-1">
-                            {t("description")}:
+                            {("description")}:
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {job.description}
@@ -231,7 +231,7 @@ export default function JobsPage() {
                       <div className="p-4 sm:p-6 lg:w-64 border-t lg:border-t-0 lg:border-l border-border bg-muted/30 flex flex-col justify-between">
                         <div>
                           <p className="text-sm text-muted-foreground mb-1">
-                            {t("bookingId")}
+                            {("bookingId")}
                           </p>
                           <p className="font-mono text-sm font-medium mb-4">
                             {job.id}
@@ -249,7 +249,7 @@ export default function JobsPage() {
                             <>
                               <Button size="sm" className="gap-2">
                                 <CheckCircle className="w-4 h-4" />
-                                {t("acceptJob")}
+                                {("acceptJob")}
                               </Button>
                               <Dialog>
                                 <DialogTrigger asChild>
@@ -259,21 +259,21 @@ export default function JobsPage() {
                                     className="gap-2 bg-transparent"
                                   >
                                     <XCircle className="w-4 h-4" />
-                                    {t("decline")}
+                                    {("decline")}
                                   </Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                   <DialogHeader>
                                     <DialogTitle>
-                                      {t("declineReason")}
+                                      {("declineReason")}
                                     </DialogTitle>
                                   </DialogHeader>
                                   <Textarea
-                                    placeholder={t("enterDeclineReason")}
+                                    placeholder={("enterDeclineReason")}
                                     rows={4}
                                   />
                                   <Button variant="destructive">
-                                    {t("confirmDecline")}
+                                    {("confirmDecline")}
                                   </Button>
                                 </DialogContent>
                               </Dialog>
@@ -284,15 +284,15 @@ export default function JobsPage() {
                             <>
                               <Button size="sm" variant="outline" className="gap-2 bg-transparent">
                                 <Phone className="w-4 h-4" />
-                                {t("callCustomer")}
+                                {("callCustomer")}
                               </Button>
                               <Button size="sm" variant="outline" className="gap-2 bg-transparent">
                                 <Navigation className="w-4 h-4" />
-                                {t("getDirections")}
+                                {("getDirections")}
                               </Button>
                               <Button size="sm" className="gap-2">
                                 <Clock className="w-4 h-4" />
-                                {t("startJob")}
+                                {("startJob")}
                               </Button>
                             </>
                           )}
@@ -300,14 +300,14 @@ export default function JobsPage() {
                           {job.status === "inProgress" && (
                             <Button size="sm" className="gap-2">
                               <CheckCircle className="w-4 h-4" />
-                              {t("completeJob")}
+                              {("completeJob")}
                             </Button>
                           )}
 
                           {job.status === "completed" && (
                             <Button size="sm" variant="outline" className="gap-2 bg-transparent">
                               <MessageSquare className="w-4 h-4" />
-                              {t("viewReview")}
+                              {("viewReview")}
                             </Button>
                           )}
                         </div>

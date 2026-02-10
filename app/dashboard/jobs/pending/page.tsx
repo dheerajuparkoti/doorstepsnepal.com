@@ -2,10 +2,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/context';
 import { useOrderStore } from '@/stores/order-store';
-import { OrderStatus, PaymentStatus } from '@/lib/data/order';
-import { OrderCard } from '@/components/orders/customer-order-card';
+import { OrderStatus } from '@/lib/data/order';
+import { ProfessionalOrderCard } from '@/components/orders/professional-order-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -14,17 +15,13 @@ import {
   Filter,
   RefreshCw,
   AlertCircle,
-  CheckCircle,
+  Clock,
   Package,
   X,
-  Star,
   Calendar,
   DollarSign,
-  Phone,
-  MessageSquare,
-  User,
-  Eye,
-  ThumbsUp
+  MapPin,
+  User
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -39,34 +36,38 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-export default function CompletedBookingsPage() {
+export default function PendingJobsPage() {
   const { t, locale } = useI18n();
+  const router = useRouter();
   const {
     orders,
     isLoading,
     error,
-    fetchCustomerOrders,
+    fetchOrders,
   } = useOrderStore();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock customer ID - in real app, get from auth
-  const mockCustomerId = 49;
+  // Mock professional ID - in real app, get from auth
+  const mockProfessionalId = 24;
 
   useEffect(() => {
-    loadOrders();
+    loadJobs();
   }, []);
 
-  const loadOrders = async () => {
+  const loadJobs = async () => {
     try {
       setIsRefreshing(true);
-      await fetchCustomerOrders(mockCustomerId);
+      await fetchOrders({
+        professional_id: mockProfessionalId,
+        status: OrderStatus.PENDING,
+      });
     } catch (err) {
       toast({
         title: 'Error',
-        description: 'Failed to load bookings',
+        description: 'Failed to load jobs',
         variant: 'destructive',
       });
     } finally {
@@ -75,7 +76,7 @@ export default function CompletedBookingsPage() {
   };
 
   const handleRefresh = () => {
-    loadOrders();
+    loadJobs();
   };
 
   const handleSearch = (value: string) => {
@@ -86,9 +87,9 @@ export default function CompletedBookingsPage() {
     setSearchQuery('');
   };
 
-  // Filter and sort completed orders
-  const completedOrders = orders
-    .filter(order => order.order_status === OrderStatus.COMPLETED)
+  // Filter and sort pending jobs
+  const pendingJobs = orders
+    .filter(order => order.order_status === OrderStatus.PENDING)
     .filter(order => {
       if (!searchQuery.trim()) return true;
       
@@ -96,12 +97,12 @@ export default function CompletedBookingsPage() {
       return (
         order.service_name_en.toLowerCase().includes(query) ||
         order.service_name_np.toLowerCase().includes(query) ||
-        order.professional_name?.toLowerCase().includes(query) ||
+        order.customer_name.toLowerCase().includes(query) ||
         order.id.toString().includes(query) ||
         order.customer_address?.municipality.toLowerCase().includes(query) ||
         order.customer_address?.district.toLowerCase().includes(query) ||
         order.total_price.toString().includes(query) ||
-        (order.order_notes && order.order_notes.toLowerCase().includes(query))
+        order.order_notes?.toLowerCase().includes(query)
       );
     })
     .sort((a, b) => {
@@ -123,29 +124,13 @@ export default function CompletedBookingsPage() {
       }
     });
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+  const getTotalPendingValue = () => {
+    return pendingJobs.reduce((sum, order) => sum + order.total_price, 0);
   };
 
-  const handleViewDetails = (orderId: number) => {
-    window.location.href = `/orders/${orderId}`;
-  };
-
-  const handleContactProfessional = (phone: string) => {
-    window.open(`tel:${phone}`);
-  };
-
-  const getTotalValue = () => {
-    return completedOrders.reduce((sum, order) => sum + order.total_price, 0);
-  };
-
-  const getAveragePrice = () => {
-    if (completedOrders.length === 0) return 0;
-    return getTotalValue() / completedOrders.length;
+  const getAveragePendingPrice = () => {
+    if (pendingJobs.length === 0) return 0;
+    return getTotalPendingValue() / pendingJobs.length;
   };
 
   if (isLoading && !isRefreshing) {
@@ -153,18 +138,18 @@ export default function CompletedBookingsPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-foreground">
-            {locale === 'ne' ? 'सम्पन्न बुकिंगहरू' : 'Completed Bookings'}
+            {locale === 'ne' ? 'बाँकी जबहरू' : 'Pending Jobs'}
           </h1>
           <p className="text-muted-foreground">
             {locale === 'ne' 
-              ? 'सफलतापूर्वक सम्पन्न भएका सेवा बुकिंगहरू'
-              : 'Successfully completed service bookings'
+              ? 'तपाईंको स्वीकृतिको लागि पर्खिरहेका जबहरू'
+              : 'Jobs waiting for your acceptance'
             }
           </p>
         </div>
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
-            <Card key={i} className="overflow-hidden">
+            <Card key={i}>
               <CardContent className="p-6">
                 <div className="space-y-3">
                   <Skeleton className="h-6 w-[250px]" />
@@ -186,7 +171,7 @@ export default function CompletedBookingsPage() {
           <CardContent className="p-8 text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">
-              {locale === 'ne' ? 'बुकिंगहरू लोड गर्न त्रुटि' : 'Error Loading Bookings'}
+              {locale === 'ne' ? 'जबहरू लोड गर्न त्रुटि' : 'Error Loading Jobs'}
             </h3>
             <p className="text-muted-foreground mb-4">{error}</p>
             <Button onClick={handleRefresh}>
@@ -205,12 +190,12 @@ export default function CompletedBookingsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">
-              {locale === 'ne' ? 'सम्पन्न बुकिंगहरू' : 'Completed Bookings'}
+              {locale === 'ne' ? 'बाँकी जबहरू' : 'Pending Jobs'}
             </h1>
             <p className="text-muted-foreground">
               {locale === 'ne' 
-                ? 'सफलतापूर्वक सम्पन्न भएका सेवा बुकिंगहरू - अब तपाईंले सेवाको समीक्षा गर्न सक्नुहुन्छ'
-                : 'Successfully completed service bookings - You can now review the service'
+                ? 'तपाईंको स्वीकृतिको लागि पर्खिरहेका जबहरू'
+                : 'Jobs waiting for your acceptance'
               }
             </p>
           </div>
@@ -221,10 +206,6 @@ export default function CompletedBookingsPage() {
                 ? (locale === 'ne' ? 'ताजा पार्दै...' : 'Refreshing...') 
                 : (locale === 'ne' ? 'ताजा पार्नुहोस्' : 'Refresh')
               }
-            </Button>
-            <Button onClick={() => window.location.href = '/services'}>
-              <Package className="w-4 h-4 mr-2" />
-              {locale === 'ne' ? 'नयाँ सेवा बुक गर्नुहोस्' : 'Book New Service'}
             </Button>
           </div>
         </div>
@@ -237,8 +218,8 @@ export default function CompletedBookingsPage() {
               <Input
                 placeholder={
                   locale === 'ne' 
-                    ? 'सेवा, पेशेवर, स्थान, आईडी, मूल्य, वा नोटहरू द्वारा खोज्नुहोस्...'
-                    : 'Search by service, professional, location, ID, price, or notes...'
+                    ? 'सेवा, ग्राहक, स्थान, आईडी, मूल्य, वा नोटहरू द्वारा खोज्नुहोस्...'
+                    : 'Search by service, customer, location, ID, price, or notes...'
                 }
                 className="pl-10 pr-10"
                 value={searchQuery}
@@ -266,14 +247,14 @@ export default function CompletedBookingsPage() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>
-                  {locale === 'ne' ? 'बुकिंग क्रमबद्ध गर्नुहोस्' : 'Sort Bookings'}
+                  {locale === 'ne' ? 'जबहरू क्रमबद्ध गर्नुहोस्' : 'Sort Jobs'}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setSortBy('date_desc')}>
-                  {locale === 'ne' ? 'सम्पन्न मिति (नयाँ देखि पुरानो)' : 'Completion Date (Newest First)'}
+                  {locale === 'ne' ? 'आर्डर मिति (नयाँ देखि पुरानो)' : 'Order Date (Newest First)'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('date_asc')}>
-                  {locale === 'ne' ? 'सम्पन्न मिति (पुरानो देखि नयाँ)' : 'Completion Date (Oldest First)'}
+                  {locale === 'ne' ? 'आर्डर मिति (पुरानो देखि नयाँ)' : 'Order Date (Oldest First)'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setSortBy('scheduled_desc')}>
                   {locale === 'ne' ? 'सेवा मिति (नयाँ देखि पुरानो)' : 'Service Date (Newest First)'}
@@ -310,8 +291,8 @@ export default function CompletedBookingsPage() {
           <div className="flex items-center justify-between text-sm mb-4">
             <p className="text-muted-foreground">
               {locale === 'ne' 
-                ? `${completedOrders.length} वटा सम्पन्न बुकिंग "${searchQuery}" सँग मिल्दो`
-                : `Found ${completedOrders.length} completed booking${completedOrders.length !== 1 ? 's' : ''} matching "${searchQuery}"`
+                ? `${pendingJobs.length} वटा बाँकी जब "${searchQuery}" सँग मिल्दो`
+                : `Found ${pendingJobs.length} pending job${pendingJobs.length !== 1 ? 's' : ''} matching "${searchQuery}"`
               }
             </p>
             <Button
@@ -325,27 +306,28 @@ export default function CompletedBookingsPage() {
         )}
       </div>
 
-      {completedOrders.length === 0 ? (
+      {pendingJobs.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <div className="mx-auto w-24 h-24 mb-4 flex items-center justify-center rounded-full bg-green-50">
-              <CheckCircle className="w-12 h-12 text-green-500" />
+            <div className="mx-auto w-24 h-24 mb-4 flex items-center justify-center rounded-full bg-yellow-50">
+              <Clock className="w-12 h-12 text-yellow-500" />
             </div>
             <h3 className="text-lg font-semibold mb-2">
-              {locale === 'ne' ? 'कुनै सम्पन्न बुकिंगहरू छैनन्' : 'No Completed Bookings'}
+              {locale === 'ne' ? 'कुनै बाँकी जबहरू छैनन्' : 'No Pending Jobs'}
             </h3>
             <p className="text-muted-foreground mb-6">
               {searchQuery
                 ? (locale === 'ne' 
-                  ? 'तपाईंको खोजसँग मिल्ने कुनै सम्पन्न बुकिंगहरू फेला परेन'
-                  : 'No completed bookings match your search')
+                  ? 'तपाईंको खोजसँग मिल्ने कुनै बाँकी जबहरू फेला परेन'
+                  : 'No pending jobs match your search')
                 : (locale === 'ne'
-                  ? 'तपाईंसँग हाल कुनै सम्पन्न बुकिंगहरू छैनन्'
-                  : 'You have no completed bookings at the moment')
+                  ? 'तपाईंसँग हाल कुनै बाँकी जबहरू छैनन्'
+                  : 'You have no pending jobs at the moment')
               }
             </p>
             <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <Button onClick={() => window.location.href = '/services'}>
+              <Button onClick={() => router.push('/services')}>
+                <Package className="w-4 h-4 mr-2" />
                 {locale === 'ne' ? 'सेवाहरू ब्राउज गर्नुहोस्' : 'Browse Services'}
               </Button>
               {searchQuery && (
@@ -361,34 +343,34 @@ export default function CompletedBookingsPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               {locale === 'ne'
-                ? `कुल ${orders.filter(o => o.order_status === OrderStatus.COMPLETED).length} मध्ये ${completedOrders.length} वटा सम्पन्न बुकिंगहरू देखाइएको`
-                : `Showing ${completedOrders.length} of ${orders.filter(o => o.order_status === OrderStatus.COMPLETED).length} completed bookings`
+                ? `कुल ${orders.filter(o => o.order_status === OrderStatus.PENDING).length} मध्ये ${pendingJobs.length} वटा बाँकी जबहरू देखाइएको`
+                : `Showing ${pendingJobs.length} of ${orders.filter(o => o.order_status === OrderStatus.PENDING).length} pending jobs`
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-green-50">
-                <CheckCircle className="w-3 h-3 mr-1" />
-                {completedOrders.length} {locale === 'ne' ? 'सम्पन्न' : 'Completed'}
+              <Badge variant="outline" className="bg-yellow-50">
+                <Clock className="w-3 h-3 mr-1" />
+                {pendingJobs.length} {locale === 'ne' ? 'बाँकी' : 'Pending'}
               </Badge>
             </div>
           </div>
 
           <Separator className="my-2" />
 
-          {/* Stats Summary for Completed Bookings */}
+          {/* Pending Jobs Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {locale === 'ne' ? 'कुल खर्च' : 'Total Spent'}
+                      {locale === 'ne' ? 'कुल बाँकी मूल्य' : 'Total Pending Value'}
                     </p>
-                    <p className="text-2xl font-bold">
-                      Rs. {getTotalValue().toLocaleString()}
+                    <p className="text-2xl font-bold text-yellow-600">
+                      Rs. {getTotalPendingValue().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-green-500" />
+                  <DollarSign className="w-8 h-8 text-yellow-500" />
                 </div>
               </CardContent>
             </Card>
@@ -398,13 +380,13 @@ export default function CompletedBookingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {locale === 'ne' ? 'औसत मूल्य' : 'Average Price'}
+                      {locale === 'ne' ? 'औसत बाँकी मूल्य' : 'Average Pending Price'}
                     </p>
                     <p className="text-2xl font-bold">
-                      Rs. {getAveragePrice().toFixed(2)}
+                      Rs. {getAveragePendingPrice().toFixed(2)}
                     </p>
                   </div>
-                  <CheckCircle className="w-8 h-8 text-blue-500" />
+                  <Calendar className="w-8 h-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>
@@ -414,31 +396,31 @@ export default function CompletedBookingsPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {locale === 'ne' ? 'सेवाहरू प्राप्त' : 'Services Received'}
+                      {locale === 'ne' ? 'ग्राहकहरू' : 'Unique Customers'}
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {completedOrders.length}
+                      {new Set(pendingJobs.map(o => o.customer_name)).size}
                     </p>
                   </div>
-                  <ThumbsUp className="w-8 h-8 text-green-600" />
+                  <User className="w-8 h-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Reminder to Review */}
+          {/* Quick Action Reminder */}
           <Card className="mb-4 border-yellow-200 bg-yellow-50 dark:bg-yellow-950/20">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <Star className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                <Clock className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-yellow-800 dark:text-yellow-300 mb-1">
-                    {locale === 'ne' ? 'समीक्षाको लागि अनुरोध' : 'Review Request'}
+                    {locale === 'ne' ? 'शीघ्र कार्य अनुरोध' : 'Quick Action Request'}
                   </p>
                   <p className="text-sm text-yellow-700 dark:text-yellow-400">
                     {locale === 'ne' 
-                      ? 'तपाईंले सेवा प्राप्त गरिसकेको छ! तपाईंको अनुभव साझा गरेर अन्य ग्राहकहरूलाई मद्दत गर्नुहोस्।'
-                      : 'You have received the service! Share your experience to help other customers.'
+                      ? 'ग्राहकहरू तपाईंको प्रतिक्रियाको प्रतिक्षा गरिरहेका छन्। शीघ्र स्वीकार वा अस्वीकार गरेर उनीहरूको समय बचाउनुहोस्।'
+                      : 'Customers are waiting for your response. Help save their time by quickly accepting or rejecting jobs.'
                     }
                   </p>
                 </div>
@@ -446,46 +428,79 @@ export default function CompletedBookingsPage() {
             </CardContent>
           </Card>
 
-          {/* Use your existing OrderCard component */}
+          {/* Professional Order Cards */}
           <div className="space-y-4">
-            {completedOrders.map((order) => (
-              <OrderCard
+            {pendingJobs.map((order) => (
+              <ProfessionalOrderCard
                 key={order.id}
                 order={order}
-                isProfessional={false}
                 showActions={true}
               />
             ))}
           </div>
 
-          {/* Year Summary (Optional) */}
+          {/* Pending Jobs Summary */}
           <Card className="mt-6">
             <CardContent className="p-6">
               <h3 className="font-semibold mb-4">
-                {locale === 'ne' ? 'तपाईंको सेवा इतिहास' : 'Your Service History'}
+                {locale === 'ne' ? 'बाँकी जब विश्लेषण' : 'Pending Jobs Analysis'}
               </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-2xl font-bold text-green-600">{completedOrders.length}</p>
-                  <p className="text-muted-foreground">{locale === 'ne' ? 'कुल सेवाहरू' : 'Total Services'}</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'विभिन्न सेवाहरू' : 'Different Services'}
+                    </span>
+                    <span className="font-medium">
+                      {new Set(pendingJobs.map(o => o.service_name_en)).size}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'विभिन्न स्थानहरू' : 'Different Locations'}
+                    </span>
+                    <span className="font-medium">
+                      {new Set(pendingJobs.map(o => o.customer_address?.municipality)).size}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'आजको बाँकी जबहरू' : "Today's Pending Jobs"}
+                    </span>
+                    <span className="font-medium">
+                      {pendingJobs.filter(order => {
+                        const orderDate = new Date(order.order_date);
+                        const today = new Date();
+                        return orderDate.toDateString() === today.toDateString();
+                      }).length}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-600">
-                    {new Set(completedOrders.map(o => o.professional_name)).size}
-                  </p>
-                  <p className="text-muted-foreground">{locale === 'ne' ? 'पेशेवरहरू' : 'Professionals'}</p>
-                </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-2xl font-bold text-purple-600">
-                    {new Set(completedOrders.map(o => o.service_name_en)).size}
-                  </p>
-                  <p className="text-muted-foreground">{locale === 'ne' ? 'विभिन्न सेवाहरू' : 'Different Services'}</p>
-                </div>
-                <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                  <p className="text-2xl font-bold text-orange-600">
-                    {Math.round(getTotalValue() / 100000 * 10) / 10}L
-                  </p>
-                  <p className="text-muted-foreground">{locale === 'ne' ? 'कुल खर्च' : 'Total Investment'}</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'उच्चतम बाँकी मूल्य' : 'Highest Pending Price'}
+                    </span>
+                    <span className="font-medium">
+                      Rs. {pendingJobs.length > 0 ? Math.max(...pendingJobs.map(o => o.total_price)).toLocaleString() : '0'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'न्यूनतम बाँकी मूल्य' : 'Lowest Pending Price'}
+                    </span>
+                    <span className="font-medium">
+                      Rs. {pendingJobs.length > 0 ? Math.min(...pendingJobs.map(o => o.total_price)).toLocaleString() : '0'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">
+                      {locale === 'ne' ? 'कुल ग्राहक नोटहरू' : 'Total Customer Notes'}
+                    </span>
+                    <span className="font-medium">
+                      {pendingJobs.filter(o => o.order_notes).length}
+                    </span>
+                  </div>
                 </div>
               </div>
             </CardContent>
