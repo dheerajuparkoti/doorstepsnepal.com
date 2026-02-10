@@ -210,6 +210,10 @@ export const translations = {
         accountInfo: "Account Info",
         appSettings: "App Settings",
         privacyCenter: "Privacy Center",
+         myOrders: "My Orders",
+    manageYourOrders: "Manage and track all your service orders",
+    all: "All",
+ 
       },
       welcome: {
         subtitle: "Book trusted home services easily",
@@ -228,6 +232,7 @@ export const translations = {
         noBookings: "No active bookings",
       },
       recommended: "Recommended Services",
+      
     },
     // Professional Dashboard
     professional: {
@@ -311,6 +316,8 @@ export const translations = {
         loggingOut: "Logging out...",
       },
     },
+
+
   },
   ne: {
     // Navigation
@@ -520,6 +527,8 @@ export const translations = {
         accountInfo: "खाता जानकारी",
         appSettings: "एप सेटिङ्स",
         privacyCenter: "गोपनीयता केन्द्र",
+        myOrders: "मेरो अर्डरहरू",
+        manageYourOrders: "आफ्ना सेवा अर्डरहरू व्यवस्थापन गर्नुहोस्",
       },
       welcome: {
         subtitle: "विश्वसनीय घरेलु सेवाहरू सजिलै बुक गर्नुहोस्",
@@ -620,6 +629,8 @@ export const translations = {
         loggingOut: "लगआउट हुँदैछ...",
       },
     },
+
+
     
   },
 };

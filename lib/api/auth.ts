@@ -1,4 +1,5 @@
-import { apiFetch } from '@/config/api-client';
+
+import { api, setToken, removeToken, getToken } from '@/config/api-client';
 import { 
   LoginRequest, 
   VerifyOTPRequest, 
@@ -9,13 +10,11 @@ import {
 
 export async function login(phoneNumber: string): Promise<boolean> {
   try {
-    const response = await apiFetch<{ message: string }>('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ phone_number: phoneNumber }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await api.post<{ message: string }>(
+      '/auth/login', 
+      { phone_number: phoneNumber },
+      { skipAuth: true }
+    );
     
     return response.message?.includes('OTP') || false;
   } catch (error) {
@@ -26,21 +25,22 @@ export async function login(phoneNumber: string): Promise<boolean> {
 
 export async function verifyOTP(
   phoneNumber: string, 
-  otp: string
-): Promise<VerifyOTPResponse> {
+  otp: string,
+  rememberMe: boolean = true
+): Promise<VerifyOTPResponse & { remember?: boolean }> {
   try {
-    const response = await apiFetch<VerifyOTPResponse>('/auth/verify_otp', {
-      method: 'POST',
-      body: JSON.stringify({ 
-        phone_number: phoneNumber, 
-        otp 
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    const response = await api.post<VerifyOTPResponse>(
+      '/auth/verify_otp', 
+      { phone_number: phoneNumber, otp },
+      { skipAuth: true }
+    );
     
-    return response;
+    // Store the token
+    if (response.access_token) {
+      setToken(response.access_token, rememberMe);
+    }
+    
+    return { ...response, remember: rememberMe };
   } catch (error) {
     console.error('Verify OTP error:', error);
     throw error;
@@ -48,19 +48,11 @@ export async function verifyOTP(
 }
 
 export async function setupProfile(
-  token: string,
   data: SetupProfileRequest
 ): Promise<User> {
   try {
-    const response = await apiFetch<User>('/users/profile/setup', {
-      method: 'POST',
-      body: JSON.stringify(data),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-    
+    const response = await api.post<User>('/users/profile/setup', data);
+    console.log("USERS DATA", response);
     return response;
   } catch (error) {
     console.error('Setup profile error:', error);
@@ -68,32 +60,32 @@ export async function setupProfile(
   }
 }
 
-export async function getCurrentUser(token: string): Promise<User> {
+export async function checkProtectedRoute(): Promise<boolean> {
   try {
-    const response = await apiFetch<User>('/users/me', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-      cache: 'no-store',
-    });
-    
-    return response;
-  } catch (error) {
-    console.error('Get current user error:', error);
-    throw error;
-  }
-}
-
-export async function checkProtectedRoute(token: string): Promise<boolean> {
-  try {
-    await apiFetch('/auth/protected', {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
+    await api.get('/auth/protected');
     return true;
   } catch (error) {
     return false;
   }
+}
+
+// Get user profile (requires valid token)
+export async function getUserProfile(): Promise<User> {
+  return api.get<User>('/users/me');
+}
+
+// Logout - clear token
+export function logout(): void {
+  removeToken();
+}
+
+// Check if user is authenticated
+export function isAuthenticated(): boolean {
+  return !!getToken();
+}
+
+// Get current token (for debugging)
+export function getCurrentToken(): string | null {
+  return getToken();
 }
 

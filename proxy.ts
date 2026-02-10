@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-
+import type { User } from '@/lib/data/user' 
+import { checkIfUserNeedsSetup } from '@/lib/utils/auth-helpers'
 // List of public routes that don't require authentication
 const publicRoutes = ['/login', '/setup', '/', '/about', '/services', '/contact']
 // List of protected routes that require authentication
@@ -8,7 +9,8 @@ const protectedRoutes = ['/dashboard', '/profile', '/settings', '/bookings', '/m
 // List of API routes that require authentication
 const protectedApiRoutes = ['/api/user/', '/api/bookings/', '/api/messages/']
 
-export function middleware(request: NextRequest) {
+
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   
   // Get token from cookies (for server-side) or check localStorage flag
@@ -16,13 +18,25 @@ export function middleware(request: NextRequest) {
   const hasLocalStorageFlag = request.headers.get('x-auth-flag') === 'true'
   const isAuthenticated = hasAuthCookie || hasLocalStorageFlag
   
+  // Get user data from cookies
+  const userCookie = request.cookies.get('user_data')?.value
+  let userData: Partial<User> | null = null
+  if (userCookie) {
+    try {
+      userData = JSON.parse(userCookie)
+    } catch (e) {
+      console.error('Error parsing user cookie:', e)
+    }
+  }
+  
+  
   // Check if current route is protected
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route))
   const isProtectedApiRoute = protectedApiRoutes.some(route => pathname.startsWith(route))
-  const isPublicRoute = publicRoutes.includes(pathname) || publicRoutes.some(route => pathname.startsWith(route))
   
-  // Handle protected routes
+  // Handle protected routes for unauthenticated users
   if ((isProtectedRoute || isProtectedApiRoute) && !isAuthenticated) {
+    
     // For API routes, return 401
     if (isProtectedApiRoute) {
       return NextResponse.json(
@@ -37,20 +51,47 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
   
-  // Handle auth pages (login, setup) when already authenticated
-  if ((pathname === '/login' || pathname === '/setup') && isAuthenticated) {
-    // Check if setup is complete from cookie or header
-    const isSetupComplete = request.cookies.get('setup_complete')?.value === 'true' ||
-                           request.headers.get('x-setup-complete') === 'true'
+  // Handle authenticated user routing
+  if (isAuthenticated) {
+  
+    // Check if user needs setup based on actual user data
+    let needsSetup = false;
     
+    if (userData) {
+      // Use the actual check function with user data
+      needsSetup = checkIfUserNeedsSetup(userData);
+    } else {
+      // If no user data, check the setup_complete cookie as fallback
+      const isSetupCompleteFromCookie = request.cookies.get('setup_complete')?.value === 'true'
+      const isSetupCompleteFromHeader = request.headers.get('x-setup-complete') === 'true'
+      const isSetupComplete = isSetupCompleteFromCookie || isSetupCompleteFromHeader
+      needsSetup = !isSetupComplete;
+    }
+
+    
+    // Handle login page when authenticated
     if (pathname === '/login') {
-      // If trying to access login when authenticated, redirect to dashboard
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      const redirectUrl = needsSetup ? '/setup' : '/dashboard'
+      return NextResponse.redirect(new URL(redirectUrl, request.url))
     }
     
-    if (pathname === '/setup' && isSetupComplete) {
-      // If trying to access setup when already completed, redirect to dashboard
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+    // Handle setup page
+    if (pathname === '/setup') {
+      if (!needsSetup) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      }
+      // Allow access to setup page if needed
+    }
+    
+    // Handle protected pages when user needs setup
+    if (isProtectedRoute && needsSetup && pathname !== '/setup') {
+      return NextResponse.redirect(new URL('/setup', request.url))
+    }
+    
+    // Allow access to protected routes if no setup needed
+    if (isProtectedRoute && !needsSetup) {
+   
+      // The code continues...
     }
   }
   

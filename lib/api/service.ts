@@ -1,4 +1,5 @@
-import { apiFetch } from '@/config/api-client';
+
+import { api } from '@/config/api-client';
 import { ServicesResponse, Service } from '@/lib/data/service';
 
 export async function fetchServices(
@@ -9,24 +10,25 @@ export async function fetchServices(
   search?: string
 ): Promise<ServicesResponse> {
   try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      size: size.toString(),
-    });
+    const params: Record<string, any> = {
+      page,
+      size,
+    };
 
     if (categoryId) {
-      params.append('category_id', categoryId.toString());
+      params.category_id = categoryId;
     }
 
     if (subCategoryId) {
-      params.append('sub_category_id', subCategoryId.toString());
+      params.sub_category_id = subCategoryId;
     }
 
     if (search && search.trim()) {
-      params.append('search', search.trim());
+      params.search = search.trim();
     }
 
-    return await apiFetch<ServicesResponse>(`/services?${params}`, {
+    return await api.get<ServicesResponse>('/services', {
+      params,
       cache: 'force-cache',
       next: { revalidate: 3600 }
     });
@@ -38,12 +40,10 @@ export async function fetchServices(
 
 export async function fetchServiceById(id: number): Promise<Service | null> {
   try {
-
-
     if (id === 0) {
       return null;
     }
-    return await apiFetch<Service>(`/services/${id}`, {
+    return await api.get<Service>(`/services/${id}`, {
       cache: 'force-cache',
       next: { revalidate: 3600 }
     });

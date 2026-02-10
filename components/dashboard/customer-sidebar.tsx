@@ -78,12 +78,12 @@ export function CustomerSidebar() {
     },
     {
       label: t.customer.sidebar.settings,
-      href: "/dashboard/settings",
+      href: "/dashboard/settings-privacy",
       icon: Settings,
       children: [
-        { label: t.customer.sidebar.accountInfo, href: "/dashboard/settings/account", icon: User },
-        { label: t.customer.sidebar.appSettings, href: "/dashboard/settings/app", icon: Smartphone },
-        { label: t.customer.sidebar.privacyCenter, href: "/dashboard/settings/privacy", icon: Shield },
+        { label: t.customer.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
+        { label: t.customer.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
+        { label: t.customer.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
       ],
     },
   ];

@@ -94,12 +94,13 @@ export function ProfessionalSidebar() {
     },
     {
       label: t.professional.sidebar.settings,
-      href: "/dashboard/settings",
+      href: "/dashboard/settings-privacy",
       icon: Settings,
       children: [
-        { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings/account", icon: User },
-        { label: t.professional.sidebar.appSettings, href: "/dashboard/settings/app", icon: Smartphone },
-        { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings/privacy", icon: Shield },
+   
+        { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
+        { label: t.professional.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
+        { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
       ],
     },
   ];

@@ -2,8 +2,10 @@
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { User, UserMode } from "@/lib/data/auth";
-import { login as apiLogin, verifyOTP as apiVerifyOTP } from "@/lib/api/auth";
+import { User, UserMode } from "@/lib/data/user"; 
+import { login as apiLogin, verifyOTP as apiVerifyOTP, setupProfile as apiSetupProfile } from "@/lib/api/auth";
+import { getUserProfile } from "@/lib/api/user";
+import { checkIfUserNeedsSetup } from '@/lib/utils/auth-helpers'
 
 interface AuthContextType {
   user: User | null;
@@ -20,6 +22,7 @@ interface AuthContextType {
   setupProfile: (data: any) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  refreshUser: () => Promise<void>; 
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,12 +36,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Helper function to set auth cookies
   const setAuthCookies = (authToken: string, userData: User) => {
+    // Calculate if setup is actually complete based on name check
+    const isActuallySetupComplete = !checkIfUserNeedsSetup(userData);
+
     // Set cookies for middleware
-    document.cookie = `auth_token=${authToken}; path=/; max-age=${60 * 60 * 24 * 7}`; // 7 days
-    document.cookie = `setup_complete=${userData.is_setup_complete}; path=/; max-age=${60 * 60 * 24 * 7}`;
-    document.cookie = `user_mode=${userData.mode}; path=/; max-age=${60 * 60 * 24 * 7}`;
+    document.cookie = `auth_token=${authToken}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    document.cookie = `setup_complete=${isActuallySetupComplete}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    document.cookie = `user_mode=${userData.mode}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
+    
+    // Store user data in cookie for middleware
+    const userDataForCookie = {
+      full_name: userData.full_name,
+      phone_number: userData.phone_number,
+      is_setup_complete: isActuallySetupComplete
+    };
+    document.cookie = `user_data=${JSON.stringify(userDataForCookie)}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
   };
 
   // Helper function to clear auth cookies
@@ -46,24 +59,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     document.cookie = 'auth_token=; path=/; max-age=0';
     document.cookie = 'setup_complete=; path=/; max-age=0';
     document.cookie = 'user_mode=; path=/; max-age=0';
+    document.cookie = 'user_data=; path=/; max-age=0'; 
   };
 
   // Load auth state from localStorage and cookies on mount
   useEffect(() => {
-    const loadAuthState = () => {
+    const loadAuthState = async () => {
       try {
         const storedToken = localStorage.getItem("auth_token");
         const storedUser = localStorage.getItem("auth_user");
         
-        if (storedToken && storedUser) {
-          const parsedUser = JSON.parse(storedUser) as User;
-          
-          // Sync cookies with localStorage
-          setAuthCookies(storedToken, parsedUser);
-          
-          setToken(storedToken);
-          setUser(parsedUser);
-          setModeState(parsedUser.mode || "customer");
+        if (storedToken) {
+          // If we have a token, fetch fresh user data from API
+          try {
+            // Use getUserProfile from api/user.ts instead of getCurrentUser
+            const freshUserData = await getUserProfile();
+            
+            // Update stored user data with fresh data
+            localStorage.setItem("auth_user", JSON.stringify(freshUserData));
+            
+            // Set cookies with fresh data
+            setAuthCookies(storedToken, freshUserData);
+            
+            setToken(storedToken);
+            setUser(freshUserData);
+            setModeState(freshUserData.mode || "customer");
+          } catch (error) {
+            console.error("Error fetching fresh user data:", error);
+            
+            // Fallback to stored user data
+            if (storedUser) {
+              const parsedUser = JSON.parse(storedUser) as User;
+              setAuthCookies(storedToken, parsedUser);
+              setToken(storedToken);
+              setUser(parsedUser);
+              setModeState(parsedUser.mode || "customer");
+            }
+          }
         } else {
           // Check for legacy setup data
           const setupComplete = localStorage.getItem("userSetupComplete");
@@ -89,13 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               isVerified: true,
               isProfessionalVerified: savedMode === "professional",
               mode: savedMode || "customer",
-              user_type: savedMode || "customer",
+              type: savedMode || "customer",
               is_setup_complete: true,
               profile_image: "",
               avatar: "",
             };
 
-            // Create a mock token for legacy users
             const mockToken = `legacy_${Date.now()}`;
             setAuthCookies(mockToken, legacyUser);
             
@@ -151,7 +182,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const updatedUser = { 
         ...user, 
         mode: newMode,
-        user_type: newMode,
+        type: newMode,
         isProfessionalVerified: newMode === "professional" 
       };
       setUser(updatedUser);
@@ -184,42 +215,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Call API to verify OTP
       const response = await apiVerifyOTP(phone, otp);
       
-      // Map API response to our User type
-      const apiUser = response.user || {
-        id: 1,
-        phone_number: phone,
-        full_name: "",
-        is_setup_complete: false,
-        user_type: "customer" as UserMode,
-      };
+      // Store the token
+      const authToken = response.access_token;
+      localStorage.setItem("auth_token", authToken);
+      setToken(authToken);
       
-      const userData: User = {
-        id: apiUser.id,
-        phone_number: apiUser.phone_number,
-        phone: apiUser.phone_number,
-        full_name: apiUser.full_name || "",
-        name: apiUser.full_name || "",
-        nameNe: apiUser.full_name || "",
-        email: apiUser.email || "",
-        gender: apiUser.gender || "",
-        age_group: apiUser.age_group || "",
-        ageGroup: apiUser.age_group || "",
-        profile_image: apiUser.profile_image || "",
-        avatar: apiUser.profile_image || "",
-        user_type: apiUser.user_type || "customer",
-        mode: apiUser.user_type || "customer",
-        is_setup_complete: apiUser.is_setup_complete || false,
-        isVerified: true,
-        isProfessionalVerified: apiUser.user_type === "professional",
-      };
+      let userData: User;
       
-      // Store token and user
-      localStorage.setItem("auth_token", response.access_token);
+      try {
+        // Use getUserProfile from api/user.ts instead of getCurrentUser
+        const apiUserData = await getUserProfile();
+        userData = apiUserData;
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        
+        // Fallback to basic data from OTP response
+        const apiUser = response.user || {
+          id: 1,
+          phone_number: phone,
+          full_name: "",
+          is_setup_complete: false,
+          type: "customer" as UserMode,
+        };
+        
+        userData = {
+          id: apiUser.id,
+          phone_number: apiUser.phone_number,
+          phone: apiUser.phone_number,
+          full_name: apiUser.full_name || "",
+          name: apiUser.full_name || "",
+          nameNe: apiUser.full_name || "",
+          email: apiUser.email || "",
+          gender: apiUser.gender || "",
+          age_group: apiUser.age_group || "",
+          ageGroup: apiUser.age_group || "",
+          profile_image: apiUser.profile_image || "",
+          avatar: apiUser.profile_image || "",
+          mode: apiUser.type || "customer",
+          type: apiUser.type || "customer",
+          is_setup_complete: apiUser.is_setup_complete || false,
+          isVerified: true,
+          isProfessionalVerified: apiUser.type === "professional",
+        };
+      }
+      
+      // Store user in localStorage
       localStorage.setItem("auth_user", JSON.stringify(userData));
       localStorage.removeItem("temp_phone");
       
       // Set cookies for middleware
-      setAuthCookies(response.access_token, userData);
+      setAuthCookies(authToken, userData);
       
       // Clear legacy data to avoid conflicts
       localStorage.removeItem("userSetupComplete");
@@ -230,15 +275,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.removeItem("userAgeGroup");
       localStorage.removeItem("userMode");
       
-      setToken(response.access_token);
       setUser(userData);
       setModeState(userData.mode);
       
-      // Redirect based on setup status
-      if (userData.is_setup_complete) {
-        router.push("/dashboard");
-      } else {
+      const needsSetup = checkIfUserNeedsSetup(userData);
+      
+      if (needsSetup) {
         router.push("/setup");
+      } else {
+        router.push("/dashboard");
       }
       
       return;
@@ -247,6 +292,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message || "Invalid OTP");
     }
   };
+
 
   const setupProfile = async (data: any) => {
     try {
@@ -260,7 +306,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           gender: data.gender,
           age_group: data.age_group,
           ageGroup: data.age_group,
-          user_type: data.user_type,
+          type: data.user_type,
           mode: data.user_type,
           is_setup_complete: true,
           isProfessionalVerified: data.user_type === "professional",
@@ -316,9 +362,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setToken(null);
     setModeState("customer");
-    // router.push("/login");
-      // Force a hard redirect to login with cache busting
-  window.location.href = "/?logout=true";
+    // Force a hard redirect to login with cache busting
+    window.location.href = "/?logout=true";
   };
 
   const updateUser = (userData: Partial<User>) => {
@@ -345,15 +390,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userData.age_group || userData.ageGroup) {
         localStorage.setItem("userAgeGroup", updatedUser.age_group || updatedUser.ageGroup || "");
       }
-      if (userData.mode || userData.user_type) {
-        localStorage.setItem("userMode", updatedUser.mode || updatedUser.user_type || "customer");
+      if (userData.mode || userData.type) {
+        localStorage.setItem("userMode", updatedUser.mode || updatedUser.type || "customer");
       }
     }
   };
 
-  if (!isInitialized) {
-    return null;
-  }
+  const refreshUser = async (): Promise<void> => {
+    const currentToken = localStorage.getItem("auth_token");
+    
+    if (!currentToken) {
+      console.warn("No token found, cannot refresh user");
+      return;
+    }
+    
+    try {
+      setIsLoading(true);
+      
+      // Use getUserProfile from api/user.ts instead of getCurrentUser
+      const freshUserData = await getUserProfile();
+      
+      // Update stored user data
+      localStorage.setItem("auth_user", JSON.stringify(freshUserData));
+      
+      // Set cookies with fresh data
+      setAuthCookies(currentToken, freshUserData);
+      
+      setUser(freshUserData);
+      setModeState(freshUserData.mode || "customer");
+      
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+      
+      // If refresh fails, clear auth state (possibly token expired)
+      if (error instanceof Error && error.message.includes("401")) {
+        logout();
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+if (!isInitialized) {
+  return (
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+    </div>
+  );
+}
 
   const value: AuthContextType = {
     user,
@@ -368,6 +451,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setupProfile,
     logout,
     updateUser,
+    refreshUser,
   };
 
   return (

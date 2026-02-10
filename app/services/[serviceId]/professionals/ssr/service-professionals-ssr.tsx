@@ -145,7 +145,7 @@ export async function ServiceProfessionalsSection({
       new Map(validData.map(item => [item.professional_id, item])).values()
     );
     
-    console.log(`Found ${uniqueProfessionals.length} professionals for service ${serviceId}`);
+
     
     return (
       <ServiceProfessionalsClient 

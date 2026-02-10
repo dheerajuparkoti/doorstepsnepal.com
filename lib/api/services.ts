@@ -1,5 +1,5 @@
 // lib/api/services.ts
-import { apiFetch } from '@/config/api-client';
+import { apiRequest } from '@/config/api-client';
 import { Service, ServicesResponse } from '@/lib/data/services';
 
 export async function fetchServices(
@@ -30,7 +30,7 @@ export async function fetchServices(
     }
 
     // SSR with ISR caching
-    return await apiFetch<ServicesResponse>(`/services?${params}`, {
+    return await apiRequest<ServicesResponse>(`/services?${params}`, {
       cache: 'force-cache',
       next: { revalidate: 3600 }, // Revalidate every hour
     });
@@ -44,7 +44,7 @@ export async function fetchServiceById(
   id: number
 ): Promise<Service | null> {
   try {
-    return await apiFetch<Service>(`/services/${id}`, {
+    return await apiRequest<Service>(`/services/${id}`, {
       cache: 'force-cache',
       next: { revalidate: 3600 },
     });

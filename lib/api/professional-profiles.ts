@@ -1,10 +1,10 @@
-import { apiFetch } from '@/config/api-client';
+
+import { api } from '@/config/api-client';
 import { ProfessionalProfile } from '@/lib/data/service-areas';
 
 export async function fetchProfessionalProfile(professionalId: number): Promise<ProfessionalProfile | null> {
   try {
-      console.log('Fetching profile for:', professionalId);
-    return await apiFetch<ProfessionalProfile>(`/professionals/${professionalId}`, {
+    return await api.get<ProfessionalProfile>(`/professionals/${professionalId}`, {
       cache: 'force-cache',
       next: { revalidate: 3600 }
     });
@@ -16,14 +16,12 @@ export async function fetchProfessionalProfile(professionalId: number): Promise<
 
 export async function fetchProfessionalServiceAreas(professionalId: number): Promise<any[]> {
   try {
-    const response = await apiFetch<any>(`/professionals/${professionalId}/service_areas`, {
+    const response = await api.get<any>(`/professionals/${professionalId}/service_areas`, {
       cache: 'force-cache',
       next: { revalidate: 3600 }
     });
 
-    console.log('Service areas response:', response);
-   return Array.isArray(response) ? response : response.service_areas || [];
-
+    return Array.isArray(response) ? response : response.service_areas || [];
   } catch (error) {
     console.error(`Error fetching service areas for professional ${professionalId}:`, error);
     return [];

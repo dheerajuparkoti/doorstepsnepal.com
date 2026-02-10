@@ -1,4 +1,4 @@
-import { apiFetch } from '@/config/api-client';
+import { api } from '@/config/api-client';
 import { CategoriesResponse, Category } from '@/lib/data/categories';
 
 export async function fetchCategories(
@@ -6,15 +6,10 @@ export async function fetchCategories(
   size: number = 1000
 ): Promise<CategoriesResponse> {
   try {
-    const params = new URLSearchParams({
-      page: page.toString(),
-      size: size.toString(),
-    });
-
-    // SSR with ISR caching
-    return await apiFetch<CategoriesResponse>(`/categories?${params}`, {
+    return await api.get<CategoriesResponse>('/categories', {
+      params: { page, size },
       cache: 'force-cache',
-      next: { revalidate: 3600 } // ISR: Revalidate every hour
+      next: { revalidate: 3600 }
     });
   } catch (error) {
     console.error('API Error fetching categories:', error);
@@ -24,7 +19,7 @@ export async function fetchCategories(
 
 export async function fetchCategoryById(id: number): Promise<Category | null> {
   try {
-    return await apiFetch<Category>(`/categories/${id}`, {
+    return await api.get<Category>(`/categories/${id}`, {
       cache: 'force-cache',
       next: { revalidate: 3600 }
     });
