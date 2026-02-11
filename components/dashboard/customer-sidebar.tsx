@@ -64,7 +64,7 @@ export function CustomerSidebar() {
       href: "/dashboard/payments",
       icon: CreditCard,
       children: [
-        { label: t.customer.sidebar.myPayments, href: "/dashboard/payments", icon: CreditCard },
+        { label: t.customer.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
       ],
     },
     {
@@ -72,8 +72,8 @@ export function CustomerSidebar() {
       href: "/dashboard/favorites",
       icon: Heart,
       children: [
-        { label: t.customer.sidebar.favServices, href: "/dashboard/favorites/services", icon: Heart },
-        { label: t.customer.sidebar.favProfessionals, href: "/dashboard/favorites/professionals", icon: Users },
+        { label: t.customer.sidebar.myFavorites, href: "/dashboard/favorites/my-favorites", icon: Heart },
+        // { label: t.customer.sidebar.favProfessionals, href: "/dashboard/favorites/professionals", icon: Users },
       ],
     },
     {

@@ -89,7 +89,7 @@ export function ProfessionalSidebar() {
       href: "/dashboard/payments",
       icon: CreditCard,
       children: [
-        { label: t.professional.sidebar.myPayments, href: "/dashboard/payments", icon: CreditCard },
+        { label: t.professional.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
       ],
     },
     {
