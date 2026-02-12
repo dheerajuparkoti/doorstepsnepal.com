@@ -12,6 +12,7 @@ export interface FavoriteProfessionalService {
   service_name_np: string;
   full_name: string;
   image: string;
+  created_at: string;
 }
 
 export interface Favorite {

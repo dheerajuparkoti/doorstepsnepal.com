@@ -45,6 +45,7 @@ import {
   CreditCard,
   Camera,
 } from 'lucide-react';
+import { AddressSection } from '@/components/account/address-section';
 
 export default function AccountInfoPage() {
   const router = useRouter();
@@ -474,7 +475,7 @@ export default function AccountInfoPage() {
                       </div>
                     </CardContent>
                   </Card>
-
+                    <AddressSection />
                   {/* Professional Section (if professional) */}
                   {getUserTypeDisplay() === 'Professional' && user.professional_id && (
                     <Card>

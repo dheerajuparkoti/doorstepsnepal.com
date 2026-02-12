@@ -265,7 +265,7 @@ export function DashboardTopbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/profile" className="flex items-center gap-2">
+                <Link href="/dashboard/my-user-profile" className="flex items-center gap-2">
                   <User className="h-4 w-4" />
                   {t.nav.profile}
                 </Link>

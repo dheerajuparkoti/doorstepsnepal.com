@@ -1,4 +1,4 @@
-// lib/data/professional.ts - ADD REGISTRATION TYPES
+// lib/data/professional.ts 
 
 export enum PaymentMethod {
   CASH = 'cash',

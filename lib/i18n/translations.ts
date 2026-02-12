@@ -245,6 +245,7 @@ export const translations = {
       sidebar: {
         dashboard: "Dashboard",
         profile: "Profile",
+        viewProfile: "View Profile",
         verifyDocuments: "Verify Documents",
         paymentsContacts: "Payments & Contacts",
         workGallery: "Work Gallery",
@@ -592,6 +593,7 @@ export const translations = {
       sidebar: {
         dashboard: "ड्यासबोर्ड",
         profile: "प्रोफाइल",
+        viewProfile: "प्रोफाइल हेर्नुहोस्",
         verifyDocuments: "कागजात प्रमाणित गर्नुहोस्",
         paymentsContacts: "भुक्तानी र सम्पर्क",
         workGallery: "काम ग्यालेरी",

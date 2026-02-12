@@ -1,6 +1,6 @@
 
 import { api } from '@/config/api-client';
-import { ProfessionalProfile } from '@/lib/data/service-areas';
+import { ProfessionalProfile } from '@/lib/data/professional';
 
 export async function fetchProfessionalProfile(professionalId: number): Promise<ProfessionalProfile | null> {
   try {

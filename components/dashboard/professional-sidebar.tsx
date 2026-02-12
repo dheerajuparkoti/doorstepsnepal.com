@@ -24,6 +24,7 @@ import {
   Smartphone,
   Shield,
   ChevronDown,
+  View,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -56,6 +57,7 @@ export function ProfessionalSidebar() {
       href: "/dashboard/profile",
       icon: User,
       children: [
+        { label: t.professional.sidebar.viewProfile, href: "/dashboard/profile/view-profile", icon: View},
         { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/profile/verify", icon: FileCheck },
         { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/profile/payments", icon: CreditCard },
         { label: t.professional.sidebar.workGallery, href: "/dashboard/profile/gallery", icon: ImageIcon },
