@@ -24,14 +24,14 @@ import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
 import { generateToken } from "./notifications/fcm-web";
-import FCMInitializer from "./notifications/fcm-initializer";
+// import FCMInitializer from "./notifications/fcm-initializer";
 
   
 export default function HomePage() {
   
   return (
     <div className="flex min-h-screen flex-col">
-          <FCMInitializer />
+          {/* <FCMInitializer /> */}
       <Navbar />
       <main className="flex-1">
         <Suspense fallback={<Loading />}>
