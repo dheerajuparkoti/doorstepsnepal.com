@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/footer";
 import { HeroCarousel } from "@/components/home/hero-carousel";
 import { HowItWorksSection } from "@/components/home/how-it-works-section";
 import { WhyChooseSection } from "@/components/home/why-choose-section";
-import { Suspense } from "react";
+import { Suspense} from "react";
 import Loading from "./loading";
 import { CategoriesSection } from '@/components/home/ssr/category-section-ssr';
 import { CategoriesSkeleton } from "@/components/home/skeleton/categories-skeleton";
@@ -23,10 +23,15 @@ import { SearchSectionSSR } from "@/components/home/ssr/search-section-ssr";
 import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
+import { generateToken } from "./notifications/fcm-web";
+import FCMInitializer from "./notifications/fcm-initializer";
 
+  
 export default function HomePage() {
+  
   return (
     <div className="flex min-h-screen flex-col">
+          <FCMInitializer />
       <Navbar />
       <main className="flex-1">
         <Suspense fallback={<Loading />}>
