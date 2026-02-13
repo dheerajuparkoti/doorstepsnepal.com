@@ -1,8 +1,8 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { fetchProfessionalProfile } from '@/lib/api/professional-profiles';
-import { ProfessionalDetailSection } from './ssr/professional-detail-ssr';
-import { ProfessionalDetailSkeleton } from './skeleton/professional-detail-skeleton';
+// import { ProfessionalDetailSection } from './ssr/professional-detail-ssr';
+// import { ProfessionalDetailSkeleton } from './skeleton/professional-detail-skeleton';
 
 interface ProfessionalDetailPageProps {
   params: Promise<{
@@ -46,12 +46,12 @@ export default async function ProfessionalDetailPage(
   
   return (
     <div className="min-h-screen">
-      <Suspense fallback={<ProfessionalDetailSkeleton />}>
+      {/* <Suspense fallback={<ProfessionalDetailSkeleton />}>
         <ProfessionalDetailSection 
           professionalId={id}
           professionalName={profile.user.full_name}
         />
-      </Suspense>
+      </Suspense> */}
     </div>
   );
 }

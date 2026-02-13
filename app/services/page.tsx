@@ -470,6 +470,7 @@
 import { Suspense } from 'react';
 import { ServicesSection } from './ssr/services-section-ssr';
 import { ServicesSkeleton } from './skeleton/services-skeleton';
+import Loading from '../loading';
 
 export const metadata = {
   title: 'Services | DoorStep',
@@ -485,3 +486,5 @@ export default function ServicesPage() {
     </div>
   );
 }
+
+export { Loading };
