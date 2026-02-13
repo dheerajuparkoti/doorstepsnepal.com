@@ -1,14 +1,20 @@
 import { Resend } from 'resend';
 import { NextResponse } from 'next/server';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.RESEND_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("Missing RESEND_API_KEY");
+    }
+
+    const resend = new Resend(apiKey);
+
     const { name, email, message } = await req.json();
 
     const data = await resend.emails.send({
-      from: 'Doorsteps Contact <onboarding@resend.dev>', 
+      from: 'Doorsteps Contact <onboarding@resend.dev>',
       to: ['doorstepsnepalfirebase@gmail.com'],
       subject: `New Contact Form: ${name}`,
       replyTo: email,
@@ -26,6 +32,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to send email' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to send email' },
+      { status: 500 }
+    );
   }
 }
