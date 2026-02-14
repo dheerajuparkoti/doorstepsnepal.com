@@ -11,7 +11,7 @@ export interface User {
   email?: string;
   gender?: string;
   age_group?: string;
-  ageGroup?: string;
+  
   
   // Auth/Profile info
   profile_image?: string;
@@ -19,6 +19,7 @@ export interface User {
   type: UserMode;
   mode: UserMode;
   is_setup_complete: boolean;
+  is_onboarding_complete : boolean;
   isVerified: boolean;
   isProfessionalVerified: boolean;
   
@@ -46,11 +47,11 @@ export interface VerifyOTPResponse {
 }
 
 export interface SetupProfileRequest {
-  full_name: string;
+  full_name?: string;
   email?: string;
-  gender: string;
-  age_group: string;
-  user_type: UserMode;
+  gender?: string;
+  age_group?: string;
+  user_type?: UserMode;
 }
 
 // For backward compatibility

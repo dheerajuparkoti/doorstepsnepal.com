@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, JSX } from 'react';
@@ -25,6 +26,7 @@ import {
   RefreshCw,
   AlertCircle,
   Image as ImageIcon,
+  ArrowRight,
 } from 'lucide-react';
 import {
   Dialog,
@@ -42,7 +44,18 @@ import {
 } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-export default function ProfessionalVerificationPage() {
+interface ProfessionalVerificationPageOnboardingProps {
+  isOnboarding?: boolean;
+  professionalId?: number;
+  onNext?: () => void;
+  onSkip?: () => void;
+}
+
+export default function ProfessionalVerificationPage({ 
+  professionalId,
+  onNext,
+  onSkip 
+}: ProfessionalVerificationPageOnboardingProps) {
   const { locale } = useI18n();
   const {
     documents,
@@ -64,12 +77,12 @@ export default function ProfessionalVerificationPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Mock professional ID - in real app, get from auth or params
-  const mockProfessionalId = 24;
+  // Use provided professionalId or default to mock ID
+  const currentProfessionalId = professionalId || 24;
 
   useEffect(() => {
     loadDocuments();
-  }, []);
+  }, [currentProfessionalId]);
 
   useEffect(() => {
     if (error) {
@@ -84,7 +97,7 @@ export default function ProfessionalVerificationPage() {
 
   const loadDocuments = async () => {
     try {
-      await fetchDocuments(mockProfessionalId);
+      await fetchDocuments(currentProfessionalId);
     } catch (err) {
       // Error handled by store
     }
@@ -150,7 +163,7 @@ export default function ProfessionalVerificationPage() {
 
     try {
       if (isEditMode && editingDocument) {
-        await updateDocument(mockProfessionalId, editingDocument.id, selectedFile, description);
+        await updateDocument(currentProfessionalId, editingDocument.id, selectedFile, description);
         toast({
           title: locale === 'ne' ? 'सफलता' : 'Success',
           description: locale === 'ne' 
@@ -160,7 +173,7 @@ export default function ProfessionalVerificationPage() {
         setIsEditMode(false);
         setEditingDocument(null);
       } else {
-        await uploadDocument(mockProfessionalId, selectedFile, description);
+        await uploadDocument(currentProfessionalId, selectedFile, description);
         toast({
           title: locale === 'ne' ? 'सफलता' : 'Success',
           description: locale === 'ne' 
@@ -182,34 +195,32 @@ export default function ProfessionalVerificationPage() {
     }
   };
 
- const handleEdit = (doc: VerificationDocument) => {
-
-  
-  // Only allow editing if document is pending or rejected
-  if (doc.status === VerificationStatus.VERIFIED) {
-    toast({
-      title: locale === 'ne' ? 'चेतावनी' : 'Warning',
-      description: locale === 'ne' 
-        ? 'सत्यापित कागजात सम्पादन गर्न सकिँदैन' 
-        : 'Verified documents cannot be edited',
-      variant: 'destructive',
-    });
-    return;
-  }
-  
-  setEditingDocument(doc);
-  setDescription(doc.description || '');
-  setIsEditMode(true);
-  setSelectedFile(null);
-  setPreviewUrl(doc.image);
-
-  if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-    const formElement = document.getElementById('document-form');
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth' });
+  const handleEdit = (doc: VerificationDocument) => {
+    // Only allow editing if document is pending or rejected
+    if (doc.status === VerificationStatus.VERIFIED) {
+      toast({
+        title: locale === 'ne' ? 'चेतावनी' : 'Warning',
+        description: locale === 'ne' 
+          ? 'सत्यापित कागजात सम्पादन गर्न सकिँदैन' 
+          : 'Verified documents cannot be edited',
+        variant: 'destructive',
+      });
+      return;
     }
-  }
-};
+    
+    setEditingDocument(doc);
+    setDescription(doc.description || '');
+    setIsEditMode(true);
+    setSelectedFile(null);
+    setPreviewUrl(doc.image);
+
+    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+      const formElement = document.getElementById('document-form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   const handleDelete = async (documentId: number) => {
     if (!confirm(locale === 'ne' 
@@ -219,7 +230,7 @@ export default function ProfessionalVerificationPage() {
     }
     
     try {
-      await deleteDocument(mockProfessionalId, documentId);
+      await deleteDocument(currentProfessionalId, documentId);
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
         description: locale === 'ne' 
@@ -277,22 +288,70 @@ export default function ProfessionalVerificationPage() {
     }
   };
 
+  const handleNext = () => {
+    if (documents.length === 0) {
+      toast({
+        title: locale === 'ne' ? 'चेतावनी' : 'Warning',
+        description: locale === 'ne' 
+          ? 'कृपया कम्तीमा एउटा कागजात अपलोड गर्नुहोस्' 
+          : 'Please upload at least one document',
+        variant: 'destructive',
+      });
+      return;
+    }
+    onNext?.();
+  };
+
   const pendingDocuments = documents.filter(doc => doc.status === VerificationStatus.PENDING);
   const verifiedDocuments = documents.filter(doc => doc.status === VerificationStatus.VERIFIED);
   const rejectedDocuments = documents.filter(doc => doc.status === VerificationStatus.REJECTED);
 
+  const hasDocuments = documents.length > 0;
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          {locale === 'ne' ? 'पेशेवर सत्यापन' : 'Professional Verification'}
-        </h1>
-        <p className="text-muted-foreground">
-          {locale === 'ne' 
-            ? 'अपने पेशेवर प्रमाणपत्र और दस्तावेज़ अपलोड करें' 
-            : 'Upload your professional certificates and documents'}
-        </p>
-      </div>
+      {/* Onboarding Header */}
+     
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                {locale === 'ne' ? 'कागजात सत्यापन' : 'Document Verification'}
+              </h1>
+              <p className="text-muted-foreground">
+                {locale === 'ne' 
+                  ? 'आफ्नो पहिचान र योग्यता प्रमाणित गर्न कागजातहरू अपलोड गर्नुहोस्' 
+                  : 'Upload documents to verify your identity and qualifications'}
+              </p>
+            </div>
+            
+            {/* Skip Option for Onboarding */}
+            {onSkip && (
+              <Button variant="ghost" onClick={onSkip}>
+                {locale === 'ne' ? 'छोड्नुहोस्' : 'Skip for now'}
+              </Button>
+            )}
+          </div>
+          
+          {/* Progress Indicator */}
+          <div className="mt-4 flex items-center gap-2">
+            <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-primary transition-all duration-500"
+                style={{ width: hasDocuments ? '100%' : '50%' }}
+              />
+            </div>
+            <span className="text-sm text-muted-foreground">
+              {hasDocuments 
+                ? (locale === 'ne' ? 'चरण २/२ पूरा' : 'Step 2/2 Complete')
+                : (locale === 'ne' ? 'चरण २/२' : 'Step 2/2')
+              }
+            </span>
+          </div>
+        </div>
+    
+
+
 
       {/* Upload/Edit Form */}
       <Card className="mb-8" id="document-form">
@@ -557,7 +616,7 @@ export default function ProfessionalVerificationPage() {
 
       {/* Stats Summary */}
       {documents.length > 0 && (
-        <Card>
+        <Card className="mb-8">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="text-center">
@@ -594,6 +653,21 @@ export default function ProfessionalVerificationPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Onboarding Navigation */}
+     
+        <div className="flex justify-end gap-4 pt-6 border-t">
+          <Button
+            size="lg"
+            onClick={handleNext}
+            disabled={!hasDocuments}
+            className="min-w-[200px] bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+          >
+            {locale === 'ne' ? 'अर्को चरणमा जानुहोस्' : 'Continue to Next Step'}
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
+     
     </div>
   );
 }
@@ -740,4 +814,3 @@ function DocumentGrid({
     </div>
   );
 }
-

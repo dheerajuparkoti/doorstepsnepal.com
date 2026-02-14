@@ -63,6 +63,10 @@ import {
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/lib/context/auth-context';
+
+
+
 
 interface ProfessionalServiceAreasOnboardingProps {
   professionalId: number;
@@ -148,7 +152,7 @@ export default function ProfessionalServiceAreasOnboarding({
 }: ProfessionalServiceAreasOnboardingProps) {
   const { locale } = useI18n();
   const router = useRouter();
-  
+    const { refreshUser } = useAuth();
   const {
     serviceAreas,
     isLoading: isLoadingServiceAreas,
@@ -304,35 +308,37 @@ export default function ProfessionalServiceAreasOnboarding({
     }
   };
 
-  const handleComplete = async () => {
-    if (serviceAreas.length === 0) {
-      toast.warning(
-        locale === 'ne' ? 'चेतावनी' : 'Warning',
-        { 
-          description: locale === 'ne'
-            ? 'कृपया कम्तीमा एउटा सेवा क्षेत्र थप्नुहोस्'
-            : 'Please add at least one service area'
-        }
-      );
-      return;
-    }
 
-    if (!termsAccepted || !privacyAccepted) {
-      toast.warning(
-        locale === 'ne' ? 'चेतावनी' : 'Warning',
-        { 
-          description: locale === 'ne'
-            ? 'कृपया नियम र सर्तहरू स्वीकार गर्नुहोस्'
-            : 'Please accept the terms and conditions'
-        }
-      );
-      return;
-    }
+const handleComplete = async () => {
+  if (serviceAreas.length === 0) {
+    toast.warning(
+      locale === 'ne' ? 'चेतावनी' : 'Warning',
+      { 
+        description: locale === 'ne'
+          ? 'कृपया कम्तीमा एउटा सेवा क्षेत्र थप्नुहोस्'
+          : 'Please add at least one service area'
+      }
+    );
+    return;
+  }
 
-    setIsSubmitting(true);
-    
-    // Simulate API call to update professional status
-    await new Promise(resolve => setTimeout(resolve, 1500));
+  if (!termsAccepted || !privacyAccepted) {
+    toast.warning(
+      locale === 'ne' ? 'चेतावनी' : 'Warning',
+      { 
+        description: locale === 'ne'
+          ? 'कृपया नियम र सर्तहरू स्वीकार गर्नुहोस्'
+          : 'Please accept the terms and conditions'
+      }
+    );
+    return;
+  }
+
+  setIsSubmitting(true);
+  
+ try {
+    // Refresh user data - now professional_id should be present
+    await refreshUser();
     
     toast.success(
       locale === 'ne' ? 'सफलता' : 'Success',
@@ -344,8 +350,16 @@ export default function ProfessionalServiceAreasOnboarding({
     );
     
     setIsSubmitting(false);
-    onComplete();
-  };
+    onComplete(); 
+  } catch (error) {
+    console.error('Failed to complete onboarding:', error);
+    toast.error(
+      locale === 'ne' ? 'त्रुटि' : 'Error',
+      { description: 'Failed to complete onboarding' }
+    );
+    setIsSubmitting(false);
+  }
+};
 
   const getAreaStats = () => {
     const districts = new Set<string>();

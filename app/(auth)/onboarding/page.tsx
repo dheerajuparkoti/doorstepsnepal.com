@@ -24,13 +24,14 @@ import { AddressStep } from '@/components/professional/onboarding/first/address-
 import { EmergencyStep } from '@/components/professional/onboarding/first/emergency-step';
 import { SkillsPaymentStep } from '@/components/professional/onboarding/first/skills-payment-step';
 import { BankDetailsDrawer } from '@/components/professional/onboarding/first/bank-details-drawer';
-import ProfessionalVerificationPage from '@/app/dashboard/professional/verify-documents/page'; 
-import ProfessionalServiceAreasOnboarding from '../complete/page';
+import ProfessionalVerificationPageOnboarding from '@/app/(auth)/onboarding/second/page'; 
+import ProfessionalServiceAreasOnboarding from './complete/page';
 
 
 // Hooks
 import { useOnboardingForm } from '@/hooks/use-onboarding-form';
 import { PaymentMethod } from '@/lib/data/professional';
+import { ProtectedRoute } from '@/components/auth/protected-route';
 
 const STEPS = [
   { 
@@ -80,7 +81,7 @@ export default function ProfessionalOnboardingPage() {
     isStepValid,
   } = useOnboardingForm();
 
-  const userId = 177; // TODO: Get from auth
+  const userId = 178; // TODO: Get from auth
 
   useEffect(() => {
     if (error) {
@@ -211,18 +212,14 @@ export default function ProfessionalOnboardingPage() {
 
       let professional;
       
-      // If we already have a professional ID from partial registration, update instead of create
-      
-        console.log("im initial================================ ",professionalData);
+ 
       if (professionalId) {
         professional = await patchProfile(professionalId,professionalData);
 
-        console.log("updating professional data================================ ",professionalData);
 
         
       } else {
         
-        console.log("im creating================================ ",professionalData);
         professional = await registerProfessional(professionalData);
       }
 
@@ -274,7 +271,7 @@ const handleServiceAreasComplete = () => {
   
   // Redirect to dashboard or success page
   setTimeout(() => {
-    router.push('/professional/dashboard');
+    router.push('/dashboard');
   }, 1500);
 };
 
@@ -286,8 +283,8 @@ const handleServiceAreasComplete = () => {
   // If showing document verification, render that page
   if (showDocumentVerification && professionalId) {
     return (
-      <ProfessionalVerificationPage
-        isOnboarding={true}
+      <ProfessionalVerificationPageOnboarding
+    
         professionalId={professionalId}
         onNext={handleDocumentNext}
         onSkip={handleDocumentSkip}
@@ -308,6 +305,7 @@ const handleServiceAreasComplete = () => {
   const currentStepData = STEPS[currentStep];
 
   return (
+  <ProtectedRoute requireProfessionalOnboarding={false}>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       {/* Background decoration */}
       <div className="absolute inset-0 bg-grid-slate-100 [mask-image:radial-gradient(ellipse_at_center,white,transparent)] dark:bg-grid-slate-800/20" />
@@ -521,5 +519,6 @@ const handleServiceAreasComplete = () => {
         initialData={formData.skillsPayment}
       />
     </div>
+     </ProtectedRoute>
   );
 }

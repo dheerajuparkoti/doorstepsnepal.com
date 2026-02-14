@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation"; 
 import { useI18n } from "@/lib/i18n/context";
 import { useTheme } from "@/lib/theme/context";
 import { useAuth } from "@/lib/context/auth-context";
@@ -24,23 +25,52 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"; // Add this import
 import { Home, Bell, Sun, Moon, Globe, User, Settings, LogOut, ChevronDown, Loader2 } from "lucide-react";
 
 // Import notification store
 import { useNotificationStore, useUnreadCount, useIsLoading } from "@/stores/notification-store";
 
+// Helper function to check if professional onboarding is complete
+const isProfessionalOnboardingComplete = (user: any): boolean => {
+  if (!user) return false;
+  const isProfessional = user.user_type === "professional" || user.type === "professional";
+    const needsOnboarding = isProfessional && !user.professional_id;
+
+
+      console.log("Professional check:", { 
+    isProfessional, 
+    professional_id: user.professional_id,
+    needsOnboarding 
+  });
+      return needsOnboarding;
+
+
+};
+
+  const needsOnboarding = isProfessionalOnboardingComplete(User);
+
 export function DashboardTopbar() {
+  const router = useRouter(); // Add router
   const { t, language, setLanguage } = useI18n();
   const { theme, toggleTheme } = useTheme();
   const { user, mode, setMode, logout } = useAuth();
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
+  const [pendingMode, setPendingMode] = useState<"customer" | "professional" | null>(null);
   
   // Use individual selectors for better performance
   const unreadCount = useUnreadCount();
   const isLoading = useIsLoading();
   const { loadNotifications, notifications } = useNotificationStore();
-
 
   useEffect(() => {
     if (user?.id) {
@@ -82,10 +112,56 @@ export function DashboardTopbar() {
       .slice(0, 2);
   };
   
-                const profileRoute =
-  mode === "professional"
-    ? "/dashboard/profile/professional"
-    : "/dashboard/profile/customer";
+  const profileRoute =
+    mode === "professional"
+      ? "/dashboard/profile/professional"
+      : "/dashboard/profile/customer";
+
+  // Handle mode switch with onboarding check
+  const handleModeSwitch = (newMode: "customer" | "professional") => {
+    // If switching to professional mode, check if onboarding is complete
+    if (newMode === "professional") {
+
+
+     
+    
+
+      if (needsOnboarding) {
+  
+        setPendingMode(newMode);
+        setShowOnboardingDialog(true);
+        return;
+      }
+    }
+    
+    // If switching to customer or professional onboarding is complete, proceed
+    performModeSwitch(newMode);
+  };
+  const performModeSwitch = (newMode: "customer" | "professional") => {
+    setMode(newMode);
+   
+    router.push("/dashboard");
+  };
+
+  // Handle onboarding dialog confirmation
+  const handleStartOnboarding = () => {
+    setShowOnboardingDialog(false);
+    // Set the mode first
+    if (pendingMode) {
+      setMode(pendingMode);
+   
+      router.push("/onboarding");
+    }
+    setPendingMode(null);
+  };
+
+
+  const handleCancelOnboarding = () => {
+    setShowOnboardingDialog(false);
+    setPendingMode(null);
+
+  };
+
   return (
     <>
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-6">
@@ -96,30 +172,6 @@ export function DashboardTopbar() {
           </div>
           <span className="hidden text-xl font-bold sm:inline-block">Doorsteps Nepal</span>
         </Link>
-
-        {/* Mode Switch */}
-        {/* <div className="flex items-center rounded-lg border border-border bg-muted p-1">
-          <button
-            onClick={() => setMode("customer")}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              mode === "customer"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t.dashboard.customerMode}
-          </button>
-          <button
-            onClick={() => setMode("professional")}
-            className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              mode === "professional"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t.dashboard.professionalMode}
-          </button>
-        </div> */}
 
         <div className="hidden md:flex items-center">
           <span
@@ -134,7 +186,6 @@ export function DashboardTopbar() {
               : "CUSTOMER DASHBOARD"}
           </span>
         </div>
-
 
         {/* Right Side Actions */}
         <div className="flex items-center gap-2">
@@ -166,10 +217,9 @@ export function DashboardTopbar() {
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 </span>
               ) : unreadCount > 0 ? (
-         <span className="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-primary text-primary-foreground px-1 text-[10px] font-semibold shadow">
-  {unreadCount > 99 ? '99+' : unreadCount}
-</span>
-
+                <span className="absolute -right-1 -top-1 flex min-h-4 min-w-4 items-center justify-center rounded-full bg-primary text-primary-foreground px-1 text-[10px] font-semibold shadow">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
               ) : null}
             </Link>
           </Button>
@@ -191,55 +241,40 @@ export function DashboardTopbar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-
-
-      <DropdownMenuItem asChild>
-  <Link href={profileRoute} className="flex items-center gap-2">
-    <User className="h-4 w-4" />
-    {t.nav.profile}
-  </Link>
-</DropdownMenuItem>
-
-
-              {/* <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  {t.nav.settings}
+              <DropdownMenuItem asChild>
+                <Link href={profileRoute} className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  {t.nav.profile}
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator /> */}
-
 
               <DropdownMenuSeparator />
 
-{/* Mode Switch */}
+      
+            {/* Mode Switch with Onboarding Check */}
 {mode === "customer" ? (
   <DropdownMenuItem asChild>
-    <Link
-      href="/dashboard"
-      onClick={() => setMode("professional")}
-      className="flex items-center gap-2"
+    <button
+      onClick={() => handleModeSwitch("professional")}
+      className="flex w-full items-center gap-2 px-2 py-1.5 text-sm"
     >
       <span className="h-2 w-2 rounded-full bg-blue-500" />
-      Go to Professional Dashboard
-    </Link>
+      {t.nav?.goToProfessional || "Go to Professional Dashboard"}
+    </button>
   </DropdownMenuItem>
 ) : (
   <DropdownMenuItem asChild>
-    <Link
-      href="/dashboard"
-      onClick={() => setMode("customer")}
-      className="flex items-center gap-2"
+    <button
+      onClick={() => handleModeSwitch("customer")}
+      className="flex w-full items-center gap-2 px-2 py-1.5 text-sm"
     >
       <span className="h-2 w-2 rounded-full bg-emerald-500" />
-      Go to Customer Dashboard
-    </Link>
+      {t.nav?.goToCustomer || "Go to Customer Dashboard"}
+    </button>
   </DropdownMenuItem>
 )}
 
 <DropdownMenuSeparator />
-
-
 
               {/* Logout Button */}
               <DropdownMenuItem 
@@ -253,6 +288,48 @@ export function DashboardTopbar() {
           </DropdownMenu>
         </div>
       </header>
+
+      {/* Onboarding Required Dialog */}
+     {/* Onboarding Required Dialog */}
+<Dialog open={showOnboardingDialog} onOpenChange={setShowOnboardingDialog}>
+  <DialogContent className="sm:max-w-md">
+    <DialogHeader>
+      <DialogTitle className="text-xl">
+        {t.onboarding?.title || "Complete Professional Onboarding"}
+      </DialogTitle>
+      <DialogDescription className="pt-2">
+        {t.onboarding?.description}
+      </DialogDescription>
+    </DialogHeader>
+    <div className="flex items-center space-x-2 rounded-md bg-muted p-3">
+      <div className="space-y-1">
+        <p className="text-sm font-medium">
+          {t.onboarding?.requiredInfo || "Required Information:"}
+        </p>
+        <ul className="list-inside list-disc text-sm text-muted-foreground">
+          <li>{t.onboarding?.businessName || "Business/Service Name"}</li>
+          <li>{t.onboarding?.serviceCategory || "Service Category"}</li>
+          <li>{t.onboarding?.experienceYears || "Years of Experience"}</li>
+          <li>{t.onboarding?.serviceAreas || "Service Areas"}</li>
+        </ul>
+      </div>
+    </div>
+    <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
+      <Button
+        variant="outline"
+        onClick={handleCancelOnboarding}
+      >
+        {t.onboarding?.cancel || "Cancel"}
+      </Button>
+      <Button
+        onClick={handleStartOnboarding}
+        className="bg-blue-600 hover:bg-blue-700"
+      >
+        {t.onboarding?.start || "Start Onboarding"}
+      </Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
       {/* Logout Confirmation Dialog */}
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

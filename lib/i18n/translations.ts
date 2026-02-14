@@ -13,6 +13,8 @@ export const translations = {
       logout: "Logout",
       profile: "Profile",
       settings: "Settings",
+              goToProfessional: "Go to Professional Dashboard",
+      goToCustomer: "Go to Customer Dashboard",
     },
     // Hero Section
     hero: {
@@ -372,6 +374,18 @@ export const translations = {
   errorLoading: "Error Loading Favorites",
 },
 
+ onboarding: {
+      title: "Complete Professional Onboarding",
+      description: "To switch to professional mode, you need to complete your professional profile setup first. This includes adding your business details, services, and professional information.",
+      requiredInfo: "Required Information:",
+      businessName: "Business/Service Name",
+      serviceCategory: "Service Category",
+      experienceYears: "Years of Experience",
+      serviceAreas: "Service Areas",
+      start: "Start Onboarding",
+      cancel: "Cancel",
+
+    }
 
   },
   ne: {
@@ -388,6 +402,8 @@ export const translations = {
       logout: "लग आउट",
       profile: "प्रोफाइल",
       settings: "सेटिङ्स",
+         goToProfessional: "व्यावसायिक ड्यासबोर्डमा जानुहोस्",
+      goToCustomer: "ग्राहक ड्यासबोर्डमा जानुहोस्",
     },
     // Hero Section
     hero: {
@@ -737,6 +753,18 @@ favorites: {
   errorLoading: "मनपर्नेहरू लोड गर्दा त्रुटि",
 },
 
+
+  onboarding: {
+      title: "व्यावसायिक अनबोर्डिंग पूरा गर्नुहोस्",
+      description: "व्यावसायिक मोडमा स्विच गर्न, तपाईंले पहिले आफ्नो व्यावसायिक प्रोफाइल सेटअप पूरा गर्न आवश्यक छ। यसमा तपाईंको व्यवसाय विवरण, सेवाहरू, र व्यावसायिक जानकारी समावेश छ।",
+      requiredInfo: "आवश्यक जानकारी:",
+      businessName: "व्यवसाय/सेवाको नाम",
+      serviceCategory: "सेवा श्रेणी",
+      experienceYears: "अनुभव वर्ष",
+      serviceAreas: "सेवा क्षेत्रहरू",
+      start: "अनबोर्डिंग सुरु गर्नुहोस्",
+      cancel: "रद्द गर्नुहोस्"
+    },
     
   },
 };
