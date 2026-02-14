@@ -24,7 +24,7 @@ export function IntlPhoneInput({
   };
 
   // Format display value with Nepal country code
-  const displayValue = value ? `+977 ${value}` : '';
+  const displayValue = value ? ` ${value}` : '';
 
   return (
     <div className="relative flex items-center">
@@ -44,7 +44,7 @@ export function IntlPhoneInput({
         value={displayValue}
         onChange={handleChange}
         disabled={disabled}
-        placeholder={`+977 ${placeholder}`}
+        placeholder={`${placeholder}`}
         className={cn(
           "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2",
           "pl-[60px] text-sm ring-offset-background",

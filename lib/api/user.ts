@@ -22,12 +22,12 @@ export async function getUserProfile(): Promise<User> {
       email: response.email || "",
       gender: response.gender || "",
       age_group: response.age_group || "",
-      ageGroup: response.age_group || "",
       profile_image: response.profile_image || "",
       avatar: response.profile_image || "",
       type: response.type || "customer",
       mode: response.type || "customer",
       is_setup_complete: response.is_setup_complete || false,
+      is_onboarding_complete: response.is_onboarding_complete || false,
       isVerified: true,
       isProfessionalVerified: response.type === "professional",
 

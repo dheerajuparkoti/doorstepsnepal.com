@@ -3,7 +3,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { User, UserMode } from "@/lib/data/user"; 
-import { login as apiLogin, verifyOTP as apiVerifyOTP, setupProfile as apiSetupProfile } from "@/lib/api/auth";
+import { login as apiLogin, verifyOTP as apiVerifyOTP,setupProfile as apiSetupProfile  } from "@/lib/api/auth";
+
 import { getUserProfile } from "@/lib/api/user";
 import { checkIfUserNeedsSetup } from '@/lib/utils/auth-helpers'
 
@@ -74,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             // Use getUserProfile from api/user.ts instead of getCurrentUser
             const freshUserData = await getUserProfile();
+          console.log("USER DATA ===========================================================",freshUserData);
             
             // Update stored user data with fresh data
             localStorage.setItem("auth_user", JSON.stringify(freshUserData));
@@ -116,13 +118,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               phone: userPhone,
               phone_number: userPhone,
               gender: userGender,
-              ageGroup: userAgeGroup,
+       
               age_group: userAgeGroup,
               isVerified: true,
               isProfessionalVerified: savedMode === "professional",
               mode: savedMode || "customer",
               type: savedMode || "customer",
               is_setup_complete: true,
+              is_onboarding_complete:true,
               profile_image: "",
               avatar: "",
             };
@@ -152,18 +155,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Handle route protection on client side (as backup to middleware)
   useEffect(() => {
     if (!isLoading && isInitialized) {
-      const isAuthPage = pathname === '/login' || pathname === '/setup';
+      const isAuthPage = pathname === '/login' || pathname === '/setup' || pathname === '/dashboard'||pathname ==='/onboarding';
       const isProtectedPage = pathname.startsWith('/dashboard') || 
                               pathname.startsWith('/profile') || 
                               pathname.startsWith('/settings');
       
       if (isAuthPage && user) {
         // If logged in and trying to access auth pages
+        console.log("PROFESSIONAL ID IS",user.professional_id);
         if (pathname === '/login') {
           router.push('/dashboard');
-        } else if (pathname === '/setup' && user.is_setup_complete) {
+        } else if (pathname === '/setup' && user.is_setup_complete ) {
           router.push('/dashboard');
         }
+        // else if (pathname == '/dashboard' && (user.professional_id)==null){
+        //     router.push('/onboarding');
+        // }
+        else if (pathname == '/onboarding'){
+            router.push('/onboarding');
+        }
+
+        
       }
       
       if (isProtectedPage && !user) {
@@ -248,12 +260,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: apiUser.email || "",
           gender: apiUser.gender || "",
           age_group: apiUser.age_group || "",
-          ageGroup: apiUser.age_group || "",
+     
           profile_image: apiUser.profile_image || "",
           avatar: apiUser.profile_image || "",
           mode: apiUser.type || "customer",
           type: apiUser.type || "customer",
           is_setup_complete: apiUser.is_setup_complete || false,
+          is_onboarding_complete:apiUser.is_onboarding_complete || false,
           isVerified: true,
           isProfessionalVerified: apiUser.type === "professional",
         };
@@ -293,53 +306,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-
-  const setupProfile = async (data: any) => {
-    try {
-      if (user && token) {
-        const updatedUser: User = {
-          ...user,
-          full_name: data.full_name,
-          name: data.full_name,
-          nameNe: data.full_name,
-          email: data.email || user.email,
-          gender: data.gender,
-          age_group: data.age_group,
-          ageGroup: data.age_group,
-          type: data.user_type,
-          mode: data.user_type,
-          is_setup_complete: true,
-          isProfessionalVerified: data.user_type === "professional",
-        };
-        
-        // Store in both formats for compatibility
-        localStorage.setItem("auth_user", JSON.stringify(updatedUser));
-        
-        // Update cookies
-        setAuthCookies(token, updatedUser);
-        
-        // Also store legacy data for backward compatibility
-        localStorage.setItem("userSetupComplete", "true");
-        localStorage.setItem("userName", data.full_name);
-        localStorage.setItem("userPhone", user.phone);
-        localStorage.setItem("userEmail", data.email || "");
-        localStorage.setItem("userGender", data.gender);
-        localStorage.setItem("userAgeGroup", data.age_group);
-        localStorage.setItem("userMode", data.user_type);
-        
-        setUser(updatedUser);
-        setModeState(data.user_type);
-        
-        // Redirect to dashboard
-        router.push("/dashboard");
-      }
-      
-      return;
-    } catch (error: any) {
-      console.error("Setup profile error:", error);
-      throw new Error(error.message || "Failed to save profile");
+  
+const setupProfile = async (data: any) => {
+  try {
+    console.log("IM FROM AUTH -CONTEXT SETUP PROFILE");
+    
+    if (!user || !token) {
+      throw new Error("User not authenticated");
     }
-  };
+
+    // Call the API to update all profile fields at once
+    const updatedUserData = await apiSetupProfile({
+      full_name: data.full_name,
+      gender: data.gender,
+      age_group: data.age_group,
+      email: data.email || user.email,
+    });
+
+    // Create updated user object with the response from API
+    const updatedUser: User = {
+      ...user,
+      ...updatedUserData,
+      full_name: data.full_name,
+      name: data.full_name,
+      nameNe: data.full_name,
+      email: data.email || user.email,
+      gender: data.gender,
+      age_group: data.age_group,
+      type: data.user_type,
+      mode: data.user_type,
+      is_setup_complete: true,
+      //  For professionals, onboarding starts as incomplete
+      // For customers, onboarding is considered complete (or N/A)
+      is_onboarding_complete: data.user_type === "professional" ? false : true,
+      isProfessionalVerified: data.user_type === "professional",
+    };
+    
+    // Store in both formats for compatibility
+    localStorage.setItem("auth_user", JSON.stringify(updatedUser));
+    
+    // Update cookies
+    setAuthCookies(token, updatedUser);
+    
+    // Also store legacy data for backward compatibility
+    localStorage.setItem("userSetupComplete", "true");
+    localStorage.setItem("userName", data.full_name);
+    localStorage.setItem("userPhone", user.phone || user.phone_number || "");
+    localStorage.setItem("userEmail", data.email || "");
+    localStorage.setItem("userGender", data.gender);
+    localStorage.setItem("userAgeGroup", data.age_group);
+    localStorage.setItem("userMode", data.user_type);
+    
+    setUser(updatedUser);
+    setModeState(data.user_type);
+    
+    // Redirect to dashboard
+    router.push("/dashboard");
+    
+    return;
+  } catch (error: any) {
+    console.error("Setup profile error:", error);
+    throw new Error(error.message || "Failed to save profile");
+  }
+};
 
   const logout = () => {
     // Clear all auth data
@@ -387,8 +416,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (userData.gender) {
         localStorage.setItem("userGender", updatedUser.gender || "");
       }
-      if (userData.age_group || userData.ageGroup) {
-        localStorage.setItem("userAgeGroup", updatedUser.age_group || updatedUser.ageGroup || "");
+      if (userData.age_group) {
+        localStorage.setItem("userAgeGroup", updatedUser.age_group ||  "");
       }
       if (userData.mode || userData.type) {
         localStorage.setItem("userMode", updatedUser.mode || updatedUser.type || "customer");
@@ -409,6 +438,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // Use getUserProfile from api/user.ts instead of getCurrentUser
       const freshUserData = await getUserProfile();
+
+          console.log("Refreshed user data:", {
+      mode: freshUserData.mode,
+      professional_id: freshUserData.professional_id,
+      hasProfessionalId: !!freshUserData.professional_id
+    });
       
       // Update stored user data
       localStorage.setItem("auth_user", JSON.stringify(freshUserData));

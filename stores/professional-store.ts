@@ -405,6 +405,7 @@ export const useProfessionalStore = create<ProfessionalStore>((set, get) => ({
     }
   },
 
+
   // Save multiple service areas at once (replace all)
   saveServiceAreas: async (professionalId: number, serviceAreaIds: number[]) => {
     set({ isUpdatingServiceAreas: true, error: null });
@@ -429,6 +430,9 @@ export const useProfessionalStore = create<ProfessionalStore>((set, get) => ({
       throw error;
     }
   },
+
+
+  
 
   // Clear error
   clearError: () => set({ error: null }),

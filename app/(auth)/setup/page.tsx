@@ -29,12 +29,12 @@ const genders = [
 ];
 
 const ageGroups = [
-  { value: "18-24", label: "18-24 years" },
-  { value: "25-34", label: "25-34 years" },
-  { value: "35-44", label: "35-44 years" },
-  { value: "45-54", label: "45-54 years" },
-  { value: "55-64", label: "55-64 years" },
-  { value: "65+", label: "65+ years" },
+  { value: "age_18_24", label: "18-24 years" },
+  { value: "age_25_34", label: "25-34 years" },
+  { value: "age_35_44", label: "35-44 years" },
+  { value: "age_45_54", label: "45-54 years" },
+  { value: "age_55_64", label: "55-64 years" },
+  { value: "age_65_plus", label: "65+ years" },
 ];
 
 
@@ -101,28 +101,36 @@ export default function SetupPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
-    if (!validateForm()) return;
+const handleSubmit = async () => {
+  if (!validateForm()) return;
+  
+  setIsLoading(true);
+  setError("");
+  
+  try {
+    // Use auth context setupProfile function
+    await setupProfile({
+      full_name: formData.name.trim(),
+      email: formData.email.trim() || undefined,
+      gender: formData.gender,
+      age_group: formData.ageGroup,
+      user_type: formData.mode,
+    });
     
-    setIsLoading(true);
-    setError("");
-    
-    try {
-      // Use auth context setupProfile function
-      await setupProfile({
-        full_name: formData.name.trim(),
-        email: formData.email.trim() || undefined,
-        gender: formData.gender,
-        age_group: formData.ageGroup,
-        user_type: formData.mode,
-      });
-      
-      // setupProfile will handle redirection automatically
-    } catch (err: any) {
-      setError(err.message || "Failed to save profile. Please try again.");
-      setIsLoading(false);
+    //  Conditional redirect based on user mode
+    if (formData.mode === "professional") {
+      // Professional users go to onboarding
+      router.push("/onboarding");
+    } else {
+      // Customer users go to dashboard
+      router.push("/dashboard");
     }
-  };
+    
+  } catch (err: any) {
+    setError(err.message || "Failed to save profile. Please try again.");
+    setIsLoading(false);
+  }
+};
 
   const handleModeSelect = (mode: UserMode) => {
     setFormData((prev) => ({ ...prev, mode }));
