@@ -10,15 +10,37 @@ import {
 
 export class OrderAPI {
   // Get orders with filters
-  static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
+  // static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
+  //   try {
+  //     return await api.get<OrdersResponse>('/orders', {
+  //       params: filters,
+  //       cache: 'no-store',
+  //     });
+  //   } catch (error) {
+  //     console.error('Error fetching orders:', error);
+  //     throw new Error(error instanceof Error ? error.message : 'Failed to fetch orders');
+  //   }
+  // }
+
+   static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
     try {
       return await api.get<OrdersResponse>('/orders', {
         params: filters,
         cache: 'no-store',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching orders:', error);
-      throw new Error(error instanceof Error ? error.message : 'Failed to fetch orders');
+     
+      if (error.response?.status === 404 || error.message.includes('404')) {
+        return {
+          orders: [],
+          total: 0,
+          page: 1,
+          per_page: filters.per_page || 10,
+          total_pages: 0,
+        };
+      }
+      throw new Error(error.message || 'Failed to fetch orders');
     }
   }
 
