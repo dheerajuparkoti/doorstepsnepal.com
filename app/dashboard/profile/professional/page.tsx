@@ -16,6 +16,7 @@ import { ProfessionalScreenSSR } from '@/components/professional/ssr/professiona
 import { ProfessionalScreenSkeleton } from '@/components/professional/skeleton/professional-screen-skeleton';
 // import { getServerSession } from '@/lib/data/auth'; // You'll need this
 import { fetchProfessionalProfile } from '@/lib/api/professional-profiles';
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: 'My Profile',
@@ -30,7 +31,7 @@ export default async function MyProfilePage() {
 //     notFound();
 //   }
 
-//   const professionalId = session.user.professionalId;
+  // const professionalId = user.professionalId;
 
   return (
     <Suspense fallback={<ProfessionalScreenSkeleton />}>
