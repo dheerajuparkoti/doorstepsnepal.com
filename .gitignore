@@ -10,8 +10,8 @@
 # production
 /build
 
-# /public/firebase-messaging-sw.js
-# /app/notifications/fcm-web.ts
+/public/firebase-messaging-sw.js
+/app/notifications/fcm-web.ts
 
 # debug
 npm-debug.log*
