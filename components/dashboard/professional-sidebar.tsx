@@ -59,11 +59,11 @@ export function ProfessionalSidebar() {
       href: "/dashboard/profile",
       icon: User,
       children: [
-        { label: t.professional.sidebar.viewProfile, href: "/dashboard/profile/view-profile", icon: View},
-        { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/profile/verify", icon: FileCheck },
-        { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/profile/payments", icon: CreditCard },
-        { label: t.professional.sidebar.workGallery, href: "/dashboard/profile/gallery", icon: ImageIcon },
-        { label: t.professional.sidebar.mySkills, href: "/dashboard/profile/skills", icon: Wrench },
+        { label: t.professional.sidebar.viewProfile, href: "/dashboard/profile/professional", icon: View},
+        { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/professional/verify-documents", icon: FileCheck },
+        { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/professional/payments", icon: CreditCard },
+        { label: t.professional.sidebar.workGallery, href: "/dashboard/professional/gallery", icon: ImageIcon },
+        { label: t.professional.sidebar.mySkills, href: "/dashboard/professional/skills", icon: Wrench },
       ],
     },
     {
@@ -71,9 +71,9 @@ export function ProfessionalSidebar() {
       href: "/dashboard/services",
       icon: Briefcase,
       children: [
-        { label: t.professional.sidebar.chooseServices, href: "/dashboard/services/choose", icon: ListChecks },
-        { label: t.professional.sidebar.serviceArea, href: "/dashboard/services/area", icon: MapPin },
-        { label: t.professional.sidebar.serviceTime, href: "/dashboard/services/time", icon: Clock },
+        { label: t.professional.sidebar.chooseServices, href: "/dashboard/professional/own-services", icon: ListChecks },
+        { label: t.professional.sidebar.serviceArea, href: "/dashboard/professional/service-area", icon: MapPin },
+        { label: t.professional.sidebar.serviceTime, href: "/dashboard/professional/service-availability", icon: Clock },
       ],
     },
     {
@@ -81,11 +81,11 @@ export function ProfessionalSidebar() {
       href: "/dashboard/jobs",
       icon: CalendarDays,
       children: [
-        { label: t.professional.sidebar.pending, href: "/dashboard/jobs/pending", icon: Clock },
-        { label: t.professional.sidebar.accepted, href: "/dashboard/jobs/accepted", icon: CheckCircle },
-        { label: t.professional.sidebar.inspected, href: "/dashboard/jobs/inspected", icon: Search },
-        { label: t.professional.sidebar.completed, href: "/dashboard/jobs/completed", icon: CheckCircle },
-        { label: t.professional.sidebar.cancelled, href: "/dashboard/jobs/cancelled", icon: XCircle },
+        { label: t.professional.sidebar.pending, href: "/dashboard/professional/jobs/pending", icon: Clock },
+        { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle },
+        { label: t.professional.sidebar.inspected, href: "/dashboard/professional/jobs/inspected", icon: Search },
+        { label: t.professional.sidebar.completed, href: "/dashboard/professional/jobs/completed", icon: CheckCircle },
+        { label: t.professional.sidebar.cancelled, href: "/dashboard/professional/jobs/cancelled", icon: XCircle },
       ],
     },
     {
@@ -103,8 +103,8 @@ export function ProfessionalSidebar() {
       children: [
    
         { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
-        { label: t.professional.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
-        { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
+        // { label: t.professional.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
+        // { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
       ],
     },
   ];

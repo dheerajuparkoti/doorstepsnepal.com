@@ -52,11 +52,11 @@ export function CustomerSidebar() {
       href: "/dashboard/bookings",
       icon: CalendarDays,
       children: [
-        { label: t.customer.sidebar.pending, href: "/dashboard/bookings/pending", icon: Clock },
-        { label: t.customer.sidebar.accepted, href: "/dashboard/bookings/accepted", icon: CheckCircle },
-        { label: t.customer.sidebar.inspected, href: "/dashboard/bookings/inspected", icon: Search },
-        { label: t.customer.sidebar.completed, href: "/dashboard/bookings/completed", icon: CheckCircle },
-        { label: t.customer.sidebar.cancelled, href: "/dashboard/bookings/cancelled", icon: XCircle },
+        { label: t.customer.sidebar.pending, href: "/dashboard/customer/bookings/pending", icon: Clock },
+        { label: t.customer.sidebar.accepted, href: "/dashboard/customer/bookings/accepted", icon: CheckCircle },
+        { label: t.customer.sidebar.inspected, href: "/dashboard/customer/bookings/inspected", icon: Search },
+        { label: t.customer.sidebar.completed, href: "/dashboard/customer/bookings/completed", icon: CheckCircle },
+        { label: t.customer.sidebar.cancelled, href: "/dashboard/customer/bookings/cancelled", icon: XCircle },
       ],
     },
     {
@@ -82,8 +82,8 @@ export function CustomerSidebar() {
       icon: Settings,
       children: [
         { label: t.customer.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
-        { label: t.customer.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
-        { label: t.customer.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
+        // { label: t.customer.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
+        // { label: t.customer.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
       ],
     },
   ];

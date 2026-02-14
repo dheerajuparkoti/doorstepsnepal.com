@@ -66,8 +66,8 @@ export default function NotificationsPage() {
     loadNotifications();
   }, [loadNotifications]);
 
-  const otherModeCount = hasOtherModeNotifications(mode === 'professional');
-  const grouped = groupNotificationsByDate(notifications, mode === 'professional');
+  const otherModeCount = hasOtherModeNotifications(mode === 'customer');
+  const grouped = groupNotificationsByDate(notifications, mode === 'customer');
   
   // Filter notifications based on selected filter
   const getFilteredGrouped = () => {
