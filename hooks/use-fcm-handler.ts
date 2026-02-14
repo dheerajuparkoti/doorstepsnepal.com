@@ -22,7 +22,7 @@ export function useFCMHandler() {
     message: ""
   });
 
-
+  // Get store actions
   const refreshPayments = usePaymentStore((state) => state.refreshAfterPayment);
   const refreshWallet = useWalletStore((state) => state.refreshWalletData);
 
