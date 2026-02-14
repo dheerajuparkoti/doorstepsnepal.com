@@ -223,11 +223,11 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
   };
 
   const handleViewDetails = () => {
-    router.push(`/jobs/${order.id}`);
+    // router.push(`/jobs/${order.id}`);
   };
 
   const handleViewPayment = () => {
-    router.push(`/payment/${order.id}?professional=true`);
+    // router.push(`/payment/${order.id}?professional=true`);
   };
 
   return (
