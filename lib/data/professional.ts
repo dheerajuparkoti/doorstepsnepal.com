@@ -56,7 +56,7 @@ export interface ProfessionalRegistrationData {
   user_id: number;
   refered_by?: string;
   skill?: string;
-  payment_method: PaymentMethod;
+  payment_method?: PaymentMethod;
   bank_account_number?: string;
   bank_branch_name?: string;
   bank_name?: string;
@@ -65,14 +65,14 @@ export interface ProfessionalRegistrationData {
   ec_name?: string;
   ec_relationship?: string;
   ec_phone?: string;
-  experience: number;
+  experience?: number;
   addresses: Address[];
   
 }
 
 export interface ProfessionalUpdateData {
   full_name?: string;
-  email?: string;
+  // email?: string;
   refered_by?: string;
   skill?: string;
   payment_method?: PaymentMethod;
