@@ -2,7 +2,7 @@ import { FeaturedServicesSection } from "../featured-services-section";
 import { fetchProfessionalServices } from "@/lib/api/professional-services";
 import type { ProfessionalService } from "@/lib/data/professional-services";
 
-export async function FeaturedServicesSections() {
+export async function FeaturedServicesSectionSSR() {
   const data = await fetchProfessionalServices(1, 30);
   const services: ProfessionalService[] = data.professional_services || [];
 

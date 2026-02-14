@@ -44,7 +44,9 @@ interface NavItem {
 export function ProfessionalSidebar() {
   const { t } = useI18n();
   const pathname = usePathname();
-  const [openSections, setOpenSections] = useState<string[]>(["profile", "services", "jobs", "settings"]);
+  // const [openSections, setOpenSections] = useState<string[]>(["profile", "services", "jobs", "settings"]);
+  const [openSections, setOpenSections] = useState<string[]>([]);// make labels collapsible
+
 
   const navItems: NavItem[] = [
     {

@@ -242,6 +242,38 @@ export const translations = {
     },
     // Professional Dashboard
     professional: {
+
+  wallet: {
+          availableBalance: "Available Balance",
+          totalEarned: "Total Earned",
+          totalWithdrawn: "Total Withdrawn",
+          myWallet: "My Wallet"
+        },
+      jobs: {
+        requests: "Job Requests",
+        active: "Active Jobs",
+        accept: "Accept",
+        reject: "Reject",
+        viewDetails: "View Details",
+        noRequests: "No pending requests",
+        noActive: "No active jobs",
+               todaySchedule: "Today's Schedule",
+          noSchedule: "No jobs scheduled for today"
+      },
+      earnings: {
+        summary: "Earnings Summary",
+        withdraw: "Withdraw",
+        monthlyChart: "Monthly Earnings",
+               monthlyEarnings: "Monthly Earnings (NPR)",
+          amount: "Amount",
+          noData: "No earnings data available"
+      },
+        deletion: {
+          notice: "Your account deletion request is being processed"
+        },
+
+
+
       sidebar: {
         dashboard: "Dashboard",
         profile: "Profile",
@@ -280,20 +312,7 @@ export const translations = {
         earnings: "Earnings (This Month)",
         rating: "Rating",
       },
-      jobs: {
-        requests: "Job Requests",
-        active: "Active Jobs",
-        accept: "Accept",
-        reject: "Reject",
-        viewDetails: "View Details",
-        noRequests: "No pending requests",
-        noActive: "No active jobs",
-      },
-      earnings: {
-        summary: "Earnings Summary",
-        withdraw: "Withdraw",
-        monthlyChart: "Monthly Earnings",
-      },
+  
     },
     // Common
     common: {
@@ -590,6 +609,38 @@ export const translations = {
     },
     // Professional Dashboard
     professional: {
+
+      wallet: {
+        availableBalance: "उपलब्ध मौज्दात",
+        totalEarned: "जम्मा कमाई",
+        totalWithdrawn: "जम्मा निकासी",
+        myWallet: "मेरो वालेट"
+      },
+
+          jobs: {
+        requests: "काम अनुरोधहरू",
+        active: "सक्रिय कामहरू",
+        accept: "स्वीकार गर्नुहोस्",
+        reject: "अस्वीकार गर्नुहोस्",
+        viewDetails: "विवरण हेर्नुहोस्",
+        noRequests: "कुनै पेन्डिङ अनुरोध छैन",
+        noActive: "कुनै सक्रिय काम छैन",
+          todaySchedule: "आजको तालिका",
+        noSchedule: "आजका लागि कुनै काम निर्धारित छैन"
+      },
+      earnings: {
+        summary: "आम्दानी सारांश",
+        withdraw: "झिक्नुहोस्",
+        monthlyChart: "मासिक आम्दानी",
+          monthlyEarnings: "मासिक कमाई (रु)",
+        amount: "रकम",
+        noData: "कमाई सम्बन्धी कुनै डेटा उपलब्ध छैन"
+      },
+  
+      deletion: {
+        notice: "तपाईंको खाता मेटाउने अनुरोध प्रक्रियामा छ"
+      },
+
       sidebar: {
         dashboard: "ड्यासबोर्ड",
         profile: "प्रोफाइल",
@@ -628,20 +679,7 @@ export const translations = {
         earnings: "आम्दानी (यो महिना)",
         rating: "रेटिङ",
       },
-      jobs: {
-        requests: "काम अनुरोधहरू",
-        active: "सक्रिय कामहरू",
-        accept: "स्वीकार गर्नुहोस्",
-        reject: "अस्वीकार गर्नुहोस्",
-        viewDetails: "विवरण हेर्नुहोस्",
-        noRequests: "कुनै पेन्डिङ अनुरोध छैन",
-        noActive: "कुनै सक्रिय काम छैन",
-      },
-      earnings: {
-        summary: "आम्दानी सारांश",
-        withdraw: "झिक्नुहोस्",
-        monthlyChart: "मासिक आम्दानी",
-      },
+  
     },
     // Common
     common: {

@@ -372,4 +372,28 @@ export class NepaliDateService {
     const d = date instanceof NepaliDate ? date : this.toBS(date);
     return d ? d.getDate() : new Date().getDate();
   }
+
+
+
+  //    * Format for header display with safe handling
+
+  static formatNepaliMonth(date: NepaliDate | Date | string | null | undefined): string {
+    if (!date) return 'Date not available';
+    
+    try {
+      const nepaliDate = date instanceof NepaliDate ? date : this.toBS(date);
+      if (!nepaliDate) return 'Date not available';
+      
+      const year = nepaliDate.getYear();
+      const month = nepaliDate.getMonth();
+      const day = nepaliDate.getDate();
+      const monthNames = [
+        'Baisakh', 'Jestha', 'Ashad', 'Shrawan', 'Bhadra', 'Ashwin',
+        'Kartik', 'Mangsir', 'Poush', 'Magh', 'Falgun', 'Chaitra'
+      ];
+      return `${monthNames[month]} ${day}, ${year}`;
+    } catch (error) {
+      return 'Date not available';
+    }
+  }
 }

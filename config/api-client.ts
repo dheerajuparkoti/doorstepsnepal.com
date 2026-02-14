@@ -152,24 +152,24 @@ async function baseRequest<T = any>(
   
   // Add logging for debugging
   if (process.env.NODE_ENV === 'development') {
-    // console.log(' API Request:', {
-    //   url,
-    //   method: finalOptions.method || 'GET',
-    //   hasToken: !skipAuth && !!getToken(),
-    //   skipAuth,
-    //   params,
-    // });
+    console.log(' API Request:', {
+      url,
+      method: finalOptions.method || 'GET',
+      hasToken: !skipAuth && !!getToken(),
+      skipAuth,
+      params,
+    });
   }
 
   try {
     const response = await fetch(url, finalOptions);
 
     if (process.env.NODE_ENV === 'development') {
-      // console.log(' API Response:', {
-      //   status: response.status,
-      //   ok: response.ok,
-      //   url: response.url,
-      // });
+      console.log(' API Response:', {
+        status: response.status,
+        ok: response.ok,
+        url: response.url,
+      });
     }
 
     // Handle 401 Unauthorized - token expired or invalid
@@ -220,10 +220,10 @@ async function baseRequest<T = any>(
     return await response.json();
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      // console.error(' API Request Failed:', {
-      //   url,
-      //   error: error instanceof Error ? error.message : 'Unknown error',
-      // });
+      console.error(' API Request Failed:', {
+        url,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
     throw error;
   }

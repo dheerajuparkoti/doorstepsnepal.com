@@ -79,6 +79,9 @@ import { ThemeProvider } from "@/lib/theme/context";
 import { I18nProvider } from "@/lib/i18n/context";
 import { AuthProvider } from "@/lib/context/auth-context"; 
 import "./globals.css";
+import { Toaster } from "sonner";
+import FCMInitializer from "./notifications/fcm-initializer";
+import { AnnouncementDialogWrapper } from "@/components/notifications/announcement-wrapper";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -139,6 +142,9 @@ export default function RootLayout({
           <I18nProvider>
             <AuthProvider> {/* Add AuthProvider*/}
               {children}
+              <Toaster richColors position="top-right" />
+              <FCMInitializer />
+              <AnnouncementDialogWrapper /> {/* We'll create this */}
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>

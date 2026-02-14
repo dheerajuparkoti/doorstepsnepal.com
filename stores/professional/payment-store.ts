@@ -18,6 +18,9 @@ interface PaymentState {
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
   clearPayments: () => void;
+  // New Refresh actions
+  refreshAfterPayment: (orderId: number) => Promise<void>;
+  fetchPaymentsByOrder: (orderId: number) => Promise<void>;
   
   // Computed
   completedPayments: () => Payment[];
@@ -46,8 +49,61 @@ export const usePaymentStore = create<PaymentState>()(
         get().payments.filter(p => p.paymentStatus === 'pending'),
       
       totalCompletedAmount: () => 
-        get().completedPayments().reduce((sum, p) => sum + p.amount, 0)
+        get().completedPayments().reduce((sum, p) => sum + p.amount, 0),
+
+
+
+        //  Refresh after payment notification
+      refreshAfterPayment: async (orderId: number) => {
+        set({ isLoading: true });
+        try {
+          // Fetch latest payments for this order
+          const response = await fetch(`/api/orders/${orderId}/payments`);
+          const data = await response.json();
+          
+          // Update payments list
+          const updatedPayments = [...get().payments];
+          const index = updatedPayments.findIndex(p => p.order_id === orderId);
+          if (index !== -1) {
+            updatedPayments[index] = data.payments;
+          } else {
+            updatedPayments.push(...data.payments);
+          }
+          
+          set({ 
+            payments: updatedPayments,
+            paymentSummary: data.summary,
+            isLoading: false 
+          });
+        } catch (error) {
+          // set({ error: error.message, isLoading: false });
+        }
+      },
+      
+      // NEW: Fetch payments by order
+      fetchPaymentsByOrder: async (orderId: number) => {
+        set({ isLoading: true });
+        try {
+          const response = await fetch(`/api/orders/${orderId}/payments`);
+          const data = await response.json();
+          set({ 
+            payments: data.payments,
+            paymentSummary: data.summary,
+            isLoading: false 
+          });
+        } catch (error) {
+          // set({ error: error.message, isLoading: false });
+        }
+      }
+
+
+
+
     }),
+
+
+
+
     { name: 'payment-store' }
   )
 );

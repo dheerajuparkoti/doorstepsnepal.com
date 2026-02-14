@@ -1,14 +1,16 @@
 "use client";
 
+import { useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
 import { useAuth } from "@/lib/context/auth-context";
+import { useOrderStore } from "@/stores/order-store";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CategoriesResponse } from "@/lib/data/categories";
-import {promotions} from "@/lib/data/promotions";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Plus,
   Search,
@@ -16,63 +18,230 @@ import {
   ArrowRight,
   Clock,
   CheckCircle,
+  XCircle,
+  Eye,
+  Package,
   Percent,
   Star,
+  MapPin,
+  User,
+  DollarSign,
+  TrendingUp,
+  AlertCircle,
 } from "lucide-react";
+import { OrderStatus } from "@/lib/data/order";
 
-// Mock data for active bookings
-const activeBookings = [
-  {
-    id: "booking-1",
-    serviceName: "AC Repair",
-    serviceNameNe: "एसी मर्मत",
-    professionalName: "Ram Bahadur",
-    professionalNameNe: "राम बहादुर",
-    professionalAvatar: "/images/professionals/pro-1.jpg",
-    status: "pending",
-    scheduledDate: "2024-01-20",
-    scheduledTime: "10:00 AM",
-  },
-  {
-    id: "booking-2",
-    serviceName: "Deep Cleaning",
-    serviceNameNe: "गहिरो सफाई",
-    professionalName: "Sita Kumari",
-    professionalNameNe: "सीता कुमारी",
-    professionalAvatar: "/images/professionals/pro-2.jpg",
-    status: "ongoing",
-    scheduledDate: "2024-01-21",
-    scheduledTime: "2:00 PM",
-  },
-];
 
-const statusConfig: Record<string, { label: string; labelNe: string; className: string }> = {
-  pending: { label: "Pending", labelNe: "पेन्डिङ", className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500" },
-  ongoing: { label: "Ongoing", labelNe: "जारी", className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500" },
-  completed: { label: "Completed", labelNe: "पूरा भयो", className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500" },
+import { FeaturedServicesSkeleton } from "../home/skeleton/feateured-services-skeleton";
+
+import dynamic from 'next/dynamic';
+import { ProfessionalsSkeleton } from "../home/skeleton/professional-skeleton";
+import { SearchSkeleton } from "../home/skeleton/search-skeleton";
+
+const FeaturedServicesWrapper = dynamic(
+  () => import('@/components/dashboard/customer/featured-services-wrapper'),
+  {
+    ssr: true,
+    loading: () => <FeaturedServicesSkeleton />
+  }
+);
+
+
+const ProfessionalsWrapper = dynamic(
+  () => import('@/components/dashboard/customer/professional-wrapper'),
+  {
+    ssr: true,
+    loading: () => <ProfessionalsSkeleton />
+  }
+);
+
+
+const SearchWrapper = dynamic(
+  () => import('@/components/dashboard/customer/search-wrapper'),
+  {
+    ssr: true,
+    loading: () => <SearchSkeleton />
+  }
+);
+// Status configuration for bookings
+const statusConfig: Record<string, { 
+  label: string; 
+  labelNe: string; 
+  className: string;
+  icon: any;
+}> = {
+  pending: { 
+    label: "Pending", 
+    labelNe: "पेन्डिङ", 
+    className: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500",
+    icon: Clock
+  },
+  accepted: { 
+    label: "Accepted", 
+    labelNe: "स्वीकृत", 
+    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500",
+    icon: CheckCircle
+  },
+  inspected: { 
+    label: "Inspected", 
+    labelNe: "निरीक्षण गरियो", 
+    className: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-500",
+    icon: Eye
+  },
+  ongoing: { 
+    label: "Ongoing", 
+    labelNe: "जारी", 
+    className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500",
+    icon: Package
+  },
+  completed: { 
+    label: "Completed", 
+    labelNe: "पूरा भयो", 
+    className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500",
+    icon: CheckCircle
+  },
+  cancelled: { 
+    label: "Cancelled", 
+    labelNe: "रद्द गरियो", 
+    className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500",
+    icon: XCircle
+  },
 };
+
 
 export function CustomerDashboard() {
   const { t, language } = useI18n();
   const { user } = useAuth();
+  const router = useRouter();
+  
+  // Get orders from store
+  const { 
+    orders, 
+    isLoading: ordersLoading, 
+    fetchCustomerOrders 
+  } = useOrderStore();
+
+  // Fetch orders on mount
+  useEffect(() => {
+    if (user?.id) {
+      fetchCustomerOrders(user.id);
+    }
+  }, [user?.id, fetchCustomerOrders]);
+
+  // Filter orders by status for quick stats
+  const pendingBookings = orders.filter(order => order.order_status === OrderStatus.PENDING);
+  const acceptedBookings = orders.filter(order => order.order_status === OrderStatus.ACCEPTED);
+  const inspectedBookings = orders.filter(order => order.order_status === OrderStatus.INSPECTED);
+  // const ongoingBookings = orders.filter(order => order.order_status === OrderStatus.ONGOING);
+  const completedBookings = orders.filter(order => order.order_status === OrderStatus.COMPLETED);
+  const cancelledBookings = orders.filter(order => order.order_status === OrderStatus.CANCELLED);
+
+  // Get recent bookings (last 3)
+  const recentBookings = [...orders]
+    .sort((a, b) => new Date(b.order_date).getTime() - new Date(a.order_date).getTime())
+    .slice(0, 3);
+
+  // Calculate total spent
+  const totalSpent = completedBookings.reduce((sum, order) => sum + order.total_price, 0);
+
+  // Stats for the dashboard
+  const stats = [
+    {
+      label: language === 'ne' ? 'कुल बुकिंग' : 'Total Bookings',
+      value: orders.length.toString(),
+      icon: Package,
+      change: `+${completedBookings.length} completed`,
+      changeType: "positive" as const,
+    },
+    {
+      label: language === 'ne' ? 'बाँकी बुकिंग' : 'Pending',
+      value: pendingBookings.length.toString(),
+      icon: Clock,
+      change: `${acceptedBookings.length} accepted`,
+      changeType: "neutral" as const,
+    },
+    {
+      label: language === 'ne' ? 'कुल खर्च' : 'Total Spent',
+      value: `Rs. ${totalSpent.toLocaleString()}`,
+      icon: DollarSign,
+      change: `avg. Rs. ${completedBookings.length ? (totalSpent / completedBookings.length).toFixed(0) : 0}`,
+      changeType: "neutral" as const,
+    },
+    // {
+    //   label: language === 'ne' ? 'सक्रिय बुकिंग' : 'Active',
+    //   value: (acceptedBookings.length + ongoingBookings.length).toString(),
+    //   icon: TrendingUp,
+    //   change: `${inspectedBookings.length} inspected`,
+    //   changeType: "positive" as const,
+    // },
+  ];
 
   return (
     <div className="space-y-6">
+
+
       {/* Welcome Section */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground md:text-3xl">
-            {t.dashboard.hi}, {language === "ne" ? user?.nameNe : user?.name}!
+            {t.dashboard.hi}, {language === "ne" ? user?.nameNe || user?.name : user?.name}!
           </h1>
-          <p className="mt-1 text-muted-foreground">{t.customer.welcome.subtitle}</p>
+          <p className="mt-1 text-muted-foreground">
+            {language === 'ne' 
+              ? 'तपाईंको बुकिंग र सेवाहरू यहाँ व्यवस्थापन गर्नुहोस्'
+              : t.customer.welcome.subtitle
+            }
+          </p>
         </div>
         <Button asChild>
           <Link href="/services">
             <Plus className="mr-2 h-4 w-4" />
-            {t.customer.quickActions.bookService}
+            {language === 'ne' ? 'नयाँ सेवा बुक गर्नुहोस्' : t.customer.quickActions.bookService}
           </Link>
         </Button>
       </div>
+
+
+{/* Search Section */}
+<div className="pt-18">
+  <SearchWrapper />
+</div>
+
+
+      {/* Stats Grid */}
+      {!ordersLoading && (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => {
+            const Icon = stat.icon;
+            return (
+              <Card key={stat.label}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    {stat.changeType === "positive" && (
+                      <div className="flex items-center gap-1 text-sm text-green-600">
+                        <TrendingUp className="h-4 w-4" />
+                        {stat.change}
+                      </div>
+                    )}
+                    {stat.changeType === "neutral" && (
+                      <span className="text-sm text-muted-foreground">{stat.change}</span>
+                    )}
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+ 
 
       {/* Quick Actions */}
       <div className="grid gap-4 sm:grid-cols-3">
@@ -83,7 +252,9 @@ export function CustomerDashboard() {
                 <Plus className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold">{t.customer.quickActions.bookService}</h3>
+                <h3 className="font-semibold">
+                  {language === 'ne' ? 'सेवा बुक गर्नुहोस्' : t.customer.quickActions.bookService}
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   {language === "ne" ? "नयाँ सेवा बुक गर्नुहोस्" : "Book a new service"}
                 </p>
@@ -99,7 +270,9 @@ export function CustomerDashboard() {
                 <Search className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold">{t.customer.quickActions.browseServices}</h3>
+                <h3 className="font-semibold">
+                  {language === 'ne' ? 'सेवाहरू खोज्नुहोस्' : t.customer.quickActions.browseServices}
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   {language === "ne" ? "सबै सेवाहरू हेर्नुहोस्" : "Explore all services"}
                 </p>
@@ -115,9 +288,11 @@ export function CustomerDashboard() {
                 <CalendarDays className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold">{t.customer.quickActions.viewActiveBookings}</h3>
+                <h3 className="font-semibold">
+                  {language === 'ne' ? 'मेरो बुकिंगहरू' : t.customer.quickActions.viewActiveBookings}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  {language === "ne" ? "तपाईंको बुकिङहरू" : "Your bookings"}
+                  {language === "ne" ? "तपाईंको बुकिङहरू हेर्नुहोस्" : "View your bookings"}
                 </p>
               </div>
             </CardContent>
@@ -125,10 +300,48 @@ export function CustomerDashboard() {
         </Card>
       </div>
 
-      {/* Active Bookings */}
+      {/* Booking Status Summary */}
+      {!ordersLoading && orders.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <Link href="/dashboard/bookings/pending">
+            <Badge variant="outline" className="cursor-pointer hover:bg-yellow-50 px-3 py-1">
+              <Clock className="w-3 h-3 mr-1" />
+              {language === 'ne' ? 'बाँकी' : 'Pending'}: {pendingBookings.length}
+            </Badge>
+          </Link>
+          <Link href="/dashboard/bookings/accepted">
+            <Badge variant="outline" className="cursor-pointer hover:bg-blue-50 px-3 py-1">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              {language === 'ne' ? 'स्वीकृत' : 'Accepted'}: {acceptedBookings.length}
+            </Badge>
+          </Link>
+          <Link href="/dashboard/bookings/inspected">
+            <Badge variant="outline" className="cursor-pointer hover:bg-purple-50 px-3 py-1">
+              <Eye className="w-3 h-3 mr-1" />
+              {language === 'ne' ? 'निरीक्षण' : 'Inspected'}: {inspectedBookings.length}
+            </Badge>
+          </Link>
+          <Link href="/dashboard/bookings/completed">
+            <Badge variant="outline" className="cursor-pointer hover:bg-green-50 px-3 py-1">
+              <CheckCircle className="w-3 h-3 mr-1" />
+              {language === 'ne' ? 'सम्पन्न' : 'Completed'}: {completedBookings.length}
+            </Badge>
+          </Link>
+          <Link href="/dashboard/bookings/cancelled">
+            <Badge variant="outline" className="cursor-pointer hover:bg-red-50 px-3 py-1">
+              <XCircle className="w-3 h-3 mr-1" />
+              {language === 'ne' ? 'रद्द' : 'Cancelled'}: {cancelledBookings.length}
+            </Badge>
+          </Link>
+        </div>
+      )}
+
+      {/* Recent Bookings */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{t.customer.bookings.active}</CardTitle>
+          <CardTitle>
+            {language === 'ne' ? 'हालैका बुकिंगहरू' : 'Recent Bookings'}
+          </CardTitle>
           <Button variant="ghost" size="sm" asChild>
             <Link href="/dashboard/bookings">
               {t.common.seeAll}
@@ -137,42 +350,63 @@ export function CustomerDashboard() {
           </Button>
         </CardHeader>
         <CardContent>
-          {activeBookings.length > 0 ? (
+          {ordersLoading ? (
             <div className="space-y-4">
-              {activeBookings.map((booking) => {
-                const status = statusConfig[booking.status];
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
+            </div>
+          ) : recentBookings.length > 0 ? (
+            <div className="space-y-4">
+              {recentBookings.map((booking) => {
+                const status = statusConfig[booking.order_status.toLowerCase()] || statusConfig.pending;
+                const StatusIcon = status.icon;
+                
                 return (
                   <div
                     key={booking.id}
-                    className="flex flex-col gap-4 rounded-lg border border-border p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col gap-4 rounded-lg border border-border p-4 hover:bg-accent/50 cursor-pointer transition-colors"
+                    onClick={() => router.push(`/orders/${booking.id}`)}
                   >
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={booking.professionalAvatar || "/placeholder.svg"} />
-                        <AvatarFallback className="bg-primary/10 text-primary">
-                          {booking.professionalName[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h4 className="font-medium">
-                          {language === "ne" ? booking.serviceNameNe : booking.serviceName}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {language === "ne" ? booking.professionalNameNe : booking.professionalName}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        {booking.scheduledDate} - {booking.scheduledTime}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={booking.professional_name || "/placeholder.svg"} />
+                          <AvatarFallback className="bg-primary/10 text-primary">
+                            {booking.professional_name?.[0] || 'P'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h4 className="font-medium">
+                            {language === "ne" ? booking.service_name_np : booking.service_name_en}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {booking.professional_name || 'Professional'}
+                          </p>
+                        </div>
                       </div>
                       <Badge className={status.className}>
+                        <StatusIcon className="w-3 h-3 mr-1" />
                         {language === "ne" ? status.labelNe : status.label}
                       </Badge>
-                      <Button variant="outline" size="sm">
-                        {t.customer.bookings.viewDetails}
-                      </Button>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      {booking.scheduled_date && (
+                        <div className="flex items-center gap-1">
+                          <CalendarDays className="h-4 w-4" />
+                          {new Date(booking.scheduled_date).toLocaleDateString()}
+                        </div>
+                      )}
+                      {booking.customer_address && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-4 w-4" />
+                          {booking.customer_address.municipality || 'Location'}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1 font-semibold text-primary">
+                        <DollarSign className="h-4 w-4" />
+                        Rs. {booking.total_price}
+                      </div>
                     </div>
                   </div>
                 );
@@ -180,91 +414,27 @@ export function CustomerDashboard() {
             </div>
           ) : (
             <div className="py-8 text-center text-muted-foreground">
-              <CalendarDays className="mx-auto mb-4 h-12 w-12 opacity-50" />
-              <p>{t.customer.bookings.noBookings}</p>
+              <Package className="mx-auto mb-4 h-12 w-12 opacity-50" />
+              <p>{language === 'ne' ? 'कुनै बुकिंगहरू छैनन्' : 'No bookings yet'}</p>
               <Button className="mt-4" asChild>
-                <Link href="/services">{t.customer.quickActions.bookService}</Link>
+                <Link href="/services">
+                  {language === 'ne' ? 'सेवा बुक गर्नुहोस्' : 'Book a Service'}
+                </Link>
               </Button>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Recommended Services */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{t.customer.recommended}</CardTitle>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/services">
-              {t.common.seeAll}
-              <ArrowRight className="ml-1 h-4 w-4" />
-            </Link>
-          </Button>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {/* {serviceCategories.slice(0, 4).map((category) => (
-              <Link key={category.id} href={`/services/${category.id}`}>
-                <Card className="group cursor-pointer transition-all hover:border-primary hover:shadow-md">
-                  <CardContent className="p-4">
-                    <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
-                      <CheckCircle className="h-6 w-6" />
-                    </div>
-                    <h3 className="font-semibold">
-                      {language === "ne" ? category.nameNe : category.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                      {language === "ne" ? category.descriptionNe : category.description}
-                    </p>
-                    <div className="mt-3 flex items-center gap-1 text-sm">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span>4.8</span>
-                      <span className="text-muted-foreground">(120+ reviews)</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))} */}
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Promotions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>{t.promotions.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {promotions.map((promo) => (
-              <Card
-                key={promo.id}
-                className="group relative overflow-hidden bg-gradient-to-br from-primary/10 to-accent/10"
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <Badge className="gap-1 bg-primary text-primary-foreground">
-                        <Percent className="h-3 w-3" />
-                        {promo.discount}% {t.promotions.off}
-                      </Badge>
-                      <h3 className="mt-2 font-semibold">
-                        {language === "ne" ? promo.titleNe : promo.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {language === "ne" ? promo.descriptionNe : promo.description}
-                      </p>
-                    </div>
-                  </div>
-                  <Button className="mt-4 w-full" size="sm">
-                    {t.promotions.bookNow}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+{/* Featured Services */}
+
+<FeaturedServicesWrapper />
+
+      {/* Professionals Section */}
+      <ProfessionalsWrapper />
+
     </div>
   );
 }
+

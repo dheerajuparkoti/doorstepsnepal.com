@@ -1,5 +1,6 @@
 
 export interface ProfessionalWallet {
+  json(): unknown;
   professional_id: number;
   total_earned: number;
   total_commission: number;

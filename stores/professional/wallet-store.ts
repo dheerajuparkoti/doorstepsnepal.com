@@ -6,13 +6,15 @@ import { Withdrawal, WithdrawalFilters, WithdrawalStats } from '@/lib/data/profe
 import { OrderCommission } from '@/lib/data/professional/commission';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { WITHDRAWAL_CONSTANTS } from '@/lib/data/professional/constants';
+import { WalletApi } from '@/lib/api/professional-payment/wallet-api';
 
 interface WalletState {
   // Data
   wallet: ProfessionalWallet | null;
   withdrawals: Withdrawal[];
   commissions: OrderCommission[];
-  
+  isBalanceVisible: boolean;
+
   // UI State
   isLoading: boolean;
   error: string | null;
@@ -26,15 +28,20 @@ interface WalletState {
   setCommissions: (commissions: OrderCommission[]) => void;
   setLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
+  refreshWalletData: (professionalId: number) => Promise<void>;
+  fetchCommissions: (professionalId: number) => Promise<void>;
+  fetchWithdrawals: (professionalId: number) => Promise<void>;
   
   // Filter Actions
   setWithdrawalFilter: (filters: Partial<WithdrawalFilters>) => void;
   clearWithdrawalFilters: () => void;
-  
+  toggleBalanceVisibility: () => void;
   // Computed
   getFilteredWithdrawals: () => Withdrawal[];
   getWithdrawalStats: () => WithdrawalStats;
   getWalletStats: () => ProfessionalWalletStats | null;
+
+
 }
 
 export const useWalletStore = create<WalletState>()(
@@ -47,6 +54,7 @@ export const useWalletStore = create<WalletState>()(
       isLoading: false,
       error: null,
       withdrawalFilters: {},
+      isBalanceVisible: true,
 
       // Setters
       setWallet: (wallet) => set({ wallet }),
@@ -55,11 +63,17 @@ export const useWalletStore = create<WalletState>()(
       setLoading: (isLoading) => set({ isLoading }),
       setError: (error) => set({ error }),
 
+
+        toggleBalanceVisibility: () => 
+        set((state) => ({ isBalanceVisible: !state.isBalanceVisible })),
+
+        
       // Filter Actions
       setWithdrawalFilter: (filters) => 
         set((state) => ({
           withdrawalFilters: { ...state.withdrawalFilters, ...filters }
         })),
+      
       
       clearWithdrawalFilters: () => 
         set({ withdrawalFilters: {} }),
@@ -129,7 +143,64 @@ export const useWalletStore = create<WalletState>()(
             eligibilityPercent
           }
         };
-      }
+      },
+
+
+refreshWalletData: async (professionalId: number) => {
+  set({ isLoading: true });
+
+  try {
+    // These already return parsed data
+    const [wallet, commissions, withdrawals] = await Promise.all([
+      WalletApi.getWallet(professionalId),
+      WalletApi.getCommissionReport(professionalId),
+      WalletApi.getWithdrawals(professionalId),
+    ]);
+
+    set({
+      wallet,
+      commissions: commissions || [],
+      withdrawals: withdrawals || [],
+      isLoading: false
+    });
+
+  } catch (error) {
+    console.error("Failed to refresh wallet:", error);
+    set({ isLoading: false });
+  }
+},
+
+      
+      // Fetch commissions only
+    fetchCommissions: async (professionalId: number) => {
+  try {
+    const commissions = await WalletApi.getCommissionReport(professionalId);
+
+    set({
+      commissions: commissions || []
+    });
+
+  } catch (error) {
+    console.error("Failed to fetch commissions:", error);
+  }
+},
+
+      
+      // fetch withdrawals only
+    fetchWithdrawals: async (professionalId: number) => {
+  try {
+    const withdrawals = await WalletApi.getWithdrawals(professionalId);
+
+    set({
+      withdrawals: withdrawals || []
+    });
+
+  } catch (error) {
+    console.error("Failed to fetch withdrawals:", error);
+  }
+},
+
+
     }),
     { name: 'wallet-store' }
   )

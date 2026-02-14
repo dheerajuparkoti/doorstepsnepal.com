@@ -39,8 +39,8 @@ interface NavItem {
 export function CustomerSidebar() {
   const { t } = useI18n();
   const pathname = usePathname();
-  const [openSections, setOpenSections] = useState<string[]>(["bookings", "favorites", "settings"]);
-
+  // const [openSections, setOpenSections] = useState<string[]>(["bookings", "favorites", "settings"]);
+  const [openSections, setOpenSections] = useState<string[]>([]);// make labels collapsible
   const navItems: NavItem[] = [
     {
       label: t.customer.sidebar.dashboard,

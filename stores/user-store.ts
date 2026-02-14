@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { User } from '@/lib/data/user';
 import { getUserProfile } from '@/lib/api/user';
+import { refreshTokenRegistration, unregisterToken } from '@/app/notifications/fcm-web';
 
 interface UserState {
   user: User | null; 
@@ -25,11 +26,30 @@ export const useUserStore = create<UserState>()(
       error: null,
       isInitialized: false,
 
-      setUser: (user) => set({ 
-        user, 
-        error: null,
-        isInitialized: true 
-      }),
+      // setUser: (user) => set({ 
+      //   user, 
+      //   error: null,
+      //   isInitialized: true 
+      // }),
+
+       setUser: (user) => { 
+        set({ 
+          user, 
+          error: null,
+          isInitialized: true 
+        });
+        
+        // When user is set (login), register FCM token
+        if (user?.id && typeof window !== 'undefined') {
+          console.log("🔔 User logged in, registering FCM token");
+          // Small delay to ensure store is updated
+          setTimeout(() => {
+            refreshTokenRegistration();
+          }, 500);
+        }
+      },
+
+      
 
       updateUser: (updates) =>
         set((state) => ({
@@ -37,11 +57,25 @@ export const useUserStore = create<UserState>()(
           error: null,
         })),
 
-      clearUser: () => set({ 
-        user: null, 
-        error: null,
-        isInitialized: true 
-      }),
+      // clearUser: () => set({ 
+      //   user: null, 
+      //   error: null,
+      //   isInitialized: true 
+      // }),
+
+        clearUser: async () => { 
+        // When user logs out, unregister token from server
+        if (typeof window !== 'undefined') {
+          console.log("🚪 User logging out, unregistering FCM token");
+          await unregisterToken();
+        }
+        
+        set({ 
+          user: null, 
+          error: null,
+          isInitialized: true 
+        });
+      },
 
       setLoading: (loading) => set({ isLoading: loading }),
 
