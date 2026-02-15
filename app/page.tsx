@@ -40,9 +40,9 @@ export default function HomePage() {
           </section>
           
           {/* Search Section with Suspense boundary */}
-          {/* <Suspense fallback={<SearchSkeleton />}>
+          <Suspense fallback={<SearchSkeleton />}>
             <SearchSectionSSR />
-          </Suspense> */}
+          </Suspense>
 
           {/* featured services Section with Suspense boundary */}
           <Suspense fallback={<FeaturedServicesCarouselSkeleton/>}>

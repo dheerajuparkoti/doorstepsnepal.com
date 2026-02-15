@@ -11,7 +11,7 @@
 /build
 
 /public/firebase-messaging-sw.js
-/app/notifications/fcm-web.ts
+/app/notifications
 
 # debug
 npm-debug.log*

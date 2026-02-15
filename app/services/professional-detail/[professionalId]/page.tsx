@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { fetchServiceById } from '@/lib/api/services';
+import { ServiceProfessionalsSection } from '../../[id]/professionals/ssr/service-professionals-ssr';
+import { ServiceProfessionalsSkeleton } from '../../[id]/professionals/skeleton/service-professionals-skeleton';
 // import { ServiceProfessionalsSection } from './ssr/service-professionals-ssr';
 // import { ServiceProfessionalsSkeleton } from './skeleton/service-professionals-skeleton';
 
@@ -47,12 +49,12 @@ export default async function ServiceProfessionalsPage(
   
   return (
     <div className="min-h-screen">
-      {/* <Suspense fallback={<ServiceProfessionalsSkeleton />}>
+      <Suspense fallback={<ServiceProfessionalsSkeleton />}>
         <ServiceProfessionalsSection 
           serviceId={id}
           serviceName={service.name_en}
         />
-      </Suspense> */}
+      </Suspense>
     </div>
   );
 }

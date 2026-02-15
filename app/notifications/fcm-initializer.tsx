@@ -32,7 +32,7 @@ export default function FCMInitializer() {
   // Initial token generation (runs once on mount)
   useEffect(() => {
     if (!initializedRef.current) {
-      console.log("🔄 Initial FCM setup");
+      console.log("Initial FCM setup");
       generateToken();
       initializedRef.current = true;
     }

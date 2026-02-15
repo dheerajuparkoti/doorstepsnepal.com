@@ -9,12 +9,11 @@
 
 
 
-// app/dashboard/my-profile/page.tsx
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ProfessionalScreenSSR } from '@/components/professional/ssr/professional-screen-ssr';
 import { ProfessionalScreenSkeleton } from '@/components/professional/skeleton/professional-screen-skeleton';
-// import { getServerSession } from '@/lib/data/auth'; // You'll need this
+// import { getServerSession } from '@/lib/data/auth'; 
 import { fetchProfessionalProfile } from '@/lib/api/professional-profiles';
 export const dynamic = "force-dynamic";
 

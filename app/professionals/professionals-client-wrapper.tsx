@@ -6,21 +6,21 @@ interface ProfessionalsClientWrapperProps {
   professionalsData: any[];
   isSingleProfessionalView?: boolean;
   professionalName?: string;
-  specificProfessionalId?: number; // Add this prop
+  specificProfessionalId?: number;
 }
 
 export function ProfessionalsClientWrapper({
   professionalsData,
   isSingleProfessionalView = false,
   professionalName,
-  specificProfessionalId, // Add this prop
+  specificProfessionalId,
 }: ProfessionalsClientWrapperProps) {
   return (
     <ProfessionalsClient 
       professionalsData={professionalsData}
       isSingleProfessionalView={isSingleProfessionalView}
       professionalName={professionalName}
-      specificProfessionalId={specificProfessionalId} // Pass it through
+      specificProfessionalId={specificProfessionalId} 
     />
   );
 }

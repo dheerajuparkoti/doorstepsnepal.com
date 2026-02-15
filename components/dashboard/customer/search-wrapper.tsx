@@ -1,16 +1,10 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { SearchSection } from "@/components/home/search-section";
 import { fetchProfessionalServices } from "@/lib/api/professional-services";
-import {
-  fetchProfessionalProfile,
-  fetchProfessionalServiceAreas,
-} from "@/lib/api/professional-profiles";
-import { Skeleton } from "@/components/ui/skeleton";
+import type { ProfessionalService } from "@/lib/data/professional-services";
 import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
-
 
 export default function SearchWrapper() {
   const [data, setData] = useState<any[] | null>(null);
@@ -19,57 +13,42 @@ export default function SearchWrapper() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const professionalServicesData = await fetchProfessionalServices();
-
-        const allServices = professionalServicesData?.professional_services || [];
-
-        const servicesByProfessional = new Map<number, any[]>();
-
-        for (const ps of allServices) {
-          if (!ps.professional) continue;
-
-          const profId = ps.professional_id;
-
-          if (!servicesByProfessional.has(profId)) {
-            servicesByProfessional.set(profId, []);
-          }
-
-          servicesByProfessional.get(profId)!.push(ps);
+        console.log("Fetching professional services for search...");
+        
+        // SINGLE API CALL - Fetch all professional services at once
+        const response = await fetchProfessionalServices(1, 10000);
+        
+        if (!response?.professional_services) {
+          console.log("No professional services found");
+          setData([]);
+          return;
         }
 
-        const professionalIds = Array.from(servicesByProfessional.keys());
+        const professionalServices: ProfessionalService[] = response.professional_services;
+        console.log(`Fetched ${professionalServices.length} professional services`);
 
-        const SAFE_LIMIT = 200;
-        const limitedProfessionalIds = professionalIds.slice(0, SAFE_LIMIT);
+        // NO ADDITIONAL API CALLS - Just transform the existing data
+        const professionalsData = professionalServices.map((ps) => ({
+          id: ps.professional_id,
+          full_name: ps.professional?.user?.full_name || "Unknown Professional",
+          profile_image: ps.professional?.user?.profile_image,
+          // Services array already contains all needed info
+          services: [{
+            service_id: ps.service_id,
+            service: {
+              id: ps.service.id,
+              name_en: ps.service.name_en,
+              name_np: ps.service.name_np,
+            },
+            professional: ps.professional, // This already has all professional data
+          }],
+          // Service name string for searching
+          service_name: `${ps.service.name_en}, ${ps.service.name_np}`,
+        }));
 
-        const professionalsData = await Promise.all(
-          limitedProfessionalIds.map(async (profId) => {
-            try {
-              const services = servicesByProfessional.get(profId) || [];
-
-              const [profile, serviceAreas] = await Promise.all([
-                fetchProfessionalProfile(profId),
-                fetchProfessionalServiceAreas(profId),
-              ]);
-
-              return {
-                id: profId,
-                full_name:
-                  services[0]?.professional?.user?.full_name ||
-                  profile?.user?.full_name ||
-                  "Unknown Professional",
-                service_areas_full: serviceAreas || [],
-                services,
-              };
-            } catch (error) {
-              console.error(`Error fetching data for professional ${profId}:`, error);
-              return null;
-            }
-          })
-        );
-
-        const cleanProfessionalsData = professionalsData.filter(Boolean);
-        setData(cleanProfessionalsData);
+        console.log(`Processed ${professionalsData.length} professionals with services`);
+        setData(professionalsData);
+        
       } catch (error) {
         console.error("Error in SearchWrapper:", error);
         setData([]);
@@ -79,7 +58,7 @@ export default function SearchWrapper() {
     }
 
     fetchData();
-  }, []);
+  }, []); // Empty dependency array = runs once on mount
 
   if (loading) {
     return <SearchSkeleton />;

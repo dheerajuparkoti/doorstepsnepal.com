@@ -6,31 +6,34 @@ import { ServiceProfessionalsSkeleton } from './skeleton/service-professionals-s
 
 interface ServiceProfessionalsPageProps {
   params: Promise<{
-    serviceId: string;
+    id: string;
   }>;
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+
+
 export async function generateMetadata({ params }: ServiceProfessionalsPageProps) {
   try {
-    const { serviceId } = await params;
-    const id = parseInt(serviceId);
+    const { id } = await params;
+    const serviceId = parseInt(id);
+    const sId = (serviceId);
     
-    if (isNaN(id)) {
+    if (isNaN(sId)) {
       return {
         title: 'Invalid Service | DoorStep',
       };
     }
-    
 
-    if (id === 0) {
+    if (sId === 0) {
       return {
         title: 'Search Services | DoorStep',
         description: 'Search and browse service professionals',
       };
     }
     
-    const service = await fetchServiceById(id);
+ 
+    const service = await fetchServiceById(sId);
     
     if (!service) {
       return {
@@ -55,11 +58,14 @@ export default async function ServiceProfessionalsPage({
   searchParams,
 }: ServiceProfessionalsPageProps) {
   try {
-    const { serviceId } = await params;
-    const id = parseInt(serviceId);
+
+    
+    const { id } = await params;
+    const serviceId = parseInt(id);
+    
     const queryParams = await searchParams;
     
-    if (isNaN(id)) {
+    if (isNaN(serviceId)) {
       console.error('Invalid service ID:', serviceId);
       notFound();
     }
@@ -68,8 +74,8 @@ export default async function ServiceProfessionalsPage({
     let serviceName = 'Services';
     
     // Only fetch service if id is not 0
-    if (id !== 0) {
-      service = await fetchServiceById(id);
+    if (serviceId !== 0) {
+      service = await fetchServiceById(serviceId);
       
       if (!service) {
         notFound();
@@ -92,7 +98,7 @@ export default async function ServiceProfessionalsPage({
       <div className="min-h-screen">
         <Suspense fallback={<ServiceProfessionalsSkeleton />}>
           <ServiceProfessionalsSection 
-            serviceId={id}
+            serviceId={serviceId}
             serviceName={serviceName}
             searchParams={queryParams}
           />
