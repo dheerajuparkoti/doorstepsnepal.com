@@ -25,7 +25,7 @@ export default function FCMInitializer() {
       return () => clearTimeout(timer);
     } else {
       // User logged out, but  keep the token for potential next login
-      console.log("🚪 No user, FCM token preserved for next login");
+      console.log(" No user, FCM token preserved for next login");
     }
   }, [user?.id]); 
 

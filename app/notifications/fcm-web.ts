@@ -91,7 +91,7 @@ export const generateToken = async (force: boolean = false) => {
     // Check if already token and don't want to force refresh
     const existingToken = getStoredToken();
     if (existingToken && !force) {
-      console.log("📦 Using existing FCM token:", existingToken);
+      console.log(" Using existing FCM token:", existingToken);
       return existingToken;
     }
 
@@ -167,7 +167,7 @@ export const refreshTokenRegistration = async () => {
   
   // Case 1: We have a pending token (generated before login)
   if (pendingToken) {
-    console.log("📦 Registering pending token for user:", currentUser.id);
+    console.log(" Registering pending token for user:", currentUser.id);
     await registerTokenWithServer(pendingToken, currentUser.id);
   }
   // Case 2: We have an existing token but not registered with this user
