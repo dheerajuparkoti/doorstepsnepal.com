@@ -51,25 +51,25 @@ import { notFound } from 'next/navigation';
 import { ProfessionalScreenSSR } from '@/components/professional/ssr/professional-screen-ssr';
 import { ProfessionalScreenSkeleton } from '@/components/professional/skeleton/professional-screen-skeleton';
 
-// ✅ IMPORTANT: Add 'async' and await params
+//  Add 'async' and await params
 export default async function ViewProfessionalPage({ 
   params 
 }: { 
-  params: Promise<{ professionalId: string }> // ✅ Type as Promise
+  params: Promise<{ professionalId: string }> 
 }) {
-  // ✅ Await the params
+
   const { professionalId } = await params;
   
-  console.log('✅ ROUTE HIT! Professional ID:', professionalId);
+  console.log(' ROUTE HIT! Professional ID:', professionalId);
   
   const professionalIdNum = parseInt(professionalId);
   
   if (isNaN(professionalIdNum)) {
-    console.log('❌ Invalid ID:', professionalId);
+    console.log(' Invalid ID:', professionalId);
     notFound();
   }
 
-  console.log('✅ Valid ID, rendering profile for:', professionalIdNum);
+  console.log('Valid ID, rendering profile for:', professionalIdNum);
   
   return (
     <Suspense fallback={<ProfessionalScreenSkeleton />}>

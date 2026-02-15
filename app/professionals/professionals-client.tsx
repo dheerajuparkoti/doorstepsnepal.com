@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react'; // Add useEffect
+import { useState, useEffect } from 'react'; 
 import { useI18n } from '@/lib/i18n/context';
-import { useRouter, useSearchParams } from 'next/navigation'; // Add useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation'; 
 import { 
   Search, 
   X, 
-  Filter, 
   ChevronRight,
   User,
   MapPin,
@@ -14,18 +13,14 @@ import {
   Building,
   Award,
   Tag,
-  ChevronDown
+  ChevronDown,
+  SlidersHorizontal,
+  Star
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -36,31 +31,56 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { createProfessionalSlug } from '@/lib/utils/slug';
+import { FilterSheet, FilterSection } from '@/components/ui/filter-sheet';
 
 interface ProfessionalsClientProps {
   professionalsData: any[];
   isSingleProfessionalView?: boolean;
   professionalName?: string;
-  specificProfessionalId?: number; // Add this prop
+  specificProfessionalId?: number;
 }
 
 type FilterType = 'name' | 'service' | 'skills' | 'address' | 'price';
 
 const priceRanges = [
-  { label: '< Rs. 300', value: 300 },
-  { label: 'Rs. 300 - Rs. 800', value: 800 },
-  { label: '> Rs. 800', value: 801 },
+  { id: 'under_300', label: '< Rs. 300', value: 300 },
+  { id: '300_800', label: 'Rs. 300 - Rs. 800', value: 800 },
+  { id: 'above_800', label: '> Rs. 800', value: 801 },
+];
+
+// Define filter options for the FilterSheet
+const searchFilterOptions = [
+  { id: 'name', labelEn: 'By Name', labelNp: 'नाम द्वारा', icon: <User className="h-3 w-3" /> },
+  { id: 'service', labelEn: 'By Service', labelNp: 'सेवा द्वारा', icon: <Building className="h-3 w-3" /> },
+  { id: 'skills', labelEn: 'By Skills', labelNp: 'कौशल द्वारा', icon: <Award className="h-3 w-3" /> },
+  { id: 'address', labelEn: 'By Address', labelNp: 'ठेगाना द्वारा', icon: <MapPin className="h-3 w-3" /> },
+  { id: 'price', labelEn: 'By Price', labelNp: 'मूल्य द्वारा', icon: <DollarSign className="h-3 w-3" /> },
+];
+
+const priceFilterOptions = [
+  { id: 'under_300', labelEn: 'Under Rs. 300', labelNp: 'रु. ३०० मुनि', value: 300 },
+  { id: '300_800', labelEn: 'Rs. 300 - Rs. 800', labelNp: 'रु. ३०० - रु. ८००', value: 800 },
+  { id: 'above_800', labelEn: 'Above Rs. 800', labelNp: 'रु. ८०० माथि', value: 801 },
+];
+
+const sortOptions = [
+  { id: 'name_asc', labelEn: 'Name (A to Z)', labelNp: 'नाम (A देखि Z)', icon: <User className="h-3 w-3" /> },
+  { id: 'name_desc', labelEn: 'Name (Z to A)', labelNp: 'नाम (Z देखि A)', icon: <User className="h-3 w-3" /> },
+  { id: 'price_low', labelEn: 'Price: Low to High', labelNp: 'मूल्य: न्यून देखि उच्च', icon: <DollarSign className="h-3 w-3" /> },
+  { id: 'price_high', labelEn: 'Price: High to Low', labelNp: 'मूल्य: उच्च देखि न्यून', icon: <DollarSign className="h-3 w-3" /> },
+  { id: 'services', labelEn: 'Most Services', labelNp: 'धेरै सेवाहरू', icon: <Star className="h-3 w-3" /> },
 ];
 
 export function ProfessionalsClient({
   professionalsData,
   isSingleProfessionalView = false,
   professionalName,
-  specificProfessionalId, // Add this prop
+  specificProfessionalId,
 }: ProfessionalsClientProps) {
   const { language } = useI18n();
   const router = useRouter();
-  const searchParams = useSearchParams(); // Add this
+  const searchParams = useSearchParams();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -72,6 +92,93 @@ export function ProfessionalsClient({
   const [detailType, setDetailType] = useState<'service_areas' | 'services' | 'skills' | null>(null);
   const [displayProfessionals, setDisplayProfessionals] = useState<any[]>([]);
   
+  // Filter sheet state
+  const [filterSheetFilters, setFilterSheetFilters] = useState({
+    searchType: 'name',
+    priceRange: null as string | null,
+    sortBy: 'name_asc',
+    hasDiscount: false,
+    hasMinimumPrice: false,
+    location: null as string | null,
+  });
+
+  // Define filter sections for FilterSheet
+  const filterSections: FilterSection[] = [
+    {
+      id: 'searchType',
+      titleEn: 'Search By',
+      titleNp: 'खोजी आधार',
+      type: 'single',
+      options: searchFilterOptions,
+    },
+    {
+      id: 'priceRange',
+      titleEn: 'Price Range',
+      titleNp: 'मूल्य सीमा',
+      type: 'single',
+      options: priceFilterOptions.map(opt => ({
+        id: opt.id,
+        labelEn: opt.labelEn,
+        labelNp: opt.labelNp,
+        value: opt.value,
+      })),
+    },
+    {
+      id: 'sortBy',
+      titleEn: 'Sort By',
+      titleNp: 'क्रमबद्ध गर्नुहोस्',
+      type: 'single',
+      options: sortOptions,
+    },
+    {
+      id: 'special',
+      titleEn: 'Special Filters',
+      titleNp: 'विशेष फिल्टरहरू',
+      type: 'multiple',
+      options: [
+        { id: 'hasDiscount', labelEn: 'Has Discounts', labelNp: 'छुट उपलब्ध', icon: <Tag className="h-3 w-3" /> },
+        { id: 'hasMinimumPrice', labelEn: 'Has Minimum Price', labelNp: 'न्यूनतम मूल्य', icon: <DollarSign className="h-3 w-3" /> },
+      ],
+    },
+  ];
+
+  // Handle filter sheet apply
+  const handleApplyFilters = (filters: Record<string, any>) => {
+    setFilterSheetFilters({
+      searchType: filters.searchType || 'name',
+      priceRange: filters.priceRange || null,
+      sortBy: filters.sortBy || 'name_asc',
+      hasDiscount: filters.special?.includes('hasDiscount') || false,
+      hasMinimumPrice: filters.special?.includes('hasMinimumPrice') || false,
+      location: filters.location || null,
+    });
+    
+    // Also update the local filter type for compatibility
+    setFilterType((filters.searchType || 'name') as FilterType);
+    
+    // Update price range if selected
+    if (filters.priceRange) {
+      const selected = priceFilterOptions.find(opt => opt.id === filters.priceRange);
+      setSelectedPriceRange(selected?.value || null);
+    } else {
+      setSelectedPriceRange(null);
+    }
+  };
+
+  // Handle filter sheet reset
+  const handleResetFilters = () => {
+    setFilterSheetFilters({
+      searchType: 'name',
+      priceRange: null,
+      sortBy: 'name_asc',
+      hasDiscount: false,
+      hasMinimumPrice: false,
+      location: null,
+    });
+    setFilterType('name');
+    setSelectedPriceRange(null);
+  };
+
   // Initialize display professionals based on props
   useEffect(() => {
     let filtered = professionalsData;
@@ -86,85 +193,115 @@ export function ProfessionalsClient({
     setDisplayProfessionals(filtered);
   }, [professionalsData, specificProfessionalId]);
 
-  // Filter professionals based on search and filters
-  // const filteredProfessionals = displayProfessionals.filter((professional) => {
-  //   const query = searchQuery.toLowerCase();
-    const filteredProfessionals = professionalsData.filter((professional) => {
-  const query = searchQuery.toLowerCase();
-    // Price filter
-    if (selectedPriceRange && filterType === 'price') {
-      const hasMatchingPrice = professional.all_prices?.some((price: any) => {
-        const priceValue = price.price;
-        if (selectedPriceRange === 300) return priceValue <= 300;
-        if (selectedPriceRange === 800) return priceValue > 300 && priceValue <= 800;
-        if (selectedPriceRange === 801) return priceValue > 800;
-        return false;
-      });
-      if (!hasMatchingPrice) return false;
-    }
-    
-    // Search filter (only if we're not showing a specific professional)
-  //   if (query && !specificProfessionalId) {
-  //     switch (filterType) {
-  //       case 'name':
-  //         return professional.full_name?.toLowerCase().includes(query);
-  //       case 'service':
-  //         return professional.service_name?.toLowerCase().includes(query);
-  //       case 'skills':
-  //         return professional.all_skills?.toLowerCase().includes(query);
-  //       case 'address':
-  //         return professional.service_areas_display?.toLowerCase().includes(query);
-  //       default:
-  //         return true;
-  //     }
-  //   }
-    
-  //   return true;
-  // });
- // Location filter from URL params
-  const province = searchParams?.get('province');
-  const district = searchParams?.get('district');
-  const municipality = searchParams?.get('municipality');
-  const ward = searchParams?.get('ward');
-  const street = searchParams?.get('street');
-  
-  // If location filters are present, filter by service areas
-  if (province || district || municipality || ward || street) {
-    const hasMatchingLocation = professional.service_areas_full?.some((area: any) => {
-      const areaName = area.name?.toLowerCase() || '';
-      const provinceMatch = province ? areaName.includes(province.toLowerCase()) : true;
-      const districtMatch = district ? areaName.includes(district.toLowerCase()) : true;
-      const municipalityMatch = municipality ? areaName.includes(municipality.toLowerCase()) : true;
-      return provinceMatch && districtMatch && municipalityMatch;
+  // Filter and sort professionals
+  const filteredProfessionals = professionalsData
+    .filter((professional) => {
+      const query = searchQuery.toLowerCase();
+      
+      // Location filter from URL params
+      const province = searchParams?.get('province');
+      const district = searchParams?.get('district');
+      const municipality = searchParams?.get('municipality');
+      
+      // Apply location filters from URL
+      if (province || district || municipality) {
+        const hasMatchingLocation = professional.service_areas_full?.some((area: any) => {
+          const areaName = area.name?.toLowerCase() || '';
+          const provinceMatch = province ? areaName.includes(province.toLowerCase()) : true;
+          const districtMatch = district ? areaName.includes(district.toLowerCase()) : true;
+          const municipalityMatch = municipality ? areaName.includes(municipality.toLowerCase()) : true;
+          return provinceMatch && districtMatch && municipalityMatch;
+        });
+        if (!hasMatchingLocation) return false;
+      }
+      
+      // Apply filter sheet location filter
+      if (filterSheetFilters.location) {
+        const locationLower = filterSheetFilters.location.toLowerCase();
+        const hasMatchingLocation = professional.service_areas_full?.some((area: any) =>
+          area.name?.toLowerCase().includes(locationLower)
+        ) || professional.service_areas_display?.toLowerCase().includes(locationLower);
+        if (!hasMatchingLocation) return false;
+      }
+      
+      // Price filter from filter sheet
+      if (filterSheetFilters.priceRange) {
+        const range = priceFilterOptions.find(r => r.id === filterSheetFilters.priceRange);
+        const hasMatchingPrice = professional.all_prices?.some((price: any) => {
+          const priceValue = price.price;
+          if (range?.value === 300) return priceValue <= 300;
+          if (range?.value === 800) return priceValue > 300 && priceValue <= 800;
+          if (range?.value === 801) return priceValue > 800;
+          return false;
+        });
+        if (!hasMatchingPrice) return false;
+      }
+      
+      // Special filters
+      if (filterSheetFilters.hasDiscount) {
+        const hasDiscount = professional.all_prices?.some((price: any) => 
+          price.discount_is_active && price.discount_percentage > 0
+        );
+        if (!hasDiscount) return false;
+      }
+      
+      if (filterSheetFilters.hasMinimumPrice) {
+        const hasMinPrice = professional.all_prices?.some((price: any) => 
+          price.is_minimum_price
+        );
+        if (!hasMinPrice) return false;
+      }
+      
+      // Search filter
+      if (query) {
+        switch (filterSheetFilters.searchType) {
+          case 'name':
+            return professional.full_name?.toLowerCase().includes(query);
+          case 'service':
+            return professional.service_name?.toLowerCase().includes(query);
+          case 'skills':
+            return professional.all_skills?.toLowerCase().includes(query);
+          case 'address':
+            return professional.service_areas_display?.toLowerCase().includes(query);
+          case 'price':
+            // Search in price descriptions
+            return professional.all_prices?.some((price: any) => 
+              price.price.toString().includes(query) ||
+              price.price_unit?.name?.toLowerCase().includes(query) ||
+              price.quality_type?.name?.toLowerCase().includes(query)
+            );
+          default:
+            return true;
+        }
+      }
+      
+      return true;
+    })
+    .sort((a, b) => {
+      switch (filterSheetFilters.sortBy) {
+        case 'name_asc':
+          return (a.full_name || '').localeCompare(b.full_name || '');
+        case 'name_desc':
+          return (b.full_name || '').localeCompare(a.full_name || '');
+        case 'price_low':
+          const aMin = a.all_prices?.length ? Math.min(...a.all_prices.map((p: any) => p.price)) : Infinity;
+          const bMin = b.all_prices?.length ? Math.min(...b.all_prices.map((p: any) => p.price)) : Infinity;
+          return aMin - bMin;
+        case 'price_high':
+          const aMax = a.all_prices?.length ? Math.max(...a.all_prices.map((p: any) => p.price)) : -Infinity;
+          const bMax = b.all_prices?.length ? Math.max(...b.all_prices.map((p: any) => p.price)) : -Infinity;
+          return bMax - aMax;
+        case 'services':
+          return (b.services?.length || 0) - (a.services?.length || 0);
+        default:
+          return 0;
+      }
     });
-    
-    if (!hasMatchingLocation) return false;
-  }
-  
-  // Search filter
-  if (query) {
-    switch (filterType) {
-      case 'name':
-        return professional.full_name?.toLowerCase().includes(query);
-      case 'service':
-        return professional.service_name?.toLowerCase().includes(query);
-      case 'skills':
-        return professional.all_skills?.toLowerCase().includes(query);
-      case 'address':
-        return professional.service_areas_display?.toLowerCase().includes(query);
-      default:
-        return true;
-    }
-  }
-  
-  return true;
-});
+
   // Get localized text
   const getLocalizedText = (en: string, np: string) => {
     return language === 'ne' ? np : en;
   };
-
-
 
   // Render truncated list with "View all" option
   const renderTruncatedList = (items: any[], maxItems: number, type: 'service_areas' | 'services' | 'skills', professional: any) => {
@@ -332,6 +469,10 @@ export function ProfessionalsClient({
     return formatted;
   };
 
+  const hasActiveFilters = searchQuery || filterSheetFilters.priceRange || 
+    filterSheetFilters.searchType !== 'name' || filterSheetFilters.sortBy !== 'name_asc' ||
+    filterSheetFilters.hasDiscount || filterSheetFilters.hasMinimumPrice || filterSheetFilters.location;
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -354,7 +495,7 @@ export function ProfessionalsClient({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={getLocalizedText(
                     `Search by ${filterType}...`,
-                    `${filterType} द्वारा खोज्नुहोस्...`
+                    `${filterSheetFilters.searchType} द्वारा खोज्नुहोस्...`
                   )}
                   className="border-0 bg-transparent text-primary-background placeholder:text-primary-background/70 focus-visible:ring-0 focus-visible:ring-offset-0"
                   autoFocus
@@ -395,60 +536,159 @@ export function ProfessionalsClient({
                 {isSearching ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
               </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+              {/* Replace the old filter dropdown with FilterSheet */}
+              <FilterSheet
+                trigger={
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-primary-background hover:bg-primary-background/20"
+                    className="text-primary-background hover:bg-primary-background/20 relative"
                   >
-                    <Filter className="h-5 w-5" />
+                    <SlidersHorizontal className="h-5 w-5" />
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setFilterType('name')}>
-                    {getLocalizedText('By Name', 'नाम द्वारा')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterType('service')}>
-                    {getLocalizedText('By Service', 'सेवा द्वारा')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterType('skills')}>
-                    {getLocalizedText('By Skills', 'कौशल द्वारा')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterType('address')}>
-                    {getLocalizedText('By Address', 'ठेगाना द्वारा')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setFilterType('price')}>
-                    {getLocalizedText('By Price', 'मूल्य द्वारा')}
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                }
+                sections={filterSections}
+                activeFilters={{
+                  searchType: filterSheetFilters.searchType,
+                  priceRange: filterSheetFilters.priceRange,
+                  sortBy: filterSheetFilters.sortBy,
+                  special: [
+                    ...(filterSheetFilters.hasDiscount ? ['hasDiscount'] : []),
+                    ...(filterSheetFilters.hasMinimumPrice ? ['hasMinimumPrice'] : []),
+                  ],
+                }}
+                onApplyFilters={handleApplyFilters}
+                onReset={handleResetFilters}
+                title={getLocalizedText('Filter Professionals', 'व्यावसायिक फिल्टर गर्नुहोस्')}
+                description={getLocalizedText(
+                  'Filter professionals by your preferences',
+                  'आफ्नो प्राथमिकता अनुसार व्यावसायिक फिल्टर गर्नुहोस्'
+                )}
+                side="right"
+              />
             </div>
           )}
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6">
-        {/* Price Filter - Only show when not viewing specific professional */}
-        {!specificProfessionalId && !isSingleProfessionalView && filterType === 'price' && (
-          <div className="mb-6">
-            <h3 className="mb-3 text-sm font-medium text-muted-foreground">
-              {getLocalizedText('Price Range', 'मूल्य सीमा')}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {priceRanges.map((range) => (
-                <Badge
-                  key={range.value}
-                  variant={selectedPriceRange === range.value ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => setSelectedPriceRange(
-                    selectedPriceRange === range.value ? null : range.value
-                  )}
+        {/* Active Filters Display */}
+        {hasActiveFilters && !specificProfessionalId && !isSingleProfessionalView && (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {getLocalizedText('Active filters:', 'सक्रिय फिल्टरहरू:')}
+            </span>
+            
+            {filterSheetFilters.searchType !== 'name' && (
+              <Badge variant="secondary" className="gap-1">
+                {getLocalizedText('Search by', 'खोजी आधार')}: {
+                  searchFilterOptions.find(o => o.id === filterSheetFilters.searchType)?.[
+                    language === 'ne' ? 'labelNp' : 'labelEn'
+                  ]
+                }
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={() => {
+                    setFilterSheetFilters(prev => ({ ...prev, searchType: 'name' }));
+                    setFilterType('name');
+                  }}
                 >
-                  {range.label}
-                </Badge>
-              ))}
-            </div>
+                  <X className="h-2 w-2" />
+                </Button>
+              </Badge>
+            )}
+            
+            {filterSheetFilters.priceRange && (
+              <Badge variant="secondary" className="gap-1">
+                {getLocalizedText('Price', 'मूल्य')}: {
+                  priceFilterOptions.find(o => o.id === filterSheetFilters.priceRange)?.[
+                    language === 'ne' ? 'labelNp' : 'labelEn'
+                  ]
+                }
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={() => {
+                    setFilterSheetFilters(prev => ({ ...prev, priceRange: null }));
+                    setSelectedPriceRange(null);
+                  }}
+                >
+                  <X className="h-2 w-2" />
+                </Button>
+              </Badge>
+            )}
+            
+            {filterSheetFilters.sortBy !== 'name_asc' && (
+              <Badge variant="secondary" className="gap-1">
+                {getLocalizedText('Sort', 'क्रम')}: {
+                  sortOptions.find(o => o.id === filterSheetFilters.sortBy)?.[
+                    language === 'ne' ? 'labelNp' : 'labelEn'
+                  ]
+                }
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={() => setFilterSheetFilters(prev => ({ ...prev, sortBy: 'name_asc' }))}
+                >
+                  <X className="h-2 w-2" />
+                </Button>
+              </Badge>
+            )}
+            
+            {filterSheetFilters.hasDiscount && (
+              <Badge variant="secondary" className="gap-1">
+                {getLocalizedText('Has Discounts', 'छुट उपलब्ध')}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={() => setFilterSheetFilters(prev => ({ ...prev, hasDiscount: false }))}
+                >
+                  <X className="h-2 w-2" />
+                </Button>
+              </Badge>
+            )}
+            
+            {filterSheetFilters.hasMinimumPrice && (
+              <Badge variant="secondary" className="gap-1">
+                {getLocalizedText('Has Minimum Price', 'न्यूनतम मूल्य')}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={() => setFilterSheetFilters(prev => ({ ...prev, hasMinimumPrice: false }))}
+                >
+                  <X className="h-2 w-2" />
+                </Button>
+              </Badge>
+            )}
+            
+            {searchQuery && (
+              <Badge variant="secondary" className="gap-1">
+                {getLocalizedText('Search', 'खोजी')}: {searchQuery}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                  onClick={() => setSearchQuery('')}
+                >
+                  <X className="h-2 w-2" />
+                </Button>
+              </Badge>
+            )}
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={handleResetFilters}
+            >
+              {getLocalizedText('Clear all', 'सबै हटाउनुहोस्')}
+            </Button>
           </div>
         )}
 
@@ -466,10 +706,7 @@ export function ProfessionalsClient({
               <Button
                 variant="outline"
                 className="mt-4"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedPriceRange(null);
-                }}
+                onClick={handleResetFilters}
               >
                 {getLocalizedText('Clear Filters', 'फिल्टर हटाउनुहोस्')}
               </Button>
@@ -603,74 +840,36 @@ export function ProfessionalsClient({
                     )}
 
                     {/* Action Buttons */}
-                    <div className="flex gap-2 pt-4 border-t mt-auto">
-                      {!specificProfessionalId && (
-                        <Button
-                          variant="outline"
-                          className="flex-1"
-                          onClick={() => router.push(`/professionals/${professional.id}`)}
-                        >
-                          {getLocalizedText('View Profile', 'प्रोफाइल हेर्नुहोस्')}
-                        </Button>
-                      )}
-                      <Button
-                        className={specificProfessionalId ? "w-full" : "flex-1"}
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
                         onClick={() => {
-                          if (professional.services?.length === 1) {
-                            router.push(`/services/${professional.services[0].service_id}/professionals`);
-                          } else {
-                            router.push(`/professionals/${professional.id}/services`);
-                          }
+                          const slug = createProfessionalSlug(
+                            professional.full_name, 
+                            professional.id
+                          );
+                          router.push(`/professionals/${slug}`);
                         }}
                       >
-                        {getLocalizedText('Book Now', 'बुक गर्नुहोस्')}
+                        {getLocalizedText('View Profile', 'प्रोफाइल हेर्नुहोस्')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => {
+                          const slug = createProfessionalSlug(professional.full_name, professional.id);
+                          router.push(`/professionals/${slug}/services`);
+                        }}
+                      >
+                        {getLocalizedText('View All Services', 'सबै सेवाहरू हेर्नुहोस्')}
                       </Button>
                     </div>
                   </CardContent>
                 </Card>
               );
             })}
-          </div>
-        )}
-
-        {/* Active Filters - Only show when not viewing specific professional */}
-        {!specificProfessionalId && (searchQuery || selectedPriceRange) && !isSingleProfessionalView && (
-          <div className="mt-8 rounded-lg border bg-card p-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                {getLocalizedText('Active filters:', 'सक्रिय फिल्टरहरू:')}
-              </span>
-              
-              {selectedPriceRange && (
-                <Badge variant="secondary" className="gap-1">
-                  {getLocalizedText('Price', 'मूल्य')}: {
-                    priceRanges.find(r => r.value === selectedPriceRange)?.label
-                  }
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
-                    onClick={() => setSelectedPriceRange(null)}
-                  >
-                    <X className="h-2 w-2" />
-                  </Button>
-                </Badge>
-              )}
-              
-              {searchQuery && (
-                <Badge variant="secondary" className="gap-1">
-                  {searchQuery}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    <X className="h-2 w-2" />
-                  </Button>
-                </Badge>
-              )}
-            </div>
           </div>
         )}
       </main>

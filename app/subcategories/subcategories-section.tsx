@@ -157,9 +157,9 @@ export function SubCategoriesClient({
   };
 
   // Navigate to services list
-  const navigateToServices = (subCategory: SubCategory) => {
-    router.push(`/services/${subCategory.category_id}/subcategories/${subCategory.id}`);
-  };
+const navigateToServices = (subCategory: SubCategory) => {
+  router.push(`/services/${subCategory.category_id}/subcategories/${subCategory.id}`);
+};
 
   // Get localized name
   const getLocalizedName = (sub: SubCategory) => {
