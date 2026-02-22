@@ -35,6 +35,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/lib/context/auth-context';
 
 const statusTabs = [
   { value: 'all', label: 'All', labelNp: 'सबै' },
@@ -48,6 +49,7 @@ const statusTabs = [
 export default function OrdersPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
+     const { user } = useAuth();
   const {
     orders,
     isLoading,
@@ -63,8 +65,8 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [customerId, setCustomerId] = useState<number | null>(null);
 
-  // Mock customer ID - in real app, get from auth
-  const mockCustomerId = 49;
+
+ const userId = user?.id||49;
 
   useEffect(() => {
     loadOrders();
@@ -72,7 +74,7 @@ export default function OrdersPage() {
 
   const loadOrders = async () => {
     try {
-      await fetchCustomerOrders(mockCustomerId);
+      await fetchCustomerOrders(userId);
     } catch (err) {
       toast({
         title: 'Error',

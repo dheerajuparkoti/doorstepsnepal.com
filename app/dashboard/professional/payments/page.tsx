@@ -51,9 +51,9 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import { useAuth } from '@/lib/context/auth-context';
 
-// Mock professional ID get from auth or params
-const MOCK_PROFESSIONAL_ID = 24;
+
 
 // Bank data for Nepal
 const BANKS_NEPAL = [
@@ -96,6 +96,7 @@ type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 
 export default function ProfessionalPaymentsPage() {
   const { locale } = useI18n();
+     const { user} = useAuth();
   const {
     profile,
     isLoading,
@@ -109,7 +110,9 @@ export default function ProfessionalPaymentsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showBankSearch, setShowBankSearch] = useState(false);
   const [bankSearchQuery, setBankSearchQuery] = useState('');
-
+// Mock professional ID get from auth or params
+ const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
   // Initialize form
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
@@ -163,7 +166,7 @@ export default function ProfessionalPaymentsPage() {
 
   const loadProfile = async () => {
     try {
-      await fetchProfile(MOCK_PROFESSIONAL_ID);
+      await fetchProfile(currentProfessionalId);
     } catch (err) {
       // Error handled by store
     }
@@ -202,7 +205,7 @@ export default function ProfessionalPaymentsPage() {
       payment_method: paymentMethodMap[data.payment_method],
     };
 
-      await patchProfile(MOCK_PROFESSIONAL_ID, patchData);
+      await patchProfile(currentProfessionalId, patchData);
       
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',

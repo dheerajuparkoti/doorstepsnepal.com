@@ -226,7 +226,7 @@ export default function BrowseableServicesPage() {
       loadData(); // Refresh the list
       // Navigate back to choose page after a delay
       setTimeout(() => {
-        router.push(`/dashboard/services/choose?professionalId=${professionalId}`);
+        router.push(`dashboard/professional/own-services/browseable?professionalId=${professionalId}`);
       }, 1500);
     } catch (error) {
       console.error('Error saving service:', error);

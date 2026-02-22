@@ -54,9 +54,10 @@ import * as z from 'zod';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/lib/context/auth-context';
 
-// Mock professional ID - in real app, get from auth or params
-const MOCK_PROFESSIONAL_ID = 24;
+
+
 
 // Form validation schema
 const availabilityFormSchema = z.object({
@@ -136,6 +137,7 @@ const TimeSlotCard = ({ availability, onEdit, onDelete, isProcessing, locale }: 
 
 export default function ProfessionalServiceAvailabilityPage() {
   const { locale } = useI18n();
+      const { user} = useAuth();
   const {
     // State
     availabilities,
@@ -171,6 +173,9 @@ export default function ProfessionalServiceAvailabilityPage() {
   const [editingAvailability, setEditingAvailability] = useState<any>(null);
   const [timeError, setTimeError] = useState<string | null>(null);
 
+  
+ const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
   // Initialize form
   const form = useForm<AvailabilityFormValues>({
     resolver: zodResolver(availabilityFormSchema),
@@ -203,7 +208,7 @@ export default function ProfessionalServiceAvailabilityPage() {
 
   const loadAvailabilities = async () => {
     try {
-      await fetchAvailabilities(MOCK_PROFESSIONAL_ID);
+      await fetchAvailabilities(currentProfessionalId);
     } catch (err) {
       // Error handled by store
     }
@@ -217,7 +222,7 @@ export default function ProfessionalServiceAvailabilityPage() {
       }
 
       await createAvailability({
-        professional_id: MOCK_PROFESSIONAL_ID,
+        professional_id: currentProfessionalId,
         day_of_week: data.day_of_week,
         start_time: data.start_time,
         end_time: data.end_time,

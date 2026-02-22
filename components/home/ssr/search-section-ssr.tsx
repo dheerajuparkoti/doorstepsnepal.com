@@ -7,7 +7,7 @@ export async function SearchSectionSSR() {
     console.log("Fetching professional services for search...");
     
     // Fetch all professional services 
-    const data = await fetchProfessionalServices(1, 10000);
+    const data = await fetchProfessionalServices(1, 20);
     
     if (!data?.professional_services) {
       console.log("No professional services found");

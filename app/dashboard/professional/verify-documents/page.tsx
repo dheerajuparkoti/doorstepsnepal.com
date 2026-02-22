@@ -41,9 +41,11 @@ import {
   AlertTitle,
 } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function ProfessionalVerificationPage() {
   const { locale } = useI18n();
+       const { user} = useAuth();
   const {
     documents,
     isLoading,
@@ -64,8 +66,9 @@ export default function ProfessionalVerificationPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Mock professional ID - in real app, get from auth or params
-  const mockProfessionalId = 24;
+
+    const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
 
   useEffect(() => {
     loadDocuments();
@@ -84,7 +87,7 @@ export default function ProfessionalVerificationPage() {
 
   const loadDocuments = async () => {
     try {
-      await fetchDocuments(mockProfessionalId);
+      await fetchDocuments(currentProfessionalId);
     } catch (err) {
       // Error handled by store
     }
@@ -150,7 +153,7 @@ export default function ProfessionalVerificationPage() {
 
     try {
       if (isEditMode && editingDocument) {
-        await updateDocument(mockProfessionalId, editingDocument.id, selectedFile, description);
+        await updateDocument(currentProfessionalId, editingDocument.id, selectedFile, description);
         toast({
           title: locale === 'ne' ? 'सफलता' : 'Success',
           description: locale === 'ne' 
@@ -160,7 +163,7 @@ export default function ProfessionalVerificationPage() {
         setIsEditMode(false);
         setEditingDocument(null);
       } else {
-        await uploadDocument(mockProfessionalId, selectedFile, description);
+        await uploadDocument(currentProfessionalId, selectedFile, description);
         toast({
           title: locale === 'ne' ? 'सफलता' : 'Success',
           description: locale === 'ne' 
@@ -219,7 +222,7 @@ export default function ProfessionalVerificationPage() {
     }
     
     try {
-      await deleteDocument(mockProfessionalId, documentId);
+      await deleteDocument(currentProfessionalId, documentId);
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
         description: locale === 'ne' 

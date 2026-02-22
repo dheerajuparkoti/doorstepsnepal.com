@@ -4,7 +4,7 @@ import type { ProfessionalService } from '@/lib/data/professional-services';
 
 export async function ProfessionalsSections() {
   // Fetch first page (large enough to get at least 8 unique professionals)
-  const data = await fetchProfessionalServices(1, 10000);
+  const data = await fetchProfessionalServices(1, 50);
 
   const professionalServices: ProfessionalService[] = data.professional_services || [];
 

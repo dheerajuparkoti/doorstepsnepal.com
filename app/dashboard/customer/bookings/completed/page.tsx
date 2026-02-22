@@ -38,9 +38,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function CompletedBookingsPage() {
   const { t, locale } = useI18n();
+    const { user} = useAuth();
   const {
     orders,
     isLoading,
@@ -52,8 +54,7 @@ export default function CompletedBookingsPage() {
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock customer ID - in real app, get from auth
-  const mockCustomerId = 49;
+ const userId = user?.id||49;
 
   useEffect(() => {
     loadOrders();
@@ -62,7 +63,7 @@ export default function CompletedBookingsPage() {
   const loadOrders = async () => {
     try {
       setIsRefreshing(true);
-      await fetchCustomerOrders(mockCustomerId);
+      await fetchCustomerOrders(userId);
     } catch (err) {
       toast({
         title: 'Error',

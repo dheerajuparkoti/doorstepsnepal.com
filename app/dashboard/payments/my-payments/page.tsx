@@ -42,10 +42,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Progress } from '@/components/ui/progress';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function PaymentDashboardPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
+       const { user} = useAuth();
   const {
     orders,
     isLoading,
@@ -59,9 +61,12 @@ export default function PaymentDashboardPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isProfessional, setIsProfessional] = useState(false);
 
-  // Mock IDs - in real app, get from auth
-  const mockCustomerId = 49;
-  const mockProfessionalId = 24;
+
+  
+  const customerId = user?.id||49;
+  const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId = isProfessional || currentProfessionalIdFromAuth||24;
+
 
   useEffect(() => {
  
@@ -74,10 +79,10 @@ export default function PaymentDashboardPage() {
     try {
       setIsRefreshing(true);
       if (isProfessional) {
-        await fetchOrders({ professional_id: mockProfessionalId });
+        await fetchOrders({ professionalId: currentProfessionalId });
       } else {
-        await fetchCustomerOrders(mockCustomerId);
-          // await fetchOrders({ professional_id: mockProfessionalId });
+        await fetchCustomerOrders(customerId);
+          // await fetchOrders({ professional_id: currentProfessionalId });
       }
     } catch (err) {
       toast({

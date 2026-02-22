@@ -36,9 +36,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function InspectedJobsPage() {
   const { t, locale } = useI18n();
+             const { user} = useAuth();
   const {
     orders,
     isLoading,
@@ -50,7 +52,8 @@ export default function InspectedJobsPage() {
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const mockProfessionalId = 24; // Replace with actual professional ID
+ const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
 
   useEffect(() => {
     loadJobs();
@@ -60,7 +63,7 @@ export default function InspectedJobsPage() {
     try {
       setIsRefreshing(true);
       await fetchOrders({
-        professional_id: mockProfessionalId,
+        professional_id: currentProfessionalId,
         status: OrderStatus.INSPECTED,
       });
     } catch (err) {

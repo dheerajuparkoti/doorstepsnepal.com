@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
+
 import {
   Upload,
   Trash2,
@@ -43,6 +44,7 @@ import {
   AlertTitle,
 } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/lib/context/auth-context';
 
 interface ProfessionalVerificationPageOnboardingProps {
   isOnboarding?: boolean;
@@ -57,6 +59,11 @@ export default function ProfessionalVerificationPage({
   onSkip 
 }: ProfessionalVerificationPageOnboardingProps) {
   const { locale } = useI18n();
+  const { user } = useAuth();
+  const userId = user?.id;
+  const professionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId = professionalId || professionalIdFromAuth||24;
+
   const {
     documents,
     isLoading,
@@ -76,9 +83,9 @@ export default function ProfessionalVerificationPage({
   const [isEditMode, setIsEditMode] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+ 
   
-  // Use provided professionalId or default to mock ID
-  const currentProfessionalId = professionalId || 24;
+
 
   useEffect(() => {
     loadDocuments();

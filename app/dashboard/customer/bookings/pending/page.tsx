@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/context/auth-context';
 
 const paymentStatusConfig = {
   [PaymentStatus.UNPAID]: {
@@ -53,6 +54,7 @@ const paymentStatusConfig = {
 
 export default function PendingBookingsPage() {
   const { t, locale } = useI18n();
+   const { user} = useAuth();
   const {
     orders,
     isLoading,
@@ -64,8 +66,7 @@ export default function PendingBookingsPage() {
   const [sortBy, setSortBy] = useState('date_desc');
   const [isSearching, setIsSearching] = useState(false);
 
-  // Mock customer ID - in real app, get from auth
-  const mockCustomerId = 49;
+ const userId = user?.id||49;
 
   useEffect(() => {
     loadOrders();
@@ -74,7 +75,7 @@ export default function PendingBookingsPage() {
   const loadOrders = async () => {
     try {
       setIsSearching(true);
-      await fetchCustomerOrders(mockCustomerId);
+      await fetchCustomerOrders(userId);
     } catch (err) {
       toast({
         title: 'Error',

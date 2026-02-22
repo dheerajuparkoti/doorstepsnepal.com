@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/context/auth-context';
 
 const paymentStatusConfig = {
   [PaymentStatus.UNPAID]: {
@@ -58,6 +59,8 @@ const paymentStatusConfig = {
 
 export default function InspectedBookingsPage() {
   const { t, locale } = useI18n();
+  
+  const { user} = useAuth();
   const {
     orders,
     isLoading,
@@ -68,9 +71,8 @@ export default function InspectedBookingsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
+ const userId = user?.id||49;
 
-  // Mock customer ID - in real app, get from auth
-  const mockCustomerId = 49;
 
   useEffect(() => {
     loadOrders();
@@ -79,7 +81,7 @@ export default function InspectedBookingsPage() {
   const loadOrders = async () => {
     try {
       setIsRefreshing(true);
-      await fetchCustomerOrders(mockCustomerId);
+      await fetchCustomerOrders(userId);
     } catch (err) {
       toast({
         title: 'Error',

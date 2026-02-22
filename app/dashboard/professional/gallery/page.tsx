@@ -44,9 +44,11 @@ import {
   AlertTitle,
 } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function ProfessionalShowcasePage() {
   const { locale } = useI18n();
+         const { user} = useAuth();
   const {
     showcases = [],
     isLoading,
@@ -69,8 +71,11 @@ export default function ProfessionalShowcasePage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Mock professional ID - in real app, get from auth or params
-  const mockProfessionalId = 24;
+  
+
+    const customerId = user?.id||49;
+  const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
 
   useEffect(() => {
     loadShowcases();
@@ -89,7 +94,7 @@ export default function ProfessionalShowcasePage() {
 
   const loadShowcases = async () => {
     try {
-      await fetchShowcases(mockProfessionalId);
+      await fetchShowcases(currentProfessionalId);
     } catch (err) {
       // Error handled by store
     }
@@ -144,7 +149,7 @@ export default function ProfessionalShowcasePage() {
 
     try {
       if (isEditMode && editingShowcase) {
-        await updateShowcase(mockProfessionalId, editingShowcase.id, selectedFile, description);
+        await updateShowcase(currentProfessionalId, editingShowcase.id, selectedFile, description);
         toast({
           title: locale === 'ne' ? 'सफलता' : 'Success',
           description: locale === 'ne' 
@@ -154,7 +159,7 @@ export default function ProfessionalShowcasePage() {
         setIsEditMode(false);
         setEditingShowcase(null);
       } else {
-        await uploadShowcase(mockProfessionalId, selectedFile, description);
+        await uploadShowcase(currentProfessionalId, selectedFile, description);
         toast({
           title: locale === 'ne' ? 'सफलता' : 'Success',
           description: locale === 'ne' 
@@ -207,7 +212,7 @@ export default function ProfessionalShowcasePage() {
     }
     
     try {
-      await deleteShowcase(mockProfessionalId, showcaseId);
+      await deleteShowcase(currentProfessionalId, showcaseId);
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
         description: locale === 'ne' 
@@ -230,7 +235,7 @@ export default function ProfessionalShowcasePage() {
 
   const handleToggleActive = async (showcaseId: number, currentActive: boolean) => {
     try {
-      await toggleShowcaseActive(mockProfessionalId, showcaseId, !currentActive);
+      await toggleShowcaseActive(currentProfessionalId, showcaseId, !currentActive);
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
         description: currentActive 

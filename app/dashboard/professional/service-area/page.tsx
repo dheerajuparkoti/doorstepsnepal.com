@@ -56,9 +56,8 @@ import {
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/lib/context/auth-context';
 
-// Mock professional ID - in real app, get from auth or params
-const MOCK_PROFESSIONAL_ID = 24;
 
 // Maximum number of service areas allowed
 const MAX_SERVICE_AREAS = 7;
@@ -135,6 +134,7 @@ const formatServiceAreaName = (district: string, municipality: string, ward?: nu
 
 export default function ProfessionalServiceAreasPage() {
   const { locale } = useI18n();
+   const { user} = useAuth();
   const {
     profile,
     serviceAreas,
@@ -155,6 +155,8 @@ export default function ProfessionalServiceAreasPage() {
   const [selectedWards, setSelectedWards] = useState<number[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
+ const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
   // Initialize form
   const form = useForm<ServiceAreaFormValues>({
     resolver: zodResolver(serviceAreaFormSchema),
@@ -173,8 +175,8 @@ export default function ProfessionalServiceAreasPage() {
       try {
         // Load profile and service areas
         await Promise.all([
-          fetchProfile(MOCK_PROFESSIONAL_ID),
-          fetchServiceAreas(MOCK_PROFESSIONAL_ID),
+          fetchProfile(currentProfessionalId),
+          fetchServiceAreas(currentProfessionalId),
         ]);
       } catch (err) {
         // Error handled by store
@@ -243,7 +245,7 @@ export default function ProfessionalServiceAreasPage() {
       }
 
       await addServiceArea(
-        MOCK_PROFESSIONAL_ID,
+        currentProfessionalId,
         data.district,
         data.municipality,
         data.ward
@@ -268,7 +270,7 @@ export default function ProfessionalServiceAreasPage() {
 
   const handleRemoveServiceArea = async (serviceAreaId: number) => {
     try {
-      await removeServiceArea(MOCK_PROFESSIONAL_ID, serviceAreaId);
+      await removeServiceArea(currentProfessionalId, serviceAreaId);
       
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
@@ -283,7 +285,7 @@ export default function ProfessionalServiceAreasPage() {
 
   const handleRefresh = async () => {
     try {
-      await fetchServiceAreas(MOCK_PROFESSIONAL_ID);
+      await fetchServiceAreas(currentProfessionalId);
       toast({
         title: locale === 'ne' ? 'ताजा पारियो' : 'Refreshed',
         description: locale === 'ne'
@@ -761,7 +763,7 @@ export default function ProfessionalServiceAreasPage() {
                       // Remove all service areas
                       Promise.all(
                         serviceAreas.map(area => 
-                          removeServiceArea(MOCK_PROFESSIONAL_ID, area.id)
+                          removeServiceArea(currentProfessionalId, area.id)
                         )
                       ).catch(err => {
                         // Error handled by store

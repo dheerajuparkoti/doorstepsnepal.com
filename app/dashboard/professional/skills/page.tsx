@@ -52,9 +52,10 @@ import {
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/lib/context/auth-context';
 
-// Mock professional ID - in real app, get from auth or params
-const MOCK_PROFESSIONAL_ID = 24;
+
+
 
 // Skills data matching your Flutter app
 const ALL_SKILLS = [
@@ -263,6 +264,7 @@ type SkillsFormValues = z.infer<typeof skillsFormSchema>;
 
 export default function ProfessionalSkillsPage() {
   const { locale } = useI18n();
+          const { user} = useAuth();
   const {
     profile,
     isLoading,
@@ -279,7 +281,8 @@ export default function ProfessionalSkillsPage() {
   const [showSkillPicker, setShowSkillPicker] = useState(false);
   const [skillSearchQuery, setSkillSearchQuery] = useState('');
   const [filteredSkills, setFilteredSkills] = useState<string[]>(ALL_SKILLS);
-
+ const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
   // Initialize form
   const form = useForm<SkillsFormValues>({
     resolver: zodResolver(skillsFormSchema),
@@ -340,7 +343,7 @@ useEffect(() => {
 
   const loadProfile = async () => {
     try {
-      await fetchProfile(MOCK_PROFESSIONAL_ID);
+      await fetchProfile(currentProfessionalId);
     } catch (err) {
       // Error handled by store
     }
@@ -397,7 +400,7 @@ useEffect(() => {
       }
 
       // Update profile with new skills
-      await patchProfile(MOCK_PROFESSIONAL_ID, {
+      await patchProfile(currentProfessionalId, {
         skill: skills.join(', '),
       });
 

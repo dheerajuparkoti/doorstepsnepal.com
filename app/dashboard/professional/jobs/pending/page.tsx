@@ -35,10 +35,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function PendingJobsPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
+            const { user} = useAuth();
   const {
     orders,
     isLoading,
@@ -50,8 +52,9 @@ export default function PendingJobsPage() {
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Mock professional ID - in real app, get from auth
-  const mockProfessionalId = 24;
+
+ const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||24;
 
   useEffect(() => {
     loadJobs();
@@ -61,7 +64,7 @@ export default function PendingJobsPage() {
     try {
       setIsRefreshing(true);
       await fetchOrders({
-        professional_id: mockProfessionalId,
+        professional_id: currentProfessionalId,
         status: OrderStatus.PENDING,
       });
     } catch (err) {
