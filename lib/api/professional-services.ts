@@ -13,15 +13,72 @@ import {
   ProfessionalServicePrice
 } from '@/lib/data/professional-services';
 
+// export async function fetchProfessionalServices(
+//   page: number = 1,
+//   per_page: number = 20,
+//   search?: string
+// ): Promise<ProfessionalServiceResponse> {
+//   try {
+//     return await api.get<ProfessionalServiceResponse>('/professional_services', {
+//       params: { page, per_page,search },
+//       cache: 'force-cache',
+//       next: { revalidate: 3600 },
+//     });
+//   } catch (error) {
+//     console.error('Error fetching professional services:', error);
+//     return {
+//       professional_services: [],
+//       total: 0,
+//       page: 1,
+//       per_page,
+//       total_pages: 0,
+//     };
+//   }
+// }
+
+
+interface FetchProfessionalServicesParams {
+  page?: number;
+  per_page?: number;
+  professional_id?: number;
+  service_id?: number;
+  category_id?: number;
+  sub_category_id?: number;
+  min_price?: number;
+  max_price?: number;
+  search?: string;
+}
+
 export async function fetchProfessionalServices(
-  page: number = 1,
-  per_page: number = 20
+  params: FetchProfessionalServicesParams = {}
 ): Promise<ProfessionalServiceResponse> {
   try {
+    const {
+      page = 1,
+      per_page = 50,
+      professional_id,
+      service_id,
+      category_id,
+      sub_category_id,
+      min_price,
+      max_price,
+      search,
+    } = params;
+
     return await api.get<ProfessionalServiceResponse>('/professional_services', {
-      params: { page, per_page },
+      params: {
+        page,
+        per_page,
+        ...(professional_id && { professional_id }),
+        ...(service_id && { service_id }),
+        ...(category_id && { category_id }),
+        ...(sub_category_id && { sub_category_id }),
+        ...(min_price !== undefined && { min_price }),
+        ...(max_price !== undefined && { max_price }),
+        ...(search && { search }),
+      },
       cache: 'force-cache',
-      next: { revalidate: 3600 },
+      next: { revalidate: 1 },
     });
   } catch (error) {
     console.error('Error fetching professional services:', error);
@@ -29,11 +86,65 @@ export async function fetchProfessionalServices(
       professional_services: [],
       total: 0,
       page: 1,
-      per_page,
+      per_page:50,
       total_pages: 0,
     };
   }
 }
+
+export async function searchProfessionalServices(
+  params: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    category_id?: number;
+    sub_category_id?: number;
+    min_price?: number;
+    max_price?: number;
+     professional_id?: number; 
+    service_id?: number;     
+  } = {}
+): Promise<ProfessionalServiceResponse> {
+  try {
+    const {
+      page = 1,
+      per_page = 20,
+      search,
+      category_id,
+      sub_category_id,
+      min_price,
+      max_price,
+        professional_id,   
+  service_id,        
+    } = params;
+
+    return await api.get<ProfessionalServiceResponse>('/professional_services', {
+      params: {
+        page,
+        per_page,
+        ...(search && { search }),
+        ...(category_id && { category_id }),
+        ...(sub_category_id && { sub_category_id }),
+        ...(min_price !== undefined && { min_price }),
+        ...(max_price !== undefined && { max_price }),
+          ...(professional_id && { professional_id }),  
+  ...(service_id && { service_id }),            
+      },
+      cache: 'no-store',
+    });
+  } catch (error) {
+    console.error('Error searching professional services:', error);
+    return {
+      professional_services: [],
+      total: 0,
+      page: 1,
+      per_page:50,
+      total_pages: 0,
+    };
+  }
+}
+
+
 
 export async function fetchServicesByProfessionalId(
   professionalId: number,

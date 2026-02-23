@@ -6,6 +6,10 @@
 //   total_pages: number;
 // }
 
+import { Service } from "./service";
+
+
+
 // export interface ProfessionalService {
 //   id: number;
 //   professional_id: number;
@@ -84,6 +88,9 @@ export interface ProfessionalService {
       is_deleted?: boolean;
       deletion_requested_at?: string;
     };
+     service_areas: ServiceArea[];
+
+     
   };
   service: {
     id: number;
@@ -163,4 +170,76 @@ export interface UpdatePriceRequest {
 export interface CreateProfessionalServiceRequest {
   professional_id: number;
   service_id: number;
+}
+
+export interface ServiceArea {
+  id: number;
+  name: string;  // Format: "Bhaktapur-Suryabinayak_Mun.-29"
+}
+
+
+
+
+export interface GroupedService {
+  service: Service;
+  professionals: ProfessionalBasic[];
+  prices: ProfessionalServicePrice[];
+  professionalCount: number;
+  uniqueProfessionalIds: Set<number>;
+}
+
+export interface ProfessionalBasic {
+  id: number;
+  user_id: number;
+  full_name: string;
+  profile_image: string | null;
+  skill: string;
+}
+
+// Helper function to group professional services by service
+export function groupProfessionalServices(professionalServices: ProfessionalService[]): Map<number, GroupedService> {
+  const groupedMap = new Map<number, GroupedService>();
+  
+  for (const ps of professionalServices) {
+    if (!ps.service || !ps.professional) continue;
+    
+    const serviceId = ps.service.id;
+    
+    if (!groupedMap.has(serviceId)) {
+      groupedMap.set(serviceId, {
+        service: ps.service,
+        professionals: [],
+        prices: [],
+        professionalCount: 0,
+        uniqueProfessionalIds: new Set<number>()
+      });
+    }
+    
+    const group = groupedMap.get(serviceId)!;
+    
+    // Add professional if unique
+    const professionalId = ps.professional.id;
+    if (!group.uniqueProfessionalIds.has(professionalId)) {
+      group.uniqueProfessionalIds.add(professionalId);
+      group.professionals.push({
+        id: professionalId,
+        user_id: ps.professional.user_id,
+        full_name: ps.professional.user.full_name,
+        profile_image: ps.professional.user.profile_image,
+        skill: ps.professional.skill
+      });
+    }
+    
+    // Add prices
+    if (ps.prices) {
+      group.prices.push(...ps.prices);
+    }
+  }
+  
+  // Update professional count
+  groupedMap.forEach((group) => {
+    group.professionalCount = group.uniqueProfessionalIds.size;
+  });
+  
+  return groupedMap;
 }

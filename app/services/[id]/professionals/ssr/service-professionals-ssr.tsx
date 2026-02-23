@@ -167,7 +167,7 @@
 
 
 // app/services/[serviceId]/professionals/ssr/service-professionals-ssr.tsx
-import { fetchProfessionalServices } from '@/lib/api/professional-services';
+import { fetchProfessionalServices, searchProfessionalServices } from '@/lib/api/professional-services';
 import { ServiceProfessionalsClient } from '../service-professionals-client';
 
 interface ServiceProfessionalsSectionProps {
@@ -184,7 +184,18 @@ export async function ServiceProfessionalsSection({
   try {
     // SINGLE API CALL - Get all professional services at once
     console.log("Fetching professional services...");
-    const professionalServicesData = await fetchProfessionalServices(1, 10000);
+    // const professionalServicesData = await searchProfessionalServices({
+    // page:1,
+    // per_page:50
+    // });
+
+    const professionalServicesData = await searchProfessionalServices({
+  page: 1,
+  per_page: 50,
+  service_id: serviceId,  // ✅ PASS ID HERE
+});
+      // const professionalServices = await fetchServicesByS(professionalId);
+    
     
     if (!professionalServicesData?.professional_services) {
       return <ServiceProfessionalsClient professionalsData={[]} serviceName={serviceName} />;
