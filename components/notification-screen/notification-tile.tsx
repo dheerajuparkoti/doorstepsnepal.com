@@ -25,6 +25,7 @@ import {
 import { Notification, getNotificationTitle, getNotificationBody } from "@/lib/data/notification";
 import { useNotificationStore } from "@/stores/notification-store";
 import { cn } from "@/lib/utils";
+import { NepaliDateService } from "@/lib/utils/nepaliDate";
 
 interface NotificationTileProps {
   notification: Notification;
@@ -68,7 +69,7 @@ export function NotificationTile({ notification }: NotificationTileProps) {
     setShowDeleteDialog(false);
   };
 
-  const timeAgo = formatDistanceToNow(new Date(notification.created_at), { addSuffix: true });
+  const timeAgo = NepaliDateService.formatTime((notification.created_at));
 
   return (
     <>

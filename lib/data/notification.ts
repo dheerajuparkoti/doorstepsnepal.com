@@ -1,4 +1,5 @@
-// types/notification.ts
+import { NepaliDateService } from "../utils/nepaliDate";
+
 export interface Notification {
   id: number;
   user_id: number;
@@ -42,6 +43,10 @@ export const getNotificationTitle = (notification: Notification): string => {
       return 'New Order';
     case 'Inspection Completed':
       return 'Inspection Completed';
+    case 'Inspection Approved':
+        return 'Order Inspection Approved';
+    case 'Inspection Rejected':
+        return 'Order Inspection Rejected';
     case 'Order Successfully Placed!':
       return 'Order Placed';
     case 'Order Confirmed!':
@@ -81,7 +86,9 @@ export const getNotificationBody = (notification: Notification): string => {
       return 'Your order has been confirmed';
 
     case 'Inspection Completed':
-      const price = data.total_price || 0;
+    case 'Inspection Approved':
+    case 'Inspection Rejected':
+            const price = data.total_price || 0;
       return `Total amount: रू ${price.toLocaleString()}`;
 
     case 'Service Finished!':
@@ -115,35 +122,41 @@ export const getNotificationType = (type: string): string => {
 };
 
 // Group notifications by date (Today, Yesterday, etc.)
-export const groupNotificationsByDate = (
-  notifications: Notification[],
+// In your notification.ts file
+export function groupNotificationsByDate(
+  notifications: Notification[], 
   isProfessionalMode: boolean
-): Map<string, Notification[]> => {
-  const filtered = notifications.filter((notif) => {
-    if (isProfessionalMode) {
-      return ['New Order', 'payment_received', 'withdrawal_approved', 
-              'withdrawal_completed', 'withdrawal_rejected'].includes(notif.type);
-    }
-    return !['New Order', 'payment_received', 'withdrawal_approved', 
-             'withdrawal_completed', 'withdrawal_rejected'].includes(notif.type);
+): Map<string, Notification[]> {
+  // First filter notifications based on mode
+  const filtered = notifications.filter(notif => {
+    // Check if notification belongs to professional mode
+    const isProNotif = 
+      // Direct type matches
+      notif.type === 'New Order' ||
+      notif.type === 'payment_received' ||
+      notif.type === 'withdrawal_approved' ||
+      notif.type === 'withdrawal_completed' ||
+      notif.type === 'withdrawal_rejected' ||
+      // Order Update with specific titles
+      (notif.type === 'Order Update' && 
+       (notif.title === 'Inspection Approved' || 
+        notif.title === 'Inspection Rejected'));
+    
+    // For professional mode: show pro notifs
+    // For customer mode: show everything EXCEPT pro notifs
+    return isProfessionalMode ? isProNotif : !isProNotif;
   });
 
+  // Then group the filtered notifications by date
   const grouped = new Map<string, Notification[]>();
-  const today = new Date().toDateString();
-  const yesterday = new Date(Date.now() - 86400000).toDateString();
-
-  filtered.forEach((notif) => {
-    const date = new Date(notif.created_at).toDateString();
-    let key = date;
-    
-    if (date === today) key = 'Today';
-    else if (date === yesterday) key = 'Yesterday';
-    
-    if (!grouped.has(key)) {
-      grouped.set(key, []);
+  
+  filtered.forEach((notification) => {
+    const dateKey = NepaliDateService.formatHeader(notification.created_at); // Your date formatting logic
+    if (!grouped.has(dateKey)) {
+      grouped.set(dateKey, []);
     }
-    grouped.get(key)!.push(notif);
+    grouped.get(dateKey)!.push(notification);
   });
-
+  
   return grouped;
-};
+}

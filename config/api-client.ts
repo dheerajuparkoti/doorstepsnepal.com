@@ -187,30 +187,42 @@ async function baseRequest<T = any>(
       throw new Error('Authentication required. Please login again.');
     }
 
-    if (!response.ok) {
-      let errorMessage = `API Error (${response.status})`;
-      let errorData: any = null;
-      
+if (!response.ok) {
+
+
+  if (response.status === 404) {
+    const error = new Error('Not Found');
+    (error as any).status = 404;
+    throw error; 
+  }
+
+  let errorMessage = `API Error (${response.status})`;
+  let errorData: any = null;
+
+  try {
+    const text = await response.text();
+    if (text) {
       try {
-        const text = await response.text();
-        if (text) {
-          try {
-            errorData = JSON.parse(text);
-            errorMessage = errorData.message || errorData.detail || errorData.error || errorMessage;
-          } catch {
-            errorMessage = text;
-          }
-        }
-      } catch (e) {
-        errorMessage = response.statusText || errorMessage;
+        errorData = JSON.parse(text);
+        errorMessage =
+          errorData.message ||
+          errorData.detail ||
+          errorData.error ||
+          errorMessage;
+      } catch {
+        errorMessage = text;
       }
-      
-      const error = new Error(errorMessage);
-      (error as any).status = response.status;
-      (error as any).data = errorData;
-      
-      throw error;
     }
+  } catch {
+    errorMessage = response.statusText || errorMessage;
+  }
+
+  const error = new Error(errorMessage);
+  (error as any).status = response.status;
+  (error as any).data = errorData;
+
+  throw error;
+}
 
     // Handle empty responses (204 No Content)
     if (response.status === 204) {
@@ -218,15 +230,17 @@ async function baseRequest<T = any>(
     }
 
     return await response.json();
-  } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error(' API Request Failed:', {
-        url,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
-    throw error;
+  } catch (error: any) {
+  if (process.env.NODE_ENV === 'development' && error?.status !== 404) {
+    console.error(' API Request Failed:', {
+      url,
+      status: error?.status,
+      error: error?.message,
+    });
   }
+
+  throw error;
+}
 }
 
 // Generic HTTP Methods

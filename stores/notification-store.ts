@@ -47,13 +47,26 @@ export const useNotificationStore = create<NotificationState>()(
           return count;
         },
 
-        hasOtherModeNotifications: (isProfessionalMode: boolean) => {
-          return get().notifications.filter(notif => {
-            const isProNotif = ['New Order', 'payment_received', 'withdrawal_approved', 
-                                'withdrawal_completed', 'withdrawal_rejected'].includes(notif.type);
-            return isProfessionalMode ? !isProNotif : isProNotif;
-          }).filter(notif => !notif.is_read).length;
-        },
+     hasOtherModeNotifications: (isProfessionalMode: boolean) => {
+  return get().notifications.filter(notif => {
+    // Check if notification belongs to professional mode
+    const isProNotif = 
+      // Direct type matches
+      notif.type === 'New Order' ||
+      notif.type === 'payment_received' ||
+      notif.type === 'withdrawal_approved' ||
+      notif.type === 'withdrawal_completed' ||
+      notif.type === 'withdrawal_rejected' ||
+      // Order Update with specific titles
+      (notif.type === 'Order Update' && 
+       (notif.title === 'Inspection Approved' || 
+        notif.title === 'Inspection Rejected'));
+    
+    // For professional mode: show pro notifs, hide customer notifs
+    // For customer mode: show customer notifs, hide pro notifs
+    return isProfessionalMode ? isProNotif : !isProNotif;
+  }).filter(notif => !notif.is_read).length;
+},
 
         // Load all notifications with caching
         loadNotifications: async (force = false) => {

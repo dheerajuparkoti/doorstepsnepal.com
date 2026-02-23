@@ -16,7 +16,8 @@ import {
   Wallet,
   CreditCard,
   Briefcase,
-  Users
+  Users,
+  InspectIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -80,6 +81,7 @@ export default function NotificationsPage() {
         if (filterType === 'payments') return n.type.includes('payment');
         if (filterType === 'orders') return n.type.includes('Order');
         if (filterType === 'withdrawals') return n.type.includes('withdrawal');
+        if (filterType === 'inspection') return n.type.includes('inspection');
         return true;
       });
       if (filteredNotifs.length > 0) {
@@ -185,6 +187,10 @@ export default function NotificationsPage() {
                   <DropdownMenuItem onClick={() => setFilterType('withdrawals')}>
                     <CreditCard className="mr-2 h-4 w-4" />
                     Withdrawals
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFilterType('inspection')}>
+                    <InspectIcon className="mr-2 h-4 w-4" />
+                    Inspection
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

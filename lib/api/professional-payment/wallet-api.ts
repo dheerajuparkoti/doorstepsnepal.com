@@ -37,16 +37,17 @@ import { Withdrawal, WithdrawalCreateRequest } from "@/lib/data/professional/wit
 // helper for safe GET with 404 fallback
 async function safeGet<T>(url: string, defaultValue: T): Promise<T> {
   try {
-    return await api.get<T>(url);
+    const response = await api.get<T>(url);
+    return response;
   } catch (error: any) {
-    console.warn(`Safe GET failed for ${url}:`, error.message || error);
-    if (error.response?.status === 404 || error.message.includes('404')) {
-      return defaultValue; // return safe default
+    if (error.response?.status === 404) {
+      return defaultValue;
     }
-    throw error; // throw real errors
+
+    console.error(`GET ${url} failed:`, error);
+    throw error;
   }
 }
-
 
 export class WalletApi {
   private static baseUrl = '/professional-wallet';
@@ -58,10 +59,8 @@ static async getWallet(professionalId: number): Promise<ProfessionalWallet> {
     total_commission: 0,
     total_withdrawn: 0,
     current_balance: 0,
-    json: () => ({}), 
   } as ProfessionalWallet);
 }
-
 
   static async getWithdrawals(professionalId: number): Promise<Withdrawal[]> {
     return safeGet(`/withdrawal/professional/${professionalId}`, []);
