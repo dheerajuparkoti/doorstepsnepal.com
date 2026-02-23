@@ -6,6 +6,7 @@ import { FavoritesResponse } from '@/lib/data/favorites';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/context';
+import { createProfessionalSlug } from '@/lib/utils/slug';
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoritesResponse>([]);
@@ -62,13 +63,25 @@ export default function FavoritesPage() {
 
   function navigateToService(serviceId?: number, serviceName?: string) {
     if (serviceId) {
-      router.push(`/services/${serviceId}?name=${encodeURIComponent(serviceName || '')}`);
+      router.push(`/services/${serviceId}/professionals?serviceName=${encodeURIComponent(serviceName || '')}`);
     }
   }
 
   function navigateToProfessional(professionalId?: number) {
     if (professionalId) {
-      router.push(`/professionals/${professionalId}`);
+      // Find the professional from favorites list
+    const professional = favorites.find(
+      fav => fav.professional?.id === professionalId
+    )?.professional;
+    
+    // Get the professional's name (fallback to empty string)
+    const professionalName = professional?.full_name || '';
+    
+    // Create slug with both ID and name
+    const slug = createProfessionalSlug( professionalName,professionalId);
+    router.push(`/professionals/${slug}`);
+  
+      
     }
   }
 

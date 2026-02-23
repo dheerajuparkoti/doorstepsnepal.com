@@ -69,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const storedToken = localStorage.getItem("auth_token");
         const storedUser = localStorage.getItem("auth_user");
+              const savedMode = localStorage.getItem("userMode") as UserMode; 
         
         if (storedToken) {
           // If we have a token, fetch fresh user data from API
@@ -76,8 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Use getUserProfile from api/user.ts instead of getCurrentUser
             const freshUserData = await getUserProfile();
           console.log("USER DATA ===========================================================",freshUserData);
-            
-            // Update stored user data with fresh data
+               const modeToUse = savedMode || freshUserData.mode || "customer";
+                      // Update the user data with the correct mode
+          freshUserData.mode = modeToUse;
+          freshUserData.type = modeToUse;
+
             localStorage.setItem("auth_user", JSON.stringify(freshUserData));
             
             // Set cookies with fresh data
@@ -85,17 +89,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             setToken(storedToken);
             setUser(freshUserData);
-            setModeState(freshUserData.mode || "customer");
+         setModeState(modeToUse);
           } catch (error) {
             console.error("Error fetching fresh user data:", error);
             
             // Fallback to stored user data
             if (storedUser) {
               const parsedUser = JSON.parse(storedUser) as User;
+
+                 // Use saved mode or parsed user mode
+            const modeToUse = savedMode || parsedUser.mode || "customer";
+            parsedUser.mode = modeToUse;
+            parsedUser.type = modeToUse;
               setAuthCookies(storedToken, parsedUser);
               setToken(storedToken);
               setUser(parsedUser);
-              setModeState(parsedUser.mode || "customer");
+        setModeState(modeToUse);
             }
           }
         } else {
@@ -199,6 +208,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setUser(updatedUser);
       localStorage.setItem("auth_user", JSON.stringify(updatedUser));
+        // Also update cookies with full user data
+    if (token) {
+      setAuthCookies(token, updatedUser);
+    }
     }
   };
 

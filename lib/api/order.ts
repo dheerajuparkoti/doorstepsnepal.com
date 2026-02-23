@@ -24,7 +24,7 @@ export class OrderAPI {
 
    static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
     try {
-      return await api.get<OrdersResponse>('/orders', {
+      return await api.get<OrdersResponse>('/orders/', {
         params: filters,
         cache: 'no-store',
       });

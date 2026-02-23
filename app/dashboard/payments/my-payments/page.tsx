@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -47,7 +46,8 @@ import { useAuth } from '@/lib/context/auth-context';
 export default function PaymentDashboardPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
-       const { user} = useAuth();
+  const { user, mode } = useAuth(); // Get mode directly from auth context
+  
   const {
     orders,
     isLoading,
@@ -59,35 +59,60 @@ export default function PaymentDashboardPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isProfessional, setIsProfessional] = useState(false);
 
-
+  // Determine if professional based on auth context mode
+  const isProfessional = mode === 'professional';
   
-  const customerId = user?.id||49;
-  const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId = isProfessional || currentProfessionalIdFromAuth||24;
-
+  // Get the correct IDs from user object
+  const customerId = user?.id;
+  const professionalId = user?.professional_id;
 
   useEffect(() => {
- 
-    const userType = localStorage.getItem('user_type') || 'customer';
-    setIsProfessional(userType === 'professional');
-    loadOrders();
-  }, []);
+    if (user) {
+      loadOrders();
+    }
+  }, [user, isProfessional]); // Re-run when user or mode changes
 
   const loadOrders = async () => {
+    if (!user) {
+      console.warn('No user found, cannot load orders');
+      return;
+    }
+
     try {
       setIsRefreshing(true);
+      
       if (isProfessional) {
-        await fetchOrders({ professionalId: currentProfessionalId });
+        // Professional mode - fetch orders by professional ID
+        if (!professionalId) {
+          console.warn('Professional ID not found');
+          toast({
+            title: locale === 'ne' ? 'जानकारी छैन' : 'Information Missing',
+            description: locale === 'ne' 
+              ? 'तपाईंको प्रोफेशनल आईडी फेला परेन' 
+              : 'Your professional ID could not be found',
+            variant: 'default',
+          });
+          return;
+        }
+        
+        await fetchOrders({ professionalId });
       } else {
+        // Customer mode - fetch orders by customer ID
+        if (!customerId) {
+          console.warn('Customer ID not found');
+          return;
+        }
+        
         await fetchCustomerOrders(customerId);
-          // await fetchOrders({ professional_id: currentProfessionalId });
       }
     } catch (err) {
+      console.error('Error loading payment data:', err);
       toast({
-        title: 'Error',
-        description: 'Failed to load payment data',
+        title: locale === 'ne' ? 'त्रुटि' : 'Error',
+        description: locale === 'ne' 
+          ? 'भुक्तानी डाटा लोड गर्न असफल' 
+          : 'Failed to load payment data',
         variant: 'destructive',
       });
     } finally {
@@ -98,6 +123,7 @@ export default function PaymentDashboardPage() {
   const handleRefresh = () => {
     loadOrders();
   };
+
 
   const handleSearch = (value: string) => {
     setSearchQuery(value);
@@ -232,6 +258,29 @@ export default function PaymentDashboardPage() {
     );
   }
 
+  // Show loading state if no user yet
+  if (!user) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <AlertCircle className="w-12 h-12 text-yellow-500 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              {locale === 'ne' ? 'प्रमाणीकरण आवश्यक' : 'Authentication Required'}
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              {locale === 'ne' 
+                ? 'कृपया भुक्तानी हेर्नको लागि लगइन गर्नुहोस्' 
+                : 'Please login to view payments'}
+            </p>
+            <Button onClick={() => router.push('/login')}>
+              {locale === 'ne' ? 'लगइन गर्नुहोस्' : 'Login'}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}

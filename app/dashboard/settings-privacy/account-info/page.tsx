@@ -49,7 +49,7 @@ import { AddressSection } from '@/components/account/address-section';
 
 export default function AccountInfoPage() {
   const router = useRouter();
-  const { logout } = useAuth();
+  const { logout,mode } = useAuth();
   
   // Zustand hooks 
   const user = useUser();
@@ -198,19 +198,15 @@ export default function AccountInfoPage() {
   }, []);
 
   // Get user type display value
-  const getUserTypeDisplay = useCallback(() => {
-    if (!user) return 'Customer';
-    
-    const userType = user.type;
-    
-    if (userType === 'professional') {
-      return 'Professional';
-    } else if (userType === 'customer') {
-      return 'Customer';
-    } else {
-      return userType || 'Customer';
-    }
-  }, [user]);
+const getUserTypeDisplay = useCallback(() => {
+  if (!user) return 'Customer';
+  
+  if (mode === 'professional') {
+    return 'Professional';
+  } else {
+    return 'Customer';
+  }
+}, [user, mode]); 
 
   // Loading state
   if (isLoading || !user) {
