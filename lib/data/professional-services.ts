@@ -69,6 +69,7 @@ export interface ProfessionalServiceResponse {
 }
 
 export interface ProfessionalService {
+  name_en: string;
   id: number;
   professional_id: number;
   service_id: number;
