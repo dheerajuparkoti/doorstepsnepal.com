@@ -1,3 +1,4 @@
+// components/professional-services-client.tsx (with parent-managed booking state)
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -12,7 +13,8 @@ import {
   Tag, 
   DollarSign,
   SlidersHorizontal,
-  Star
+  Star,
+  Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -33,7 +35,9 @@ import {
 } from '@/components/ui/select';
 import Image from 'next/image';
 import { BookNowButton } from '@/components/professional/book-now-button';
-import { FilterSheet, FilterSection } from '@/components/ui/filter-sheet'; // Import your new component
+import { FilterSheet, FilterSection } from '@/components/ui/filter-sheet'; 
+import { BookingSheet } from '@/components/booking/booking-sheet';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ProfessionalServicesClientProps {
   professionalId: number;
@@ -65,6 +69,7 @@ export function ProfessionalServicesClient({
 }: ProfessionalServicesClientProps) {
   const router = useRouter();
   const { language } = useI18n();
+  const { toast } = useToast();
   
   // State management
   const [searchQuery, setSearchQuery] = useState('');
@@ -74,6 +79,11 @@ export function ProfessionalServicesClient({
   const [selectedPriceRange, setSelectedPriceRange] = useState<number | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('popular');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Booking state
+  const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
+  const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 
   const getLocalizedText = (en: string, np: string) => {
     return language === 'ne' ? np : en;
@@ -94,6 +104,30 @@ export function ProfessionalServicesClient({
       unit: price.price_unit?.name || '',
       quality: price.quality_type?.name || '',
       isMinimumPrice: price.is_minimum_price,
+    };
+  };
+
+  // Format price for booking sheet
+  const formatPriceForBooking = (priceItem: any) => {
+    const hasDiscount = priceItem.discount_is_active && priceItem.discount_percentage > 0;
+    const discountedPrice = hasDiscount
+      ? Math.round(priceItem.price * (1 - priceItem.discount_percentage / 100))
+      : priceItem.price;
+
+    return {
+      originalPrice: priceItem.price,
+      discountedPrice,
+      hasDiscount,
+      display: hasDiscount
+        ? `Rs. ${discountedPrice} (${priceItem.discount_percentage}% off)`
+        : `Rs. ${priceItem.price}`,
+      display_ne: hasDiscount
+        ? `रु. ${discountedPrice} (${priceItem.discount_percentage}% छुट)`
+        : `रु. ${priceItem.price}`,
+      unit: priceItem.price_unit?.name || 'Unit',
+      unit_ne: priceItem.price_unit?.name_ne || 'एकाइ',
+      quality: priceItem.quality_type?.name || 'Standard',
+      quality_ne: priceItem.quality_type?.name_ne || 'सामान्य',
     };
   };
 
@@ -185,6 +219,74 @@ export function ProfessionalServicesClient({
     all_prices: service.prices || [],
   });
 
+  // Handle book now click
+  const handleBookNow = (professional: any) => {
+    setSelectedProfessional(professional);
+    setIsBookingSheetOpen(true);
+  };
+
+  // Handle address operations
+  const handleAddAddress = async (address: any) => {
+    // Implement your address save logic here
+    setSavedAddresses(prev => [...prev, { ...address, id: Date.now().toString() }]);
+    
+    toast({
+      title: getLocalizedText('Address Added', 'ठेगाना थपियो'),
+      description: getLocalizedText(
+        'Address has been added successfully',
+        'ठेगाना सफलतापूर्वक थपियो'
+      ),
+    });
+  };
+
+  const handleUpdateAddress = async (address: any) => {
+    setSavedAddresses(prev => prev.map(addr => 
+      addr.id === address.id ? address : addr
+    ));
+    
+    toast({
+      title: getLocalizedText('Address Updated', 'ठेगाना अद्यावधिक गरियो'),
+      description: getLocalizedText(
+        'Address has been updated successfully',
+        'ठेगाना सफलतापूर्वक अद्यावधिक गरियो'
+      ),
+    });
+  };
+
+  // Handle booking confirmation
+  const handleConfirmBooking = async (details: any) => {
+    try {
+      // Implement your booking API call here
+      console.log('Booking confirmed:', details);
+      
+      // Example API call:
+      // await fetch('/api/bookings', {
+      //   method: 'POST',
+      //   body: JSON.stringify(details),
+      // });
+      
+      toast({
+        title: getLocalizedText('Booking Confirmed', 'बुकिङ पुष्टि भयो'),
+        description: getLocalizedText(
+          'Your booking has been confirmed successfully',
+          'तपाईंको बुकिङ सफलतापूर्वक पुष्टि भएको छ'
+        ),
+      });
+      
+      setIsBookingSheetOpen(false);
+      setSelectedProfessional(null);
+    } catch (error) {
+      toast({
+        title: getLocalizedText('Error', 'त्रुटि'),
+        description: getLocalizedText(
+          'Failed to confirm booking. Please try again.',
+          'बुकिङ पुष्टि गर्न असफल भयो। कृपया पुनः प्रयास गर्नुहोस्।'
+        ),
+        variant: 'destructive',
+      });
+    }
+  };
+
   const hasActiveFilters = searchQuery || selectedTags.length > 0 || selectedPriceRange;
 
   // Define filter sections for the reusable FilterSheet
@@ -209,7 +311,7 @@ export function ProfessionalServicesClient({
       options: priceRanges.map(range => ({
         id: range.value.toString(),
         labelEn: range.label,
-        labelNp: range.label, // You can add Nepali translations if needed
+        labelNp: range.label,
         value: range.value,
       })),
     },
@@ -228,346 +330,366 @@ export function ProfessionalServicesClient({
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-primary text-primary-foreground">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-primary-foreground hover:bg-primary-foreground/20"
-              onClick={() => router.back()}
-            >
-              <ChevronRight className="h-5 w-5 rotate-180" />
-            </Button>
-            
-            {isSearching ? (
-              <div className="flex-1">
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={getLocalizedText(
-                    'Search services...',
-                    'सेवाहरू खोज्नुहोस्...'
-                  )}
-                  className="border-0 bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  autoFocus
-                />
-              </div>
-            ) : (
-              <div>
-                <h1 className="text-lg font-semibold">{professionalName}</h1>
-                <p className="text-xs text-primary-foreground/70">
-                  {filteredAndSortedServices.length} {getLocalizedText('services', 'सेवाहरू')}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-primary-foreground hover:bg-primary-foreground/20"
-              onClick={() => {
-                setIsSearching(!isSearching);
-                if (isSearching) setSearchQuery('');
-              }}
-            >
-              {isSearching ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
-            </Button>
-
-            {/* Replace the old filter button with FilterSheet */}
-            <FilterSheet
-              trigger={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-primary-foreground hover:bg-primary-foreground/20 relative"
-                >
-                  <SlidersHorizontal className="h-5 w-5" />
-                </Button>
-              }
-              sections={filterSections}
-              activeFilters={{
-                tags: selectedTags,
-                priceRange: selectedPriceRange?.toString(),
-              }}
-              onApplyFilters={handleApplyFilters}
-              onReset={handleResetFilters}
-              title={getLocalizedText('Filter Services', 'सेवाहरू फिल्टर गर्नुहोस्')}
-              description={getLocalizedText(
-                'Filter services by your preferences',
-                'आफ्नो प्राथमिकता अनुसार सेवाहरू फिल्टर गर्नुहोस्'
+    <>
+      <div className="min-h-screen bg-background">
+        {/* Header */}
+        <header className="sticky top-0 z-50 w-full border-b bg-primary text-primary-foreground">
+          <div className="container mx-auto flex h-16 items-center justify-between px-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground hover:bg-primary-foreground/20"
+                onClick={() => router.back()}
+              >
+                <ChevronRight className="h-5 w-5 rotate-180" />
+              </Button>
+              
+              {isSearching ? (
+                <div className="flex-1">
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={getLocalizedText(
+                      'Search services...',
+                      'सेवाहरू खोज्नुहोस्...'
+                    )}
+                    className="border-0 bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/70 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <div>
+                  <h1 className="text-lg font-semibold">{professionalName}</h1>
+                  <p className="text-xs text-primary-foreground/70">
+                    {filteredAndSortedServices.length} {getLocalizedText('services', 'सेवाहरू')}
+                  </p>
+                </div>
               )}
-              side="right"
-            />
+            </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-primary-foreground hover:bg-primary-foreground/20"
-                >
-                  <Filter className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setSortBy('popular')}>
-                  {getLocalizedText('Popular', 'लोकप्रिय')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('price-low')}>
-                  {getLocalizedText('Price: Low to High', 'मूल्य: न्यून देखि उच्च')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('price-high')}>
-                  {getLocalizedText('Price: High to Low', 'मूल्य: उच्च देखि न्यून')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('name-asc')}>
-                  {getLocalizedText('Name: A to Z', 'नाम: A देखि Z')}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy('name-desc')}>
-                  {getLocalizedText('Name: Z to A', 'नाम: Z देखि A')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-primary-foreground hover:bg-primary-foreground/20"
+                onClick={() => {
+                  setIsSearching(!isSearching);
+                  if (isSearching) setSearchQuery('');
+                }}
+              >
+                {isSearching ? <X className="h-5 w-5" /> : <Search className="h-5 w-5" />}
+              </Button>
+
+              {/* FilterSheet */}
+              <FilterSheet
+                trigger={
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-primary-foreground hover:bg-primary-foreground/20 relative"
+                  >
+                    <SlidersHorizontal className="h-5 w-5" />
+                    {hasActiveFilters && (
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-destructive text-[10px] font-medium text-destructive-foreground flex items-center justify-center">
+                        {(selectedTags.length + (selectedPriceRange ? 1 : 0))}
+                      </span>
+                    )}
+                  </Button>
+                }
+                sections={filterSections}
+                activeFilters={{
+                  tags: selectedTags,
+                  priceRange: selectedPriceRange?.toString(),
+                }}
+                onApplyFilters={handleApplyFilters}
+                onReset={handleResetFilters}
+                title={getLocalizedText('Filter Services', 'सेवाहरू फिल्टर गर्नुहोस्')}
+                description={getLocalizedText(
+                  'Filter services by your preferences',
+                  'आफ्नो प्राथमिकता अनुसार सेवाहरू फिल्टर गर्नुहोस्'
+                )}
+                side="right"
+              />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-primary-foreground hover:bg-primary-foreground/20"
+                  >
+                    <Filter className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setSortBy('popular')}>
+                    {getLocalizedText('Popular', 'लोकप्रिय')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('price-low')}>
+                    {getLocalizedText('Price: Low to High', 'मूल्य: न्यून देखि उच्च')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('price-high')}>
+                    {getLocalizedText('Price: High to Low', 'मूल्य: उच्च देखि न्यून')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('name-asc')}>
+                    {getLocalizedText('Name: A to Z', 'नाम: A देखि Z')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSortBy('name-desc')}>
+                    {getLocalizedText('Name: Z to A', 'नाम: Z देखि A')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="container mx-auto px-4 py-6">
-        {/* Active Filters Display */}
-        {hasActiveFilters && (
-          <div className="mb-4 flex flex-wrap items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              {getLocalizedText('Active filters:', 'सक्रिय फिल्टरहरू:')}
-            </span>
-            
-            {searchQuery && (
-              <Badge variant="secondary" className="gap-1">
-                {getLocalizedText('Search', 'खोज')}: {searchQuery}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
-                  onClick={() => setSearchQuery('')}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              </Badge>
-            )}
-            
-            {selectedTags.map(tagId => {
-              const tag = tagFilters.find(t => t.id === tagId);
-              return tag ? (
-                <Badge key={tagId} variant="secondary" className="gap-1">
-                  {tag.icon}
-                  {getLocalizedText(tag.labelEn, tag.labelNp)}
+        <main className="container mx-auto px-4 py-6">
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                {getLocalizedText('Active filters:', 'सक्रिय फिल्टरहरू:')}
+              </span>
+              
+              {searchQuery && (
+                <Badge variant="secondary" className="gap-1">
+                  {getLocalizedText('Search', 'खोज')}: {searchQuery}
                   <Button
                     variant="ghost"
                     size="icon"
                     className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
-                    onClick={() => toggleTag(tagId)}
+                    onClick={() => setSearchQuery('')}
                   >
                     <X className="h-2 w-2" />
                   </Button>
                 </Badge>
-              ) : null;
-            })}
-            
-            {selectedPriceRange && (
-              <Badge variant="secondary" className="gap-1">
-                {getLocalizedText('Price', 'मूल्य')}: {
-                  priceRanges.find(r => r.value === selectedPriceRange)?.label
-                }
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
-                  onClick={() => setSelectedPriceRange(null)}
-                >
-                  <X className="h-2 w-2" />
-                </Button>
-              </Badge>
-            )}
-
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={clearFilters}
-            >
-              {getLocalizedText('Clear all', 'सबै हटाउनुहोस्')}
-            </Button>
-          </div>
-        )}
-
-        {/* Results Count */}
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            {getLocalizedText('All Services', 'सबै सेवाहरू')}
-          </h2>
-          <span className="text-sm text-muted-foreground">
-            {filteredAndSortedServices.length} {getLocalizedText('services found', 'सेवाहरू फेला पर्यो')}
-          </span>
-        </div>
-        
-        {/* Services Grid */}
-        {filteredAndSortedServices.length === 0 ? (
-          <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed">
-            <Search className="mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              {getLocalizedText('No services found', 'कुनै सेवा फेला परेन')}
-            </p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={clearFilters}
-            >
-              {getLocalizedText('Clear Filters', 'फिल्टर हटाउनुहोस्')}
-            </Button>
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredAndSortedServices.map((service: any) => {
-              const professional = createProfessionalObject(service);
-              const pricedItems = service.prices?.filter((p: any) => p.price !== null) || [];
+              )}
               
-              return (
-                <Card 
-                  key={service.id} 
-                  className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg cursor-pointer"
-                //   onClick={() => router.push(`/services/${service.service_id}/professionals`)}
-                >
-                  <CardContent className="p-0">
-                    {/* Service Image */}
-                    <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
-                      {service.service?.image ? (
-                        <Image
-                          src={service.service.image}
-                          alt={service.service.name_en}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <Wrench className="h-12 w-12 text-muted-foreground/30" />
-                        </div>
-                      )}
-                      
-                      {/* Price Badge */}
-                      {pricedItems.length > 0 && (
-                        <div className="absolute top-3 right-3">
-                          <div className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
-                            <DollarSign className="inline h-3 w-3" />
-                            {Math.min(...pricedItems.map((p: any) => p.price))}+
-                          </div>
-                        </div>
-                      )}
-                    </div>
+              {selectedTags.map(tagId => {
+                const tag = tagFilters.find(t => t.id === tagId);
+                return tag ? (
+                  <Badge key={tagId} variant="secondary" className="gap-1">
+                    {tag.icon}
+                    {getLocalizedText(tag.labelEn, tag.labelNp)}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                      onClick={() => toggleTag(tagId)}
+                    >
+                      <X className="h-2 w-2" />
+                    </Button>
+                  </Badge>
+                ) : null;
+              })}
+              
+              {selectedPriceRange && (
+                <Badge variant="secondary" className="gap-1">
+                  {getLocalizedText('Price', 'मूल्य')}: {
+                    priceRanges.find(r => r.value === selectedPriceRange)?.label
+                  }
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="ml-1 h-3 w-3 p-0 hover:bg-transparent"
+                    onClick={() => setSelectedPriceRange(null)}
+                  >
+                    <X className="h-2 w-2" />
+                  </Button>
+                </Badge>
+              )}
 
-                    {/* Content */}
-                    <div className="p-5 space-y-4">
-                      {/* Service Name */}
-                      <div>
-                        <h3 className="text-lg font-semibold line-clamp-1">
-                          {language === 'ne' ? service.service?.name_np : service.service?.name_en}
-                        </h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                          {service.service?.description_en}
-                        </p>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={clearFilters}
+              >
+                {getLocalizedText('Clear all', 'सबै हटाउनुहोस्')}
+              </Button>
+            </div>
+          )}
+
+          {/* Results Count */}
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">
+              {getLocalizedText('All Services', 'सबै सेवाहरू')}
+            </h2>
+            <span className="text-sm text-muted-foreground">
+              {filteredAndSortedServices.length} {getLocalizedText('services found', 'सेवाहरू फेला पर्यो')}
+            </span>
+          </div>
+          
+          {/* Services Grid */}
+          {filteredAndSortedServices.length === 0 ? (
+            <div className="flex h-64 flex-col items-center justify-center rounded-lg border border-dashed">
+              <Search className="mb-4 h-12 w-12 text-muted-foreground" />
+              <p className="text-muted-foreground">
+                {getLocalizedText('No services found', 'कुनै सेवा फेला परेन')}
+              </p>
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={clearFilters}
+              >
+                {getLocalizedText('Clear Filters', 'फिल्टर हटाउनुहोस्')}
+              </Button>
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filteredAndSortedServices.map((service: any) => {
+                const professional = createProfessionalObject(service);
+                const pricedItems = service.prices?.filter((p: any) => p.price !== null) || [];
+                
+                return (
+                  <Card 
+                    key={service.id} 
+                    className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg"
+                  >
+                    <CardContent className="p-0">
+                      {/* Service Image */}
+                      <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10">
+                        {service.service?.image ? (
+                          <Image
+                            src={service.service.image}
+                            alt={service.service.name_en}
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center">
+                            <Wrench className="h-12 w-12 text-muted-foreground/30" />
+                          </div>
+                        )}
+                        
+                        {/* Price Badge */}
+                        {pricedItems.length > 0 && (
+                          <div className="absolute top-3 right-3">
+                            <div className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
+                              <DollarSign className="inline h-3 w-3" />
+                              {Math.min(...pricedItems.map((p: any) => p.price))}+
+                            </div>
+                          </div>
+                        )}
                       </div>
 
-                      {/* Prices Section */}
-                      {pricedItems.length > 0 && (
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                            <DollarSign className="h-4 w-4" />
-                            <span>{getLocalizedText('Pricing', 'मूल्य निर्धारण')}</span>
-                          </div>
-                          
-                          <div className="space-y-2">
-                            {pricedItems.slice(0, 2).map((price: any) => {
-                              const priceDisplay = formatPriceDisplay(price);
-                              
-                              return (
-                                <div
-                                  key={price.id}
-                                  className="rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
-                                >
-                                  <div className="flex items-start justify-between">
-                                    {/* Price */}
-                                    <div>
-                                      {priceDisplay.hasDiscount ? (
-                                        <div className="space-y-1">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-lg font-bold text-primary">
-                                              Rs. {priceDisplay.discountedPrice}
-                                            </span>
-                                            <span className="text-xs line-through text-muted-foreground">
-                                              Rs. {priceDisplay.originalPrice}
-                                            </span>
+                      {/* Content */}
+                      <div className="p-5 space-y-4">
+                        {/* Service Name */}
+                        <div>
+                          <h3 className="text-lg font-semibold line-clamp-1">
+                            {language === 'ne' ? service.service?.name_np : service.service?.name_en}
+                          </h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                            {service.service?.description_en}
+                          </p>
+                        </div>
+
+                        {/* Prices Section */}
+                        {pricedItems.length > 0 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                              <DollarSign className="h-4 w-4" />
+                              <span>{getLocalizedText('Pricing', 'मूल्य निर्धारण')}</span>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              {pricedItems.slice(0, 2).map((price: any) => {
+                                const priceDisplay = formatPriceDisplay(price);
+                                
+                                return (
+                                  <div
+                                    key={price.id}
+                                    className="rounded-lg border bg-card p-3 transition-colors hover:bg-accent/50"
+                                  >
+                                    <div className="flex items-start justify-between">
+                                      {/* Price */}
+                                      <div>
+                                        {priceDisplay.hasDiscount ? (
+                                          <div className="space-y-1">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-lg font-bold text-primary">
+                                                Rs. {priceDisplay.discountedPrice}
+                                              </span>
+                                              <span className="text-xs line-through text-muted-foreground">
+                                                Rs. {priceDisplay.originalPrice}
+                                              </span>
+                                            </div>
+                                            <div className="flex items-center gap-1">
+                                              <Tag className="h-3 w-3 text-green-500" />
+                                              <span className="text-xs font-medium text-green-500">
+                                                {priceDisplay.discountPercentage}% OFF
+                                              </span>
+                                            </div>
                                           </div>
-                                          <div className="flex items-center gap-1">
-                                            <Tag className="h-3 w-3 text-green-500" />
-                                            <span className="text-xs font-medium text-green-500">
-                                              {priceDisplay.discountPercentage}% OFF
-                                            </span>
-                                          </div>
+                                        ) : (
+                                          <span className="text-lg font-bold text-primary">
+                                            Rs. {priceDisplay.originalPrice}
+                                          </span>
+                                        )}
+                                        
+                                        {/* Unit and Quality */}
+                                        <div className="mt-1 text-xs text-muted-foreground">
+                                          {priceDisplay.unit} • {priceDisplay.quality}
                                         </div>
-                                      ) : (
-                                        <span className="text-lg font-bold text-primary">
-                                          Rs. {priceDisplay.originalPrice}
+                                      </div>
+
+                                      {/* Minimum Price Badge */}
+                                      {priceDisplay.isMinimumPrice && (
+                                        <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                                          {getLocalizedText('Starting', 'सुरु')}
                                         </span>
                                       )}
-                                      
-                                      {/* Unit and Quality */}
-                                      <div className="mt-1 text-xs text-muted-foreground">
-                                        {priceDisplay.unit} • {priceDisplay.quality}
-                                      </div>
                                     </div>
-
-                                    {/* Minimum Price Badge */}
-                                    {priceDisplay.isMinimumPrice && (
-                                      <span className="rounded-full bg-blue-100 px-2 py-1 text-[10px] font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                                        {getLocalizedText('Starting', 'सुरु')}
-                                      </span>
-                                    )}
                                   </div>
-                                </div>
-                              );
-                            })}
-                            
-                            {/* Show count of additional prices */}
-                            {pricedItems.length > 2 && (
-                              <p className="text-xs text-muted-foreground text-center pt-1">
-                                +{pricedItems.length - 2} {getLocalizedText('more options', 'थप विकल्पहरू')}
-                              </p>
-                            )}
+                                );
+                              })}
+                              
+                              {/* Show count of additional prices */}
+                              {pricedItems.length > 2 && (
+                                <p className="text-xs text-muted-foreground text-center pt-1">
+                                  +{pricedItems.length - 2} {getLocalizedText('more options', 'थप विकल्पहरू')}
+                                </p>
+                              )}
+                            </div>
                           </div>
+                        )}
+
+                        {/* Book Now Button */}
+                        <div onClick={(e) => e.stopPropagation()} className="pt-2">
+                          <Button
+                            onClick={() => handleBookNow(professional)}
+                            className="w-full"
+                            size="default"
+                          >
+                            <Calendar className="mr-2 h-4 w-4" />
+                            {getLocalizedText('Book Now', 'अहिले बुक गर्नुहोस्')}
+                          </Button>
                         </div>
-                      )}
-
-                      {/* Book Now Button */}
-                      <div onClick={(e) => e.stopPropagation()} className="pt-2">
-                        <BookNowButton 
-                          professional={professional}
-                          size="default"
-                          variant="default"
-                          className="w-full"
-                        />
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </main>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </main>
+      </div>
 
-      {/* Remove the old Filter Sheet - it's now replaced by the FilterSheet component above */}
-    </div>
+      {/* Booking Sheet */}
+      {selectedProfessional && (
+        <BookingSheet
+          open={isBookingSheetOpen}
+          onOpenChange={setIsBookingSheetOpen}
+          professional={selectedProfessional}
+          onConfirm={handleConfirmBooking}
+          formatPrice={formatPriceForBooking}
+          savedAddresses={savedAddresses}
+          onAddAddress={handleAddAddress}
+          onUpdateAddress={handleUpdateAddress}
+        />
+      )}
+    </>
   );
 }

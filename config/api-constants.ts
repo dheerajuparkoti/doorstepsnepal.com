@@ -1,6 +1,6 @@
 
 export class ApiConstants {
-  static useProduction = true ; 
+  static useProduction = false; 
   
   static get baseUrl(): string {
     const url = this.useProduction 

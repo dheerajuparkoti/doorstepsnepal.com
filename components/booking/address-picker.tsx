@@ -1,3 +1,4 @@
+// components/address-dialog.tsx (updated version)
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -30,13 +31,12 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Check, Loader2, Home } from 'lucide-react';
+import { Check, Loader2, Home, MapPin } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { 
-  ALL_PROVINCES, 
   TEMPORARY_PROVINCES,
   getDistrictsByProvince, 
   getMunicipalitiesByDistrict,
-  getProvincesByType,
   WARDS,
   AddressType 
 } from '@/lib/data/address';
@@ -48,6 +48,9 @@ const addressFormSchema = z.object({
   municipality: z.string().min(1, 'Municipality is required'),
   ward_no: z.string().min(1, 'Ward number is required'),
   street_address: z.string().min(1, 'Street address is required'),
+  // Optional fields for better UX
+  label: z.string().optional(),
+  is_default: z.boolean().optional(),
 });
 
 type AddressFormValues = z.infer<typeof addressFormSchema>;
@@ -61,6 +64,7 @@ interface AddressDialogProps {
   description?: string;
   isLoading?: boolean;
   addressType: AddressType;
+  showLabelField?: boolean;
 }
 
 export function AddressDialog({
@@ -72,6 +76,7 @@ export function AddressDialog({
   description,
   isLoading = false,
   addressType,
+  showLabelField = true,
 }: AddressDialogProps) {
   const { locale } = useI18n();
 
@@ -84,16 +89,13 @@ export function AddressDialog({
       municipality: '',
       ward_no: '',
       street_address: '',
+      label: '',
+      is_default: false,
     },
   });
 
   const selectedProvince = form.watch('province');
   const selectedDistrict = form.watch('district');
-
-  // Get available provinces based on address type
-  const availableProvinces = useMemo(() => {
-    return getProvincesByType(addressType);
-  }, [addressType]);
 
   // Get districts based on selected province
   const availableDistricts = useMemo(() => {
@@ -120,6 +122,8 @@ export function AddressDialog({
           municipality: '',
           ward_no: '',
           street_address: '',
+          label: '',
+          is_default: false,
         });
       }
     }
@@ -129,11 +133,17 @@ export function AddressDialog({
     await onSubmit(data);
   };
 
+  // Only show provinces available for temporary addresses
+  const availableProvinces = TEMPORARY_PROVINCES;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            {title}
+          </DialogTitle>
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
 
@@ -144,9 +154,42 @@ export function AddressDialog({
               control={form.control}
               name="type"
               render={({ field }) => (
-                <input type="hidden" {...field} />
+                <input type="hidden" {...field} value="temporary" />
               )}
             />
+
+            {/* Address Label (Optional) */}
+            {showLabelField && (
+              <FormField
+                control={form.control}
+                name="label"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {locale === 'ne' ? 'ठेगानाको नाम' : 'Address Label'} 
+                      <span className="text-muted-foreground text-sm ml-1">
+                        ({locale === 'ne' ? 'वैकल्पिक' : 'optional'})
+                      </span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={locale === 'ne' 
+                          ? 'जस्तै: घर, कार्यालय, आदि' 
+                          : 'E.g., Home, Office, etc.'
+                        }
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      {locale === 'ne'
+                        ? 'यस ठेगानालाई सजिलै चिन्न नाम दिनुहोस्'
+                        : 'Give this address a name to easily identify it'}
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {/* Province Selection */}
             <FormField
@@ -160,11 +203,9 @@ export function AddressDialog({
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      // Reset district and municipality when province changes
                       form.setValue('district', '');
                       form.setValue('municipality', '');
                     }}
-                    defaultValue={field.value}
                     value={field.value}
                   >
                     <FormControl>
@@ -180,13 +221,16 @@ export function AddressDialog({
                       ))}
                     </SelectContent>
                   </Select>
-                  {addressType === 'temporary' && (
-                    <FormDescription>
+                  <FormDescription className="flex items-center gap-1">
+                    <Badge variant="outline" className="text-xs">
+                      {locale === 'ne' ? 'अस्थायी ठेगाना' : 'Temporary Address'}
+                    </Badge>
+                    <span>
                       {locale === 'ne'
-                        ? 'अस्थायी ठेगानाको लागि बागमती र गण्डकी प्रदेश मात्र उपलब्ध छ'
-                        : 'Only Bagmati and Gandaki provinces are available for temporary addresses'}
-                    </FormDescription>
-                  )}
+                        ? 'बागमती र गण्डकी प्रदेश मात्र उपलब्ध'
+                        : 'Only Bagmati and Gandaki provinces available'}
+                    </span>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -204,10 +248,8 @@ export function AddressDialog({
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
-                      // Reset municipality when district changes
                       form.setValue('municipality', '');
                     }}
-                    defaultValue={field.value}
                     value={field.value}
                     disabled={!selectedProvince || availableDistricts.length === 0}
                   >
@@ -248,7 +290,6 @@ export function AddressDialog({
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                     value={field.value}
                     disabled={!selectedDistrict || availableMunicipalities.length === 0}
                   >
@@ -273,17 +314,13 @@ export function AddressDialog({
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    {!selectedDistrict ? (
-                      locale === 'ne'
-                        ? 'जिल्ला छानेपछि मात्र नगरपालिका छान्न सकिन्छ'
-                        : 'Municipality can only be selected after choosing district'
-                    ) : (
-                      locale === 'ne'
+                  {selectedDistrict && (
+                    <FormDescription>
+                      {locale === 'ne'
                         ? `${selectedDistrict} जिल्लाका नगरपालिकाहरू`
-                        : `Municipalities in ${selectedDistrict} district`
-                    )}
-                  </FormDescription>
+                        : `Municipalities in ${selectedDistrict} district`}
+                    </FormDescription>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -300,7 +337,6 @@ export function AddressDialog({
                   </FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
                     value={field.value}
                   >
                     <FormControl>
@@ -353,6 +389,34 @@ export function AddressDialog({
               )}
             />
 
+            {/* Default Address Checkbox */}
+            <FormField
+              control={form.control}
+              name="is_default"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={field.onChange}
+                      className="h-4 w-4 mt-1"
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>
+                      {locale === 'ne' ? 'पूर्वनिर्धारित ठेगाना' : 'Set as default address'}
+                    </FormLabel>
+                    <FormDescription>
+                      {locale === 'ne'
+                        ? 'यो ठेगाना भविष्यका बुकिङहरूको लागि पूर्वनिर्धारित रूपमा प्रयोग गर्नुहोस्'
+                        : 'Use this address as default for future bookings'}
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+
             {/* Action Buttons */}
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button
@@ -366,6 +430,7 @@ export function AddressDialog({
               <Button
                 type="submit"
                 disabled={isLoading}
+                className="min-w-[120px]"
               >
                 {isLoading ? (
                   <>

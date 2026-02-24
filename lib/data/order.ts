@@ -43,8 +43,8 @@ export interface Order {
   order_date: string;
   order_status: string;
   payment_status: string;
-  scheduled_date: string;
-  scheduled_time: string;
+  scheduled_date: Date;
+  scheduled_time: Date;
   order_notes: string;
   inspection_notes: string;
   customer_address: CustomerAddress;

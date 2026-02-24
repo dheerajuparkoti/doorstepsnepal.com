@@ -93,7 +93,7 @@ export class OrderAPI {
   // Create new order
   static async createOrder(orderData: CreateOrderDTO): Promise<Order> {
     try {
-      return await api.post<Order>('/orders', orderData);
+      return await api.post<Order>('/orders/', orderData);
     } catch (error) {
       console.error('Error creating order:', error);
       throw new Error(

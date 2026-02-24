@@ -46,7 +46,13 @@ import { obfuscateId } from '@/lib/utils/id-obfuscator';
 import { createProfessionalSlug } from '@/lib/utils/slug';
 import { FilterSheet, FilterSection } from '@/components/ui/filter-sheet';
 import { BookingSheet, BookingDetails } from '@/components/booking/booking-sheet';
-
+import { useOrderStore } from '@/stores/order-store';
+import { toast } from "sonner";
+import { CreateOrderDTO } from '@/lib/data/order';
+import { useAuth } from '@/lib/context/auth-context';
+import NepaliDate from 'nepali-datetime';
+import { NepaliDateService } from '@/lib/utils/nepaliDate';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 interface ServiceProfessionalsClientProps {
   professionalsData: any[];
   serviceName: string;
@@ -85,6 +91,9 @@ export function ServiceProfessionalsClient({
 }: ServiceProfessionalsClientProps) {
   const { language } = useI18n();
   const router = useRouter();
+
+  const { createOrder } = useOrderStore(); 
+    const { confirm, ConfirmationDialog } = useConfirmationDialog();
   
   // State management
   const [filters, setFilters] = useState<FilterState>({
@@ -103,6 +112,8 @@ export function ServiceProfessionalsClient({
   const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
   const [showBookingSheet, setShowBookingSheet] = useState(false);
   const [showProfessionalsDialog, setShowProfessionalsDialog] = useState(false);
+  const { user } = useAuth();
+
 
   // Get unique skills from all professionals
   const allSkills = [...new Set(
@@ -291,17 +302,165 @@ export function ServiceProfessionalsClient({
   };
 
   // Handle booking
-  const handleBookNow = (professional: any, priceItem: any) => {
-    setSelectedProfessional(professional);
-    setShowBookingSheet(true);
-  };
+  // const handleBookNow = (professional: any, priceItem: any) => {
+  //   setSelectedProfessional(professional);
+  //   setShowBookingSheet(true);
+  // };
+
+
+const handleBookNow = (professional: any, priceItem: any) => {
+  
+  if (!user) {
+    toast.error(
+      getLocalizedText('Authentication Required', 'प्रमाणीकरण आवश्यक छ'),
+      {
+        description: getLocalizedText('Please log in to book a service', 'सेवा बुक गर्न कृपया लग इन गर्नुहोस्'),
+      }
+    );
+    router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
+    return;
+  }
+
+  // Check if booking own profile
+  if (professional.user_id === user.id) {
+    toast.error(
+      getLocalizedText('Cannot Book', 'बुक गर्न सकिँदैन'),
+      {
+        description: getLocalizedText('You cannot book your own service', 'तपाईं आफ्नै सेवा बुक गर्न सक्नुहुन्न'),
+      }
+    );
+    return;
+  }
+
+  setSelectedProfessional(professional);
+  setShowBookingSheet(true);
+};
 
   // Handle booking confirmation
-  const handleBookingConfirm = (bookingDetails: BookingDetails) => {
-    console.log('Booking confirmed:', bookingDetails);
-    // TODO: Implement actual booking submission
-    alert('Booking confirmed! (Demo)');
+  // const handleBookingConfirm = (bookingDetails: BookingDetails) => {
+  //   console.log('Booking confirmed:', bookingDetails);
+  //   // TODO: Implement actual booking submission
+  //   alert('Booking confirmed! (Demo)');
+  // };
+
+
+const handleBookingConfirm = async (bookingDetails: BookingDetails) => {
+  try {
+    if (!user) {
+       toast.error(
+        getLocalizedText('Authentication Required', 'प्रमाणीकरण आवश्यक छ'),
+        {
+          description: getLocalizedText('Please log in to book a service', 'सेवा बुक गर्न कृपया लग इन गर्नुहोस्'),
+        }
+      );
+      router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+
+
+    if (!bookingDetails.priceItem) {
+      throw new Error('No price item selected');
+    }
+    if (!bookingDetails.address) {
+      throw new Error('No delivery address selected');
+    }
+    if (!selectedProfessional) {
+      throw new Error('No professional selected');
+    }
+
+    const selectedPriceInfo = formatPrice(bookingDetails.priceItem);
+    const totalPrice = selectedPriceInfo.discountedPrice * bookingDetails.quantity;
+
+    const bsDateString = bookingDetails.scheduledDate;
+    const timeString = bookingDetails.scheduledTime; 
+    const [hours, minutes] = timeString.split(':').map(Number);
+    const adDate = NepaliDateService.convertBSToAD(bsDateString);
+    if (!adDate) {
+      throw new Error('Invalid BS date');
+    }
+    const year = adDate.getFullYear();
+    const month = String(adDate.getMonth() + 1).padStart(2, '0');
+    const day = String(adDate.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`; 
+    const hourStr = String(hours).padStart(2, '0');
+    const minuteStr = String(minutes).padStart(2, '0');
+    const timeStringFormatted = `${hourStr}:${minuteStr}:00`;
+    const dateTimeString = `${dateString} ${timeStringFormatted}`; // "2024-02-24 21:06:00"
+
+const localISOString = `${dateString}T${timeStringFormatted}`;
+ 
+    const orderData: CreateOrderDTO = {
+      professional_service_id: selectedProfessional.id,
+      customer_id: user.id, 
+  scheduled_date: localISOString,
+      scheduled_time: localISOString,
+      order_notes: bookingDetails.notes || '',
+      price_unit_id: bookingDetails.priceItem.price_unit_id || 1, 
+      quality_type_id: bookingDetails.priceItem.quality_type_id || 1, 
+      quantity: bookingDetails.quantity,
+      total_price: totalPrice,
+      address: {
+        type: 'temporary',
+        province: bookingDetails.address.province,
+        district: bookingDetails.address.district,
+        municipality: bookingDetails.address.municipality,
+        ward_no: bookingDetails.address.ward_no,
+        street_address: bookingDetails.address.street_address,
+      },
+  
+    };
+
+
+
+    const createdOrder = await createOrder(orderData);
+
+    console.log('Order created successfully:', createdOrder);
+
+    setShowBookingSheet(false);
+ console.log('About to show toast'); // Add this
+      toast.success(
+  getLocalizedText('Booking Successful!', 'बुकिङ सफल भयो!'),
+  {
+    description: getLocalizedText(
+      'Your booking has been confirmed. You will receive a notification soon.',
+      'तपाईंको बुकिङ पुष्टि भएको छ। तपाईंलाई चाँडै सूचना प्राप्त हुनेछ।'
+    ),
+  }
+);
+ 
+      const shouldProceedToPayment = await confirm({
+        title: getLocalizedText(
+          'Proceed to Payment?',
+          'भुक्तानीमा जाने?'
+        ),
+        description: getLocalizedText(
+          `Your booking has been created successfully!\n\nTotal amount: Rs. ${totalPrice.toLocaleString()}\n\nWould you like to proceed to payment now?`,
+          `तपाईंको बुकिङ सफलतापूर्वक सिर्जना गरिएको छ!\n\nजम्मा रकम: रु. ${totalPrice.toLocaleString()}\n\nके तपाईं अहिले भुक्तानीमा जान चाहनुहुन्छ?`
+        ),
+        confirmText: getLocalizedText('Pay Now', 'अहिले भुक्तानी गर्नुहोस्'),
+        cancelText: getLocalizedText('Pay Later', 'पछि भुक्तानी गर्नुहोस्'),
+      });
+      
+      if (shouldProceedToPayment) {
+        router.push(`/orders/${createdOrder.id}/payment`);
+      }
+  console.log('Toast shown'); // Add this
+    } catch (error: any) {
+      console.error('Error creating order:', error);
+      
+     // For error toasts:
+toast.error(
+  getLocalizedText('Booking Failed', 'बुकिङ असफल भयो'),
+  {
+    description: error.message || getLocalizedText(
+      'Failed to create booking. Please try again.',
+      'बुकिङ सिर्जना गर्न असफल भयो। कृपया पुनः प्रयास गर्नुहोस्।'
+    ),
+  }
+);
+    }
   };
+
 
   // Handle filter changes
   const handleFilterChange = (newFilters: Record<string, any>) => {
@@ -740,7 +899,8 @@ export function ServiceProfessionalsClient({
         onConfirm={handleBookingConfirm}
         formatPrice={formatPrice}
       />
-
+    {/*  the confirmation dialog */}
+    <ConfirmationDialog />
       {/* Service Areas Dialog */}
       <Dialog open={showProfessionalsDialog} onOpenChange={setShowProfessionalsDialog}>
         <DialogContent>

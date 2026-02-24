@@ -24,6 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapPin, User } from 'lucide-react';
+import { BookingSheet } from '../booking/booking-sheet';
 
 interface BookNowButtonProps {
   professional: any;
@@ -93,6 +94,10 @@ export function BookNowButton({
       >
         {getLocalizedText('Book Now', 'बुक गर्नुहोस्')}
       </Button>
+
+      
+    
+      
 
       {/* Booking Sheet */}
       <Sheet open={showBookingSheet} onOpenChange={setShowBookingSheet}>

@@ -254,6 +254,54 @@ export class NepaliDateService {
     return new NepaliDate();
   }
 
+
+
+
+
+static getCurrentTime12Hour = (): string => {
+  const now = NepaliDateService.now(); // Returns NepaliDate instance
+  return now.format('hh:mm A'); // Returns string like "12:11 PM"
+};
+
+
+static toAD(bsDateString: string): Date | null {
+  const nepaliDate = this.toBS(bsDateString);
+  if (!nepaliDate) return null;
+  
+  // Convert NepaliDate to AD Date
+  return new Date(
+    nepaliDate.getYear(),
+    nepaliDate.getMonth(),
+    nepaliDate.getDate()
+  );
+}
+
+
+
+// In your nepaliDate.ts file
+static convertBSToAD(bsDateString: string): Date | null {
+  try {
+    // Parse BS date string (format: "2082-11-12")
+    const [year, month, day] = bsDateString.split('-').map(Number);
+    
+    // Create NepaliDate
+    const nepaliDate = new NepaliDate(year, month - 1, day);
+    
+    // Convert to AD Date
+    // NepaliDate has methods to get AD equivalent
+    const adDate = new Date(
+      nepaliDate.getYear(), // This might actually return AD year
+      nepaliDate.getMonth(),
+      nepaliDate.getDate()
+    );
+    
+    return adDate;
+  } catch (error) {
+    console.error('Error converting BS to AD:', error);
+    return null;
+  }
+}
+
   /**
    * Generic formatting
    */
@@ -396,4 +444,25 @@ export class NepaliDateService {
       return 'Date not available';
     }
   }
+
+  /**
+ * Convert AD date to BS date string in YYYY-MM-DD format
+ * @param date AD date as Date object or string
+ * @returns BS date string in YYYY-MM-DD format (e.g., "2082-11-12")
+ */
+static convertADToBS(date: Date | string | null | undefined): string {
+  if (!date) return '';
+  
+  try {
+    // Convert to NepaliDate
+    const nepaliDate = this.toBS(date);
+    if (!nepaliDate) return '';
+    
+    // Format as YYYY-MM-DD (this will be BS date with English numbers)
+    return nepaliDate.format('YYYY-MM-DD');
+  } catch (error) {
+    console.error('Error converting AD to BS:', error);
+    return '';
+  }
+}
 }
