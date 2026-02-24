@@ -48,6 +48,7 @@ import { cn } from '@/lib/utils';
 import { DatePicker } from 'hamro-nepali-patro';
 import 'hamro-nepali-patro/dist/styles.css';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
+import { useAddressStore } from '@/stores/address-store';
 // Types
 export interface PriceItem {
   id: number;
@@ -62,13 +63,13 @@ export interface PriceItem {
 }
 
 export interface AddressData {
-  type: 'temporary'; // Always temporary for booking
+  type: 'temporary';
   province: string;
   district: string;
   municipality: string;
   ward_no: string;
   street_address: string;
-  id?: string;
+  id?: number;
   label?: string;
   is_default?: boolean;
 }
@@ -85,6 +86,28 @@ export interface BookingDetails {
 
 
 
+// interface BookingSheetProps {
+//   open: boolean;
+//   onOpenChange: (open: boolean) => void;
+//   professional: any;
+//   onConfirm: (details: BookingDetails) => Promise<void>;
+//   formatPrice: (priceItem: PriceItem) => {
+//     originalPrice: number;
+//     discountedPrice: number;
+//     hasDiscount: boolean;
+//     display: string;
+//     display_ne?: string;
+//     unit: string;
+//     unit_ne?: string;
+//     quality: string;
+//     quality_ne?: string;
+//   };
+//   User's saved addresses (temporary addresses only)
+//   savedAddresses?: AddressData[];
+//   onAddAddress?: (address: AddressData) => Promise<void>;
+//   onUpdateAddress?: (address: AddressData) => Promise<void>;
+  
+// }
 interface BookingSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -103,8 +126,9 @@ interface BookingSheetProps {
   };
   // User's saved addresses (temporary addresses only)
   savedAddresses?: AddressData[];
-  onAddAddress?: (address: AddressData) => Promise<void>;
-  onUpdateAddress?: (address: AddressData) => Promise<void>;
+  onAddAddress?: (address: any) => Promise<any>;
+  onUpdateAddress?: (addressId: number, address: any) => Promise<any>;
+  isLoadingAddresses?: boolean; // Add loading state
 }
 
 export function BookingSheet({
@@ -157,7 +181,7 @@ export function BookingSheet({
   const [selectedAddressForEdit, setSelectedAddressForEdit] = useState<AddressData | null>(null);
   const [isAddressSaving, setIsAddressSaving] = useState(false);
   const [step, setStep] = useState<'details' | 'address' | 'confirm'>('details');
-
+  const isLoadingAddresses = useAddressStore((state) => state.isLoading);
   const getLocalizedText = (en: string, np: string) => {
     return language === 'ne' ? np : en;
   };
@@ -173,31 +197,48 @@ export function BookingSheet({
     return `${address.street_address}, ${address.municipality}, ${address.district}, ${address.province} - ${address.ward_no}`;
   };
 
-  const handleAddressSave = async (addressData: any) => {
-    try {
-      setIsAddressSaving(true);
-      const address: AddressData = {
-        ...addressData,
-        type: 'temporary', // Force to temporary for booking
-        id: selectedAddressForEdit?.id || Date.now().toString(),
-      };
+const handleAddressSave = async (addressData: any) => {
+  try {
+    setIsAddressSaving(true);
+    const address: AddressData = {
+      ...addressData,
+      type: 'temporary', // Force to temporary for booking
+      id: selectedAddressForEdit?.id || Date.now(),
+    };
 
-      if (selectedAddressForEdit && onUpdateAddress) {
-        await onUpdateAddress(address);
-      } else if (onAddAddress) {
-        await onAddAddress(address);
+    if (selectedAddressForEdit && onUpdateAddress) {
+      // For update, ensure we have a valid ID
+      const addressId = selectedAddressForEdit.id;
+      
+      // Check if addressId exists and is a number
+      if (typeof addressId === 'number') {
+        await onUpdateAddress(addressId, address);
+      } else if (typeof addressId === 'string') {
+        // If it's a string (like from Date.now()), convert to number
+        const parsedId = parseInt(addressId, 10);
+        if (!isNaN(parsedId)) {
+          await onUpdateAddress(parsedId, address);
+        } else {
+          throw new Error('Invalid address ID');
+        }
+      } else {
+        throw new Error('Address ID is required for update');
       }
-
-      // Select the newly added/updated address
-      setBookingDetails(prev => ({ ...prev, address }));
-      setAddressDialogOpen(false);
-      setSelectedAddressForEdit(null);
-    } catch (error) {
-      console.error('Error saving address:', error);
-    } finally {
-      setIsAddressSaving(false);
+    } else if (onAddAddress) {
+      // For add, just pass the address
+      await onAddAddress(address);
     }
-  };
+    
+    // Select the newly added/updated address
+    setBookingDetails(prev => ({ ...prev, address }));
+    setAddressDialogOpen(false);
+    setSelectedAddressForEdit(null);
+  } catch (error) {
+    console.error('Error saving address:', error);
+  } finally {
+    setIsAddressSaving(false);
+  }
+};
 
   const handleConfirmBooking = async () => {
     if (!bookingDetails.priceItem || !bookingDetails.address) return;
@@ -487,7 +528,7 @@ export function BookingSheet({
                       {getLocalizedText('Delivery Address', 'डेलिभरी ठेगाना')}
                     </Label>
                     
-                    {/* Saved Addresses */}
+                    {/* Saved Addresses
                     {savedAddresses.length > 0 && (
                       <div className="space-y-2">
                         {savedAddresses.map((addr) => (
@@ -529,8 +570,59 @@ export function BookingSheet({
                           </Card>
                         ))}
                       </div>
-                    )}
+                    )} */}
 
+                    {/* Saved Addresses */}
+{/* Saved Addresses */}
+{savedAddresses.length > 0 && (
+  <div className="space-y-2">
+    {isLoadingAddresses ? (
+      // Loading skeleton
+      <div className="space-y-2">
+        {[1, 2].map((i) => (
+          <Card key={i} className="p-4 animate-pulse">
+            <div className="h-16 bg-muted rounded"></div>
+          </Card>
+        ))}
+      </div>
+    ) : (
+      savedAddresses.map((addr) => (
+        <Card
+          key={addr.id}
+          className={cn(
+            "p-4 cursor-pointer transition-all hover:border-primary",
+            bookingDetails.address?.id === addr.id && "border-primary bg-primary/5"
+          )}
+          onClick={() => setBookingDetails(prev => ({ ...prev, address: addr }))}
+        >
+          <div className="flex items-start justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="outline" className="bg-primary/5">
+                  {getLocalizedText('Temporary', 'अस्थायी')}
+                </Badge>
+                {/* Removed is_default badge since it doesn't exist in your table */}
+              </div>
+              <p className="text-sm">{formatAddressDisplay(addr)}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 ml-2"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelectedAddressForEdit(addr);
+                setAddressDialogOpen(true);
+              }}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+          </div>
+        </Card>
+      ))
+    )}
+  </div>
+)}
                     {/* Add New Address Button */}
                     <Button
                       variant="outline"

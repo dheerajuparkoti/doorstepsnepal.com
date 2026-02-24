@@ -12,7 +12,7 @@ interface AddressState {
   error: string | null;
   lastFetched: number | null;
   
-  // Permanent and temporary addresses (convenience getters)
+  // Permanent and temporary addresses
   permanentAddress: Address | null;
   temporaryAddress: Address | null;
   

@@ -1,7 +1,7 @@
 // components/professional-services-client.tsx (with parent-managed booking state)
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/context';
 import { 
@@ -36,9 +36,16 @@ import {
 import Image from 'next/image';
 import { BookNowButton } from '@/components/professional/book-now-button';
 import { FilterSheet, FilterSection } from '@/components/ui/filter-sheet'; 
-import { BookingSheet } from '@/components/booking/booking-sheet';
-import { useToast } from '@/components/ui/use-toast';
-
+import { BookingDetails, BookingSheet } from '@/components/booking/booking-sheet';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { toast } from "sonner";
+import { CreateOrderDTO } from '@/lib/data/order';
+import { NepaliDateService } from '@/lib/utils/nepaliDate';
+import { useAuth } from '@/lib/context/auth-context';
+import { useOrderStore } from '@/stores/order-store';
+import { useAddressStore, useTemporaryAddress, useAddresses } from '@/stores/address-store';
+import { Address } from '@/lib/data/address';
+import { AddressData } from '@/components/booking/booking-sheet';
 interface ProfessionalServicesClientProps {
   professionalId: number;
   professionalName: string;
@@ -69,7 +76,8 @@ export function ProfessionalServicesClient({
 }: ProfessionalServicesClientProps) {
   const router = useRouter();
   const { language } = useI18n();
-  const { toast } = useToast();
+  const { createOrder } = useOrderStore(); 
+    const { confirm, ConfirmationDialog } = useConfirmationDialog();
   
   // State management
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,6 +92,46 @@ export function ProfessionalServicesClient({
   const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
   const [isBookingSheetOpen, setIsBookingSheetOpen] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [showBookingSheet, setShowBookingSheet] = useState(false);
+  const [showProfessionalsDialog, setShowProfessionalsDialog] = useState(false);
+  const { user } = useAuth();
+
+
+    // Address store
+  const addresses = useAddresses();
+  const temporaryAddress = useTemporaryAddress();
+  const fetchAddresses = useAddressStore((state) => state.fetchAddresses);
+  const createAddress = useAddressStore((state) => state.createAddress);
+  const updateAddress = useAddressStore((state) => state.updateAddress);
+  const isLoadingAddresses = useAddressStore((state) => state.isLoading);
+  
+
+  
+
+  // Filter and convert addresses to AddressData type (only fields that exist)
+  const temporaryAddresses = useMemo((): AddressData[] => {
+    return addresses
+      .filter((addr): addr is Address & { type: 'temporary' } => addr.type === 'temporary')
+      .map((addr) => ({
+        id: addr.id,
+        type: 'temporary',
+        province: addr.province,
+        district: addr.district,
+        municipality: addr.municipality,
+        ward_no: addr.ward_no,
+        street_address: addr.street_address,
+    
+        
+      }));
+  }, [addresses]);
+
+
+   // Fetch addresses when user is logged in
+  useEffect(() => {
+    if (user) {
+      fetchAddresses();
+    }
+  }, [user, fetchAddresses]);
 
   const getLocalizedText = (en: string, np: string) => {
     return language === 'ne' ? np : en;
@@ -130,6 +178,8 @@ export function ProfessionalServicesClient({
       quality_ne: priceItem.quality_type?.name_ne || 'सामान्य',
     };
   };
+
+  
 
   // Get minimum price for a service
   const getMinPrice = (prices: any[]) => {
@@ -217,73 +267,230 @@ export function ProfessionalServicesClient({
     full_name: professionalName,
     service_name: language === 'ne' ? service.service?.name_np : service.service?.name_en,
     all_prices: service.prices || [],
+    user_id : service.professional_user_id,
   });
 
   // Handle book now click
+  // const handleBookNow = (professional: any) => {
+  //   setSelectedProfessional(professional);
+  //   setIsBookingSheetOpen(true);
+  // };
+
+
   const handleBookNow = (professional: any) => {
-    setSelectedProfessional(professional);
-    setIsBookingSheetOpen(true);
-  };
+  
+  if (!user) {
+    toast.error(
+      getLocalizedText('Authentication Required', 'प्रमाणीकरण आवश्यक छ'),
+      {
+        description: getLocalizedText('Please log in to book a service', 'सेवा बुक गर्न कृपया लग इन गर्नुहोस्'),
+      }
+    );
+    router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
+    return;
+  }
 
-  // Handle address operations
-  const handleAddAddress = async (address: any) => {
-    // Implement your address save logic here
-    setSavedAddresses(prev => [...prev, { ...address, id: Date.now().toString() }]);
-    
-    toast({
-      title: getLocalizedText('Address Added', 'ठेगाना थपियो'),
-      description: getLocalizedText(
-        'Address has been added successfully',
-        'ठेगाना सफलतापूर्वक थपियो'
-      ),
-    });
-  };
+  // Check if booking own profile
+  if (professional.user_id === user.id) {
+    toast.error(
+      getLocalizedText('Cannot Book', 'बुक गर्न सकिँदैन'),
+      {
+        description: getLocalizedText('You cannot book your own service', 'तपाईं आफ्नै सेवा बुक गर्न सक्नुहुन्न'),
+      }
+    );
+    return;
+  }
 
-  const handleUpdateAddress = async (address: any) => {
-    setSavedAddresses(prev => prev.map(addr => 
-      addr.id === address.id ? address : addr
-    ));
-    
-    toast({
-      title: getLocalizedText('Address Updated', 'ठेगाना अद्यावधिक गरियो'),
-      description: getLocalizedText(
-        'Address has been updated successfully',
-        'ठेगाना सफलतापूर्वक अद्यावधिक गरियो'
-      ),
-    });
-  };
+  setSelectedProfessional(professional);
+setIsBookingSheetOpen(true);
+};
 
-  // Handle booking confirmation
-  const handleConfirmBooking = async (details: any) => {
+
+
+
+  // Handle address operations using the store
+  const handleAddAddress = async (addressData: any) => {
     try {
-      // Implement your booking API call here
-      console.log('Booking confirmed:', details);
-      
-      // Example API call:
-      // await fetch('/api/bookings', {
-      //   method: 'POST',
-      //   body: JSON.stringify(details),
-      // });
-      
-      toast({
-        title: getLocalizedText('Booking Confirmed', 'बुकिङ पुष्टि भयो'),
-        description: getLocalizedText(
-          'Your booking has been confirmed successfully',
-          'तपाईंको बुकिङ सफलतापूर्वक पुष्टि भएको छ'
-        ),
+      const newAddress = await createAddress({
+        type: 'temporary',
+        province: addressData.province,
+        district: addressData.district,
+        municipality: addressData.municipality,
+        ward_no: addressData.ward_no,
+        street_address: addressData.street_address,
       });
       
-      setIsBookingSheetOpen(false);
-      setSelectedProfessional(null);
-    } catch (error) {
-      toast({
-        title: getLocalizedText('Error', 'त्रुटि'),
-        description: getLocalizedText(
-          'Failed to confirm booking. Please try again.',
-          'बुकिङ पुष्टि गर्न असफल भयो। कृपया पुनः प्रयास गर्नुहोस्।'
-        ),
-        variant: 'destructive',
+      toast.success(
+        getLocalizedText('Address Added', 'ठेगाना थपियो'),
+        {
+          description: getLocalizedText(
+            'Address has been added successfully',
+            'ठेगाना सफलतापूर्वक थपियो'
+          ),
+        }
+      );
+      
+      return newAddress;
+    } catch (error: any) {
+      toast.error(
+        getLocalizedText('Failed to Add Address', 'ठेगाना थप्न असफल'),
+        {
+          description: error.message,
+        }
+      );
+      throw error;
+    }
+  };
+
+  const handleUpdateAddress = async (addressId: number, addressData: any) => {
+    try {
+      const updatedAddress = await updateAddress(addressId, {
+        type: 'temporary',
+        province: addressData.province,
+        district: addressData.district,
+        municipality: addressData.municipality,
+        ward_no: addressData.ward_no,
+        street_address: addressData.street_address,
       });
+      
+      toast.success(
+        getLocalizedText('Address Updated', 'ठेगाना अद्यावधिक गरियो'),
+        {
+          description: getLocalizedText(
+            'Address has been updated successfully',
+            'ठेगाना सफलतापूर्वक अद्यावधिक गरियो'
+          ),
+        }
+      );
+      
+      return updatedAddress;
+    } catch (error: any) {
+      toast.error(
+        getLocalizedText('Failed to Update Address', 'ठेगाना अद्यावधिक गर्न असफल'),
+        {
+          description: error.message,
+        }
+      );
+      throw error;
+    }
+  };
+
+
+
+  const handleConfirmBooking= async (bookingDetails: BookingDetails) => {
+  try {
+    if (!user) {
+       toast.error(
+        getLocalizedText('Authentication Required', 'प्रमाणीकरण आवश्यक छ'),
+        {
+          description: getLocalizedText('Please log in to book a service', 'सेवा बुक गर्न कृपया लग इन गर्नुहोस्'),
+        }
+      );
+      router.push('/login?redirect=' + encodeURIComponent(window.location.pathname));
+      return;
+    }
+
+
+    if (!bookingDetails.priceItem) {
+      throw new Error('No price item selected');
+    }
+    if (!bookingDetails.address) {
+      throw new Error('No delivery address selected');
+    }
+    if (!selectedProfessional) {
+      throw new Error('No professional selected');
+    }
+
+    const selectedPriceInfo = formatPriceForBooking(bookingDetails.priceItem);
+    const totalPrice = selectedPriceInfo.discountedPrice * bookingDetails.quantity;
+
+    const bsDateString = bookingDetails.scheduledDate;
+    const timeString = bookingDetails.scheduledTime; 
+    const [hours, minutes] = timeString.split(':').map(Number);
+    const adDate = NepaliDateService.convertBSToAD(bsDateString);
+    if (!adDate) {
+      throw new Error('Invalid BS date');
+    }
+    const year = adDate.getFullYear();
+    const month = String(adDate.getMonth() + 1).padStart(2, '0');
+    const day = String(adDate.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`; 
+    const hourStr = String(hours).padStart(2, '0');
+    const minuteStr = String(minutes).padStart(2, '0');
+    const timeStringFormatted = `${hourStr}:${minuteStr}:00`;
+    const dateTimeString = `${dateString} ${timeStringFormatted}`; // "2024-02-24 21:06:00"
+
+    const localISOString = `${dateString}T${timeStringFormatted}`;
+ 
+    const orderData: CreateOrderDTO = {
+      professional_service_id: selectedProfessional.id,
+      customer_id: user.id, 
+  scheduled_date: localISOString,
+      scheduled_time: localISOString,
+      order_notes: bookingDetails.notes || '',
+      price_unit_id: bookingDetails.priceItem.price_unit_id || 1, 
+      quality_type_id: bookingDetails.priceItem.quality_type_id || 1, 
+      quantity: bookingDetails.quantity,
+      total_price: totalPrice,
+      address: {
+        type: 'temporary',
+        province: bookingDetails.address.province,
+        district: bookingDetails.address.district,
+        municipality: bookingDetails.address.municipality,
+        ward_no: bookingDetails.address.ward_no,
+        street_address: bookingDetails.address.street_address,
+      },
+  
+    };
+
+
+
+    const createdOrder = await createOrder(orderData);
+
+    console.log('Order created successfully:', createdOrder);
+
+setIsBookingSheetOpen(false);
+
+      toast.success(
+  getLocalizedText('Booking Successful!', 'बुकिङ सफल भयो!'),
+  {
+    description: getLocalizedText(
+      'Your booking has been confirmed. You will receive a notification soon.',
+      'तपाईंको बुकिङ पुष्टि भएको छ। तपाईंलाई चाँडै सूचना प्राप्त हुनेछ।'
+    ),
+  }
+);
+ 
+      const shouldProceedToPayment = await confirm({
+        title: getLocalizedText(
+          'Proceed to Payment?',
+          'भुक्तानीमा जाने?'
+        ),
+        description: getLocalizedText(
+          `Your booking has been created successfully!\n\nTotal amount: Rs. ${totalPrice.toLocaleString()}\n\nWould you like to proceed to payment now?`,
+          `तपाईंको बुकिङ सफलतापूर्वक सिर्जना गरिएको छ!\n\nजम्मा रकम: रु. ${totalPrice.toLocaleString()}\n\nके तपाईं अहिले भुक्तानीमा जान चाहनुहुन्छ?`
+        ),
+        confirmText: getLocalizedText('Pay Now', 'अहिले भुक्तानी गर्नुहोस्'),
+        cancelText: getLocalizedText('Pay Later', 'पछि भुक्तानी गर्नुहोस्'),
+      });
+      
+      if (shouldProceedToPayment) {
+        router.push(`/orders/${createdOrder.id}/payment`);
+      }
+  console.log('Toast shown'); // Add this
+    } catch (error: any) {
+      console.error('Error creating order:', error);
+      
+     // For error toasts:
+toast.error(
+  getLocalizedText('Booking Failed', 'बुकिङ असफल भयो'),
+  {
+    description: error.message || getLocalizedText(
+      'Failed to create booking. Please try again.',
+      'बुकिङ सिर्जना गर्न असफल भयो। कृपया पुनः प्रयास गर्नुहोस्।'
+    ),
+  }
+);
     }
   };
 
@@ -677,7 +884,7 @@ export function ProfessionalServicesClient({
         </main>
       </div>
 
-      {/* Booking Sheet */}
+        {/* Booking Sheet - Pass the temporary addresses */}
       {selectedProfessional && (
         <BookingSheet
           open={isBookingSheetOpen}
@@ -685,11 +892,15 @@ export function ProfessionalServicesClient({
           professional={selectedProfessional}
           onConfirm={handleConfirmBooking}
           formatPrice={formatPriceForBooking}
-          savedAddresses={savedAddresses}
+          savedAddresses={temporaryAddresses}
           onAddAddress={handleAddAddress}
           onUpdateAddress={handleUpdateAddress}
+          isLoadingAddresses={isLoadingAddresses}
         />
       )}
+
+      {/* Confirmation dialog */}
+      <ConfirmationDialog />
     </>
   );
 }
