@@ -38,7 +38,7 @@ export interface PaymentSummary {
   total_paid: number;
   remaining_amount: number;
   payment_percentage: number;
-  payment_status: 'paid' | 'partial' | 'unpaid';
+  payment_status: 'paid' | 'partial' | 'unpaid' ;
   // paymentStatus: 'pending' | 'completed' | 'refunded' | 'failed'
   
 }

@@ -25,6 +25,8 @@ import {
   Shield,
   ChevronDown,
   View,
+  LucideHourglass,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -82,8 +84,8 @@ export function ProfessionalSidebar() {
       icon: CalendarDays,
       children: [
         { label: t.professional.sidebar.pending, href: "/dashboard/professional/jobs/pending", icon: Clock },
-        { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle },
-        { label: t.professional.sidebar.inspected, href: "/dashboard/professional/jobs/inspected", icon: Search },
+        { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle2},
+        { label: t.professional.sidebar.awaitingApproval, href: "/dashboard/professional/jobs/awaiting-approval", icon: LucideHourglass },
         { label: t.professional.sidebar.completed, href: "/dashboard/professional/jobs/completed", icon: CheckCircle },
         { label: t.professional.sidebar.cancelled, href: "/dashboard/professional/jobs/cancelled", icon: XCircle },
       ],

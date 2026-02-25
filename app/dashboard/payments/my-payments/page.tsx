@@ -46,7 +46,7 @@ import { useAuth } from '@/lib/context/auth-context';
 export default function PaymentDashboardPage() {
   const { t, locale } = useI18n();
   const router = useRouter();
-  const { user, mode } = useAuth(); // Get mode directly from auth context
+  const { user, mode } = useAuth(); 
   
   const {
     orders,

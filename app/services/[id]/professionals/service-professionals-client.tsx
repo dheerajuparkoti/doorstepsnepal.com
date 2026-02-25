@@ -54,6 +54,7 @@ import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { useAddresses, useAddressStore, useTemporaryAddress } from '@/stores/address-store';
 import { Address } from '@/lib/data/address';
+import { notificationApi } from '@/lib/api/notification'; //for notification
 interface ServiceProfessionalsClientProps {
   professionalsData: any[];
   serviceName: string;
@@ -446,7 +447,37 @@ const handleBookNow = (professional: any, priceItem: any) => {
   //   // TODO: Implement actual booking submission
   //   alert('Booking confirmed! (Demo)');
   // };
+const createOrderNotifications = async (
+  professionalUserId: number,
+  customerUserId: number,
+  orderId: number,
+  totalPrice: number
+) => {
+  try {
+    // Professional notification
+    await notificationApi.createNotification({
+      user_id: professionalUserId,
+      type: 'New Order',
+      title: 'New Service Request Available',
+      body: 'A new service request is ready for your attention. Tap to view the service details and accept or reject the assignment.',
+      action_route: 'order',
+      custom_data: { orderId, total_price: totalPrice }
+    });
 
+    // Customer notification
+    await notificationApi.createNotification({
+      user_id: customerUserId,
+      type: 'Order Confirmation',
+      title: 'Order Successfully Placed!',
+      body: 'Thank you! Your booking has been successfully placed and is now awaiting confirmation from a professional.',
+      action_route: 'order',
+      custom_data: { orderId, total_price: totalPrice }
+    });
+  } catch (error) {
+    console.error('Failed to create notifications:', error);
+    throw error; // Re-throw if you want to handle it differently
+  }
+};
 
 const handleBookingConfirm = async (bookingDetails: BookingDetails) => {
   try {
@@ -517,7 +548,33 @@ const localISOString = `${dateString}T${timeStringFormatted}`;
 
     const createdOrder = await createOrder(orderData);
 
+
+
+
     console.log('Order created successfully:', createdOrder);
+
+    try {
+      await createOrderNotifications(
+        selectedProfessional.user_id,
+        user.id,
+        createdOrder.id,
+        totalPrice
+      );
+    } catch (notificationError) {
+   
+      console.error('Failed to create notifications:', notificationError);
+      // Optionally show a non-blocking warning
+      toast.warning(
+        getLocalizedText('Order Created', 'अर्डर सिर्जना गरियो'),
+        {
+          description: getLocalizedText(
+            'Order was created but notifications could not be sent',
+            'अर्डर सिर्जना गरियो तर सूचना पठाउन सकिएन'
+          ),
+        }
+      );
+    }
+        
 
     setShowBookingSheet(false);
 

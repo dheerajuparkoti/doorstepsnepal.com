@@ -48,7 +48,7 @@ export class OrderAPI {
   static async getOrdersByCustomer(
     customerId: number, 
     page: number = 1, 
-    perPage: number = 10
+    perPage: number = 10000
   ): Promise<OrdersResponse> {
     try {
       console.log(`Fetching orders for customer ${customerId}...`);

@@ -20,6 +20,8 @@ import {
   Smartphone,
   Shield,
   ChevronDown,
+  LucideHourglass,
+  CheckCircle2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -53,8 +55,8 @@ export function CustomerSidebar() {
       icon: CalendarDays,
       children: [
         { label: t.customer.sidebar.pending, href: "/dashboard/customer/bookings/pending", icon: Clock },
-        { label: t.customer.sidebar.accepted, href: "/dashboard/customer/bookings/accepted", icon: CheckCircle },
-        { label: t.customer.sidebar.inspected, href: "/dashboard/customer/bookings/inspected", icon: Search },
+        { label: t.customer.sidebar.accepted, href: "/dashboard/customer/bookings/accepted", icon: CheckCircle2 },
+        { label: t.customer.sidebar.awaitingApproval, href: "/dashboard/customer/bookings/awaiting-approval", icon: LucideHourglass },
         { label: t.customer.sidebar.completed, href: "/dashboard/customer/bookings/completed", icon: CheckCircle },
         { label: t.customer.sidebar.cancelled, href: "/dashboard/customer/bookings/cancelled", icon: XCircle },
       ],

@@ -45,8 +45,8 @@ export const usePaymentStore = create<PaymentState>()(
       completedPayments: () => 
         get().payments.filter(p => p.payment_status === 'completed'),
       
-      pendingPayments: () => 
-        get().payments.filter(p => p.paymentStatus === 'pending'),
+     pendingPayments: () => 
+  get().payments.filter(p => p.payment_status === 'pending'),
       
       totalCompletedAmount: () => 
         get().completedPayments().reduce((sum, p) => sum + p.amount, 0),

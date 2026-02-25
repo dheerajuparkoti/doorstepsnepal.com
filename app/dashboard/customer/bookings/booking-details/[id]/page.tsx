@@ -154,7 +154,7 @@ export default function OrderDetailsPage() {
             <p className="text-muted-foreground mb-4">
               {error || 'The order you are looking for does not exist.'}
             </p>
-            <Button onClick={() => router.push('/orders')}>
+            <Button onClick={() => router.back()}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Orders
             </Button>
@@ -184,7 +184,7 @@ export default function OrderDetailsPage() {
           <Button
             variant="outline"
             size="icon"
-            onClick={() => router.push('/orders')}
+            onClick={() => router.back()}
           >
             <ArrowLeft className="w-4 h-4" />
           </Button>

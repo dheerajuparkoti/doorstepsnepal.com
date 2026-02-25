@@ -1,4 +1,8 @@
 
+
+
+
+
 'use client';
 
 import { useRouter } from 'next/navigation';
@@ -23,6 +27,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
+import { NepaliDateService } from '@/lib/utils/nepaliDate';
 
 interface CompactPaymentCardProps {
   order: Order;
@@ -87,12 +92,16 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
   const { t, locale } = useI18n();
   const router = useRouter();
 
+  const getLocalizedText = (en: string, np: string) => {
+    return locale === 'ne' ? np : en;
+  };
+
   const status = order.order_status as OrderStatus;
   const paymentStatus = order.payment_status as PaymentStatus;
   const statusInfo = statusConfig[status];
   const paymentInfo = paymentStatusConfig[paymentStatus];
 
-  const formattedDate = format(new Date(order.order_date), 'MMM dd, yyyy');
+  const formattedDate = NepaliDateService.formatNepaliMonth(order.scheduled_date)
   const formattedTime = format(new Date(order.order_date), 'hh:mm a');
 
   const remainingAmount = order.payment_summary.remaining_amount;
@@ -141,14 +150,14 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
               {isProfessional ? order.customer_name : order.professional_name}
             </span>
           </div>
-          {!isProfessional && status !== OrderStatus.PENDING && (
+      {/* {!isProfessional && status !== OrderStatus.PENDING && (
             <div className="flex items-center gap-1">
               <Phone className="w-3 h-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground">
                 {order.customer_phone}
               </span>
             </div>
-          )}
+          )} */}
         </div>
 
         {/* Payment Summary */}
@@ -156,7 +165,9 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Payment Summary</span>
+              <span className="text-sm font-medium">
+                {getLocalizedText('Payment Summary', 'भुक्तानी सारांश')}
+              </span>
             </div>
             <span className="text-sm font-bold">Rs. {totalAmount}</span>
           </div>
@@ -166,7 +177,7 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
             <div className="space-y-1">
               <Progress value={paymentPercentage} className="h-1.5" />
               <div className="flex justify-between text-xs text-muted-foreground">
-                <span>{paymentPercentage.toFixed(1)}% paid</span>
+                <span>{paymentPercentage.toFixed(1)}% {getLocalizedText('paid', 'भुक्तानी भयो')}</span>
                 <span>Rs. {paidAmount} / Rs. {totalAmount}</span>
               </div>
             </div>
@@ -175,13 +186,17 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
           {/* Amount Breakdown */}
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="flex items-center justify-between p-1.5 bg-green-50 dark:bg-green-950/20 rounded">
-              <span className="text-green-700 dark:text-green-300">Paid</span>
+              <span className="text-green-700 dark:text-green-300">
+                {getLocalizedText('Paid', 'भुक्तानी')}
+              </span>
               <span className="font-medium text-green-700 dark:text-green-300">
                 Rs. {paidAmount}
               </span>
             </div>
             <div className="flex items-center justify-between p-1.5 bg-orange-50 dark:bg-orange-950/20 rounded">
-              <span className="text-orange-700 dark:text-orange-300">Balance</span>
+              <span className="text-orange-700 dark:text-orange-300">
+                {getLocalizedText('Balance', 'बाँकी')}
+              </span>
               <span className="font-medium text-orange-700 dark:text-orange-300">
                 Rs. {remainingAmount}
               </span>
@@ -200,19 +215,22 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
             onClick={handleViewDetails}
           >
             <Eye className="w-3 h-3 mr-1" />
-            Details
+            {getLocalizedText('Details', 'विवरण')}
           </Button>
 
-          {paymentStatus !== PaymentStatus.PAID && status !== OrderStatus.CANCELLED && (
+          {/* make Payment */}
+          {/* {paymentStatus !== PaymentStatus.PAID && status !== OrderStatus.CANCELLED && (
             <Button
               size="sm"
               className="h-8 text-xs bg-green-600 hover:bg-green-700"
               onClick={handleMakePayment}
             >
               <CreditCard className="w-3 h-3 mr-1" />
-              {isProfessional ? 'Receive Payment' : 'Make Payment'}
+              {isProfessional 
+                ? getLocalizedText('Receive Payment', 'भुक्तानी प्राप्त गर्नुहोस्')
+                : getLocalizedText('Make Payment', 'भुक्तानी गर्नुहोस्')}
             </Button>
-          )}
+          )} */}
         </div>
       </CardContent>
     </Card>

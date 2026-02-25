@@ -14,6 +14,7 @@ export interface CustomerAddress {
 // Payment Summary Type
 export interface PaymentSummary {
   total_price: number;
+  initial_price?:number;
   total_paid: number;
   remaining_amount: number;
   payment_percentage: number;
@@ -29,6 +30,7 @@ export interface Order {
   professional_service_id: number;
   customer_id: number;
   professional_id: number;
+  professional_user_id:number;
   professional_name: string;
   customer_name: string;
   customer_phone: string;
@@ -40,6 +42,7 @@ export interface Order {
   quality_type_id: number;
   quantity: number;
   total_price: number;
+  initial_price :number;
   order_date: string;
   order_status: string;
   payment_status: string;

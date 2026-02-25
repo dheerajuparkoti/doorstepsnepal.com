@@ -364,7 +364,7 @@ export default function PendingBookingsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={true} // You can implement pagination later
+                  disabled={true} //  implement pagination later
                 >
                   <ChevronLeft className="w-4 h-4 mr-2" />
                   {locale === 'ne' ? 'अघिल्लो' : 'Previous'}
@@ -372,7 +372,7 @@ export default function PendingBookingsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={true} // You can implement pagination later
+                  disabled={true} //  pagination options
                 >
                   {locale === 'ne' ? 'अर्को' : 'Next'}
                   <ChevronRight className="w-4 h-4 ml-2" />

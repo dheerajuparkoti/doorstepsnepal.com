@@ -1,4 +1,7 @@
+import NepaliDate from "nepali-datetime";
 import { NepaliDateService } from "../utils/nepaliDate";
+
+
 
 export interface Notification {
   id: number;
@@ -121,42 +124,109 @@ export const getNotificationType = (type: string): string => {
   }
 };
 
-// Group notifications by date (Today, Yesterday, etc.)
-// In your notification.ts file
-export function groupNotificationsByDate(
+
+
+export const groupNotificationsByDate = (
   notifications: Notification[], 
   isProfessionalMode: boolean
-): Map<string, Notification[]> {
-  // First filter notifications based on mode
-  const filtered = notifications.filter(notif => {
-    // Check if notification belongs to professional mode
+): Map<string, Notification[]> => {
+  const grouped = new Map<string, Notification[]>();
+  
+
+  const filteredNotifications = notifications.filter(notif => {
     const isProNotif = 
-      // Direct type matches
       notif.type === 'New Order' ||
       notif.type === 'payment_received' ||
       notif.type === 'withdrawal_approved' ||
       notif.type === 'withdrawal_completed' ||
       notif.type === 'withdrawal_rejected' ||
-      // Order Update with specific titles
       (notif.type === 'Order Update' && 
        (notif.title === 'Inspection Approved' || 
         notif.title === 'Inspection Rejected'));
     
-    // For professional mode: show pro notifs
-    // For customer mode: show everything EXCEPT pro notifs
     return isProfessionalMode ? isProNotif : !isProNotif;
   });
 
-  // Then group the filtered notifications by date
-  const grouped = new Map<string, Notification[]>();
-  
-  filtered.forEach((notification) => {
-    const dateKey = NepaliDateService.formatHeader(notification.created_at); // Your date formatting logic
-    if (!grouped.has(dateKey)) {
-      grouped.set(dateKey, []);
+
+  const sortedNotifications = [...filteredNotifications].sort((a, b) => {
+    try {
+      const dateA = NepaliDateService.toBS(a.created_at);
+      const dateB = NepaliDateService.toBS(b.created_at);
+      
+      if (!dateA || !dateB) return 0;
+      
+
+      const yearA = dateA.getYear();
+      const monthA = dateA.getMonth();
+      const dayA = dateA.getDate();
+      
+      const yearB = dateB.getYear();
+      const monthB = dateB.getMonth();
+      const dayB = dateB.getDate();
+      
+
+      if (yearA !== yearB) return yearB - yearA;
+
+      if (monthA !== monthB) return monthB - monthA;
+
+      if (dayA !== dayB) return dayB - dayA;
+
+      const [timeA] = a.created_at.split(' ').slice(1);
+      const [timeB] = b.created_at.split(' ').slice(1);
+      
+      if (timeA && timeB) {
+        return timeB.localeCompare(timeA);
+      }
+      
+      return 0;
+    } catch (error) {
+      console.error('Error sorting notifications:', error);
+      return 0;
     }
-    grouped.get(dateKey)!.push(notification);
   });
-  
+
+  // Group by date header
+  sortedNotifications.forEach(notification => {
+    try {
+      const nepaliDate = NepaliDateService.toBS(notification.created_at);
+      
+      if (!nepaliDate) return;
+      
+      // Get today and yesterday in BS
+      const now = NepaliDateService.now();
+      const yesterday = new NepaliDate(
+        now.getYear(),
+        now.getMonth(),
+        now.getDate() - 1
+      );
+      
+      let header = '';
+      
+      // Check if it's today
+      if (nepaliDate.getYear() === now.getYear() &&
+          nepaliDate.getMonth() === now.getMonth() &&
+          nepaliDate.getDate() === now.getDate()) {
+        header = 'Today';
+      } 
+      // Check if it's yesterday
+      else if (nepaliDate.getYear() === yesterday.getYear() &&
+               nepaliDate.getMonth() === yesterday.getMonth() &&
+               nepaliDate.getDate() === yesterday.getDate()) {
+        header = 'Yesterday';
+      } 
+      // For other dates, use formatted Nepali date
+      else {
+        header = NepaliDateService.formatHeader(nepaliDate); // This will give "Mangsir 1, 2082"
+      }
+      
+      if (!grouped.has(header)) {
+        grouped.set(header, []);
+      }
+      grouped.get(header)?.push(notification);
+    } catch (error) {
+      console.error('Error grouping notification:', error);
+    }
+  });
+
   return grouped;
-}
+};

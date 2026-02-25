@@ -59,13 +59,23 @@ export class PaymentApi {
     return safeGet(`${this.baseUrl}/?order_id=${orderId}&skip=${skip}&limit=${limit}`, []);
   }
 
-  static async getPaymentSummary(orderId: number) {
-    return safeGet(`${this.baseUrl}/summary/${orderId}`, {
-      total_paid: 0,
-      total_due: 0,
-    });
-  }
+// static async getPaymentSummary(orderId: number): Promise<PaymentSummary> {
+//   const defaultSummary: PaymentSummary = {
+//     order_id: orderId,
+//     total_price: 0,
+//     total_paid: 0,
+//     remaining_amount: 0,
+//     payment_percentage: 0,
+//     payment_status: 'unpaid'
+//   };
+  
+//   return safeGet(`${this.baseUrl}/summary/${orderId}`, defaultSummary);
+// }
 
+
+  static async getPaymentSummary(orderId: number): Promise<PaymentSummary> {
+    return api.get(`${this.baseUrl}/summary/${orderId}`);
+  }
   static async createPayment(request: PaymentCreateRequest) {
     return api.post(`${this.baseUrl}/`, request);
   }
