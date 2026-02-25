@@ -602,9 +602,9 @@ const localISOString = `${dateString}T${timeStringFormatted}`;
       });
       
       if (shouldProceedToPayment) {
-        router.push(`/orders/${createdOrder.id}/payment`);
+        router.push(`/dashboard/payments/orders/${createdOrder.id}`);
       }
-  console.log('Toast shown'); // Add this
+
     } catch (error: any) {
       console.error('Error creating order:', error);
       

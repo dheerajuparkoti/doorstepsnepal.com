@@ -46,6 +46,7 @@ export interface ProfessionalProfile {
   ec_relationship?: string;
   ec_phone?: string;
   experience: number;
+  bio?: string; 
   completed_orders: number;
   user: User;
   addresses: Address[];
@@ -66,6 +67,7 @@ export interface ProfessionalRegistrationData {
   ec_relationship?: string;
   ec_phone?: string;
   experience?: number;
+  bio?: string; 
   addresses: Address[];
   
 }
@@ -85,6 +87,8 @@ export interface ProfessionalUpdateData {
   ec_relationship?: string;
   ec_phone?: string;
   experience?: number;
+  bio?: string; 
+
 }
 
 export interface PaymentInfo {

@@ -1,3 +1,6 @@
+
+
+
 'use client';
 
 import { useState } from 'react';
@@ -49,6 +52,7 @@ import { DatePicker } from 'hamro-nepali-patro';
 import 'hamro-nepali-patro/dist/styles.css';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { useAddressStore } from '@/stores/address-store';
+
 // Types
 export interface PriceItem {
   id: number;
@@ -58,7 +62,7 @@ export interface PriceItem {
   price_unit?: { name: string; name_ne?: string };
   quality_type?: { name: string; name_ne?: string };
   is_minimum_price?: boolean;
-    price_unit_id: number; 
+  price_unit_id: number; 
   quality_type_id: number; 
 }
 
@@ -83,31 +87,6 @@ export interface BookingDetails {
   notes: string;
 }
 
-
-
-
-// interface BookingSheetProps {
-//   open: boolean;
-//   onOpenChange: (open: boolean) => void;
-//   professional: any;
-//   onConfirm: (details: BookingDetails) => Promise<void>;
-//   formatPrice: (priceItem: PriceItem) => {
-//     originalPrice: number;
-//     discountedPrice: number;
-//     hasDiscount: boolean;
-//     display: string;
-//     display_ne?: string;
-//     unit: string;
-//     unit_ne?: string;
-//     quality: string;
-//     quality_ne?: string;
-//   };
-//   User's saved addresses (temporary addresses only)
-//   savedAddresses?: AddressData[];
-//   onAddAddress?: (address: AddressData) => Promise<void>;
-//   onUpdateAddress?: (address: AddressData) => Promise<void>;
-  
-// }
 interface BookingSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -124,11 +103,10 @@ interface BookingSheetProps {
     quality: string;
     quality_ne?: string;
   };
-  // User's saved addresses (temporary addresses only)
   savedAddresses?: AddressData[];
   onAddAddress?: (address: any) => Promise<any>;
   onUpdateAddress?: (addressId: number, address: any) => Promise<any>;
-  isLoadingAddresses?: boolean; // Add loading state
+  isLoadingAddresses?: boolean;
 }
 
 export function BookingSheet({
@@ -143,35 +121,33 @@ export function BookingSheet({
 }: BookingSheetProps) {
   const { language } = useI18n();
 
-
-    const getCurrentDateString = (): string => {
+  const getCurrentDateString = (): string => {
     const now = NepaliDateService.now();
-    return now.format('YYYY-MM-DD'); // Format as string
+    return now.format('YYYY-MM-DD');
   };
   
   const getCurrentTime24Hour = (): string => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`; // Returns "14:30" for 2:30 PM
+    return `${hours}:${minutes}`;
   };
 
-
   const formatTimeTo12Hour = (time24: string): string => {
-  if (!time24) return '';
-  
-  const [hours, minutes] = time24.split(':');
-  const hour = parseInt(hours, 10);
-  const ampm = hour >= 12 ? 'PM' : 'AM';
-  const hour12 = hour % 12 || 12;
-  
-  return `${hour12}:${minutes} ${ampm}`;
-};
+    if (!time24) return '';
+    
+    const [hours, minutes] = time24.split(':');
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const hour12 = hour % 12 || 12;
+    
+    return `${hour12}:${minutes} ${ampm}`;
+  };
   
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     priceItem: null,
     quantity: 1,
-    scheduledDate:getCurrentDateString(),
+    scheduledDate: getCurrentDateString(),
     scheduledTime: getCurrentTime24Hour(),
     address: null,
     notes: '',
@@ -182,13 +158,10 @@ export function BookingSheet({
   const [isAddressSaving, setIsAddressSaving] = useState(false);
   const [step, setStep] = useState<'details' | 'address' | 'confirm'>('details');
   const isLoadingAddresses = useAddressStore((state) => state.isLoading);
+
   const getLocalizedText = (en: string, np: string) => {
     return language === 'ne' ? np : en;
   };
-
-
-
-
 
   const formatAddressDisplay = (address: AddressData): string => {
     if (language === 'ne') {
@@ -197,48 +170,43 @@ export function BookingSheet({
     return `${address.street_address}, ${address.municipality}, ${address.district}, ${address.province} - ${address.ward_no}`;
   };
 
-const handleAddressSave = async (addressData: any) => {
-  try {
-    setIsAddressSaving(true);
-    const address: AddressData = {
-      ...addressData,
-      type: 'temporary', // Force to temporary for booking
-      id: selectedAddressForEdit?.id || Date.now(),
-    };
+  const handleAddressSave = async (addressData: any) => {
+    try {
+      setIsAddressSaving(true);
+      const address: AddressData = {
+        ...addressData,
+        type: 'temporary',
+        id: selectedAddressForEdit?.id || Date.now(),
+      };
 
-    if (selectedAddressForEdit && onUpdateAddress) {
-      // For update, ensure we have a valid ID
-      const addressId = selectedAddressForEdit.id;
-      
-      // Check if addressId exists and is a number
-      if (typeof addressId === 'number') {
-        await onUpdateAddress(addressId, address);
-      } else if (typeof addressId === 'string') {
-        // If it's a string (like from Date.now()), convert to number
-        const parsedId = parseInt(addressId, 10);
-        if (!isNaN(parsedId)) {
-          await onUpdateAddress(parsedId, address);
+      if (selectedAddressForEdit && onUpdateAddress) {
+        const addressId = selectedAddressForEdit.id;
+        
+        if (typeof addressId === 'number') {
+          await onUpdateAddress(addressId, address);
+        } else if (typeof addressId === 'string') {
+          const parsedId = parseInt(addressId, 10);
+          if (!isNaN(parsedId)) {
+            await onUpdateAddress(parsedId, address);
+          } else {
+            throw new Error('Invalid address ID');
+          }
         } else {
-          throw new Error('Invalid address ID');
+          throw new Error('Address ID is required for update');
         }
-      } else {
-        throw new Error('Address ID is required for update');
+      } else if (onAddAddress) {
+        await onAddAddress(address);
       }
-    } else if (onAddAddress) {
-      // For add, just pass the address
-      await onAddAddress(address);
+      
+      setBookingDetails(prev => ({ ...prev, address }));
+      setAddressDialogOpen(false);
+      setSelectedAddressForEdit(null);
+    } catch (error) {
+      console.error('Error saving address:', error);
+    } finally {
+      setIsAddressSaving(false);
     }
-    
-    // Select the newly added/updated address
-    setBookingDetails(prev => ({ ...prev, address }));
-    setAddressDialogOpen(false);
-    setSelectedAddressForEdit(null);
-  } catch (error) {
-    console.error('Error saving address:', error);
-  } finally {
-    setIsAddressSaving(false);
-  }
-};
+  };
 
   const handleConfirmBooking = async () => {
     if (!bookingDetails.priceItem || !bookingDetails.address) return;
@@ -247,7 +215,6 @@ const handleAddressSave = async (addressData: any) => {
     try {
       await onConfirm(bookingDetails);
       onOpenChange(false);
-      // Reset form after successful booking
       setBookingDetails({
         priceItem: null,
         quantity: 1,
@@ -281,9 +248,9 @@ const handleAddressSave = async (addressData: any) => {
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="sm:max-w-md p-0 flex flex-col">
-          <SheetHeader className="p-6 pb-2">
-            <SheetTitle className="text-2xl">
+        <SheetContent className="sm:max-w-md p-0 flex flex-col h-full max-h-screen">
+          <SheetHeader className="p-4 pb-1 flex-shrink-0">
+            <SheetTitle className="text-xl">
               {getLocalizedText('Book Service', 'सेवा बुक गर्नुहोस्')}
             </SheetTitle>
             <SheetDescription>
@@ -295,8 +262,8 @@ const handleAddressSave = async (addressData: any) => {
             </SheetDescription>
           </SheetHeader>
 
-          {/* Step Indicator */}
-          <div className="px-6 pt-2">
+          {/* Step Indicator - Compact */}
+          <div className="px-4 py-1 flex-shrink-0">
             <div className="flex items-center justify-between">
               {[
                 { key: 'details', label: getLocalizedText('Details', 'विवरण') },
@@ -306,7 +273,7 @@ const handleAddressSave = async (addressData: any) => {
                 <div key={s.key} className="flex items-center">
                   <div className="flex flex-col items-center">
                     <div className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors",
+                      "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
                       step === s.key 
                         ? "bg-primary text-primary-foreground" 
                         : canProceed[s.key as keyof typeof canProceed]
@@ -314,34 +281,35 @@ const handleAddressSave = async (addressData: any) => {
                         : "bg-muted text-muted-foreground"
                     )}>
                       {canProceed[s.key as keyof typeof canProceed] && step !== s.key ? (
-                        <Check className="h-4 w-4" />
+                        <Check className="h-3 w-3" />
                       ) : (
                         index + 1
                       )}
                     </div>
-                    <span className="text-xs mt-1 text-muted-foreground">{s.label}</span>
+                    <span className="text-[10px] mt-0.5 text-muted-foreground">{s.label}</span>
                   </div>
                   {index < 2 && (
-                    <ChevronRight className="h-4 w-4 mx-2 text-muted-foreground" />
+                    <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground" />
                   )}
                 </div>
               ))}
             </div>
           </div>
 
-          <ScrollArea className="flex-1 px-6">
-            <div className="space-y-6 py-4">
-              {/* Service Info Card */}
-              <Card className="p-4 bg-muted/50">
-                <div className="flex items-start gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <User className="h-5 w-5 text-primary" />
+          {/* Scrollable Content Area */}
+          <ScrollArea className="flex-1 overflow-y-auto px-4 py-2">
+            <div className="space-y-3">
+              {/* Service Info Card - Compact */}
+              <Card className="p-3 bg-muted/50">
+                <div className="flex items-start gap-2">
+                  <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{professional?.service_name}</h3>
-                    <p className="text-sm text-muted-foreground">{professional?.full_name}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-base truncate">{professional?.service_name}</h3>
+                    <p className="text-xs text-muted-foreground truncate">{professional?.full_name}</p>
                     {professional?.experience_years && (
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-[10px] text-muted-foreground mt-0.5">
                         {getLocalizedText(
                           `${professional.experience_years}+ years experience`,
                           `${professional.experience_years}+ वर्ष अनुभव`
@@ -353,14 +321,14 @@ const handleAddressSave = async (addressData: any) => {
               </Card>
 
               {step === 'details' && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {/* Price Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold flex items-center gap-2">
-                      <Tag className="h-4 w-4" />
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-semibold flex items-center gap-1">
+                      <Tag className="h-3.5 w-3.5" />
                       {getLocalizedText('Select Service Type', 'सेवा प्रकार छान्नुहोस्')}
                     </Label>
-                    <div className="grid gap-2">
+                    <div className="grid gap-1.5">
                       {professional?.all_prices?.map((price: PriceItem) => {
                         const priceInfo = formatPrice(price);
                         const isSelected = bookingDetails.priceItem?.id === price.id;
@@ -368,21 +336,21 @@ const handleAddressSave = async (addressData: any) => {
                           <Card
                             key={price.id}
                             className={cn(
-                              "p-4 cursor-pointer transition-all hover:border-primary",
+                              "p-2.5 cursor-pointer transition-all hover:border-primary",
                               isSelected && "border-primary bg-primary/5"
                             )}
                             onClick={() => setBookingDetails(prev => ({ ...prev, priceItem: price }))}
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="space-y-1">
-                                <div className="font-medium">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="space-y-0.5 min-w-0 flex-1">
+                                <div className="font-medium text-sm truncate">
                                   {language === 'ne' ? priceInfo.quality_ne : priceInfo.quality}
                                 </div>
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-xs text-muted-foreground">
                                   {getLocalizedText('Unit', 'एकाइ')}: {language === 'ne' ? priceInfo.unit_ne : priceInfo.unit}
                                 </div>
                                 {priceInfo.hasDiscount && (
-                                  <Badge variant="secondary" className="mt-1">
+                                  <Badge variant="secondary" className="mt-0.5 text-[10px] px-1 py-0">
                                     {getLocalizedText(
                                       `${price.discount_percentage}% OFF`,
                                       `${price.discount_percentage}% छुट`
@@ -390,18 +358,18 @@ const handleAddressSave = async (addressData: any) => {
                                   </Badge>
                                 )}
                               </div>
-                              <div className="text-right">
+                              <div className="text-right flex-shrink-0">
                                 {priceInfo.hasDiscount ? (
                                   <>
-                                    <div className="text-sm text-muted-foreground line-through">
+                                    <div className="text-xs text-muted-foreground line-through">
                                       Rs. {priceInfo.originalPrice}
                                     </div>
-                                    <div className="text-lg font-bold text-primary">
+                                    <div className="text-sm font-bold text-primary">
                                       Rs. {priceInfo.discountedPrice}
                                     </div>
                                   </>
                                 ) : (
-                                  <div className="text-lg font-bold">
+                                  <div className="text-sm font-bold">
                                     Rs. {priceInfo.originalPrice}
                                   </div>
                                 )}
@@ -414,240 +382,235 @@ const handleAddressSave = async (addressData: any) => {
                   </div>
 
                   {/* Quantity */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold flex items-center gap-2">
-                      <Package className="h-4 w-4" />
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-semibold flex items-center gap-1">
+                      <Package className="h-3.5 w-3.5" />
                       {getLocalizedText('Quantity', 'परिमाण')}
                     </Label>
-                    <div className="flex items-center justify-between p-2 border rounded-lg">
+                    <div className="flex items-center justify-between p-1.5 border rounded-lg">
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-10 w-10"
+                        className="h-8 w-8"
                         onClick={() => setBookingDetails(prev => ({
                           ...prev,
                           quantity: Math.max(1, prev.quantity - 1)
                         }))}
                         disabled={bookingDetails.quantity <= 1}
                       >
-                        <X className="h-4 w-4" />
+                        <X className="h-3.5 w-3.5" />
                       </Button>
-                      <span className="text-2xl font-semibold min-w-[60px] text-center">
+                      <span className="text-xl font-semibold min-w-[50px] text-center">
                         {bookingDetails.quantity}
                       </span>
                       <Button
                         variant="outline"
                         size="icon"
-                        className="h-10 w-10"
+                        className="h-8 w-8"
                         onClick={() => setBookingDetails(prev => ({
                           ...prev,
                           quantity: prev.quantity + 1
                         }))}
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
 
-{/* Date and Time */}
-<div className="space-y-3">
-  <Label className="text-base font-semibold flex items-center gap-2">
-    <Calendar className="h-4 w-4" />
-    {getLocalizedText('Schedule', 'मिति र समय')}
+                  {/* Date and Time */}
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-semibold flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5" />
+                      {getLocalizedText('Schedule', 'मिति र समय')}
+                    </Label>
+                    
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* Date */}
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">
+                          {getLocalizedText('Date', 'मिति')}
+                        </Label>
+                        <div className="relative">
+                          <DatePicker
+                            value={bookingDetails.scheduledDate}
+                            onChange={(value: string) => {
+                              setBookingDetails(prev => ({
+                                ...prev,
+                                scheduledDate: value
+                              }));
+                            }}
+                            calendarType="BS" 
+                            dateFormat="YYYY-MM-DD"
+                            showMonthDropdown
+                            showYearDropdown
+                            isClearable={false}
+                            className="w-full border rounded-md !h-9 [&>input]:!h-9 [&>input]:!min-h-0 [&>input]:!py-0 [&>input]:!px-2 [&>input]:pl-8 text-sm"
+                            inputClassName="!h-9 !min-h-0 !py-0 !px-2 !pl-8 text-sm"
+                            placeholder={getLocalizedText('Select date', 'मिति चयन गर्नुहोस्')}
+                          />
+                        </div>
+                      </div>
+                     
+                      {/* Time */}
+                      <div className="space-y-1">
+                        <Label className="text-xs text-muted-foreground">
+                          {getLocalizedText('Time', 'समय')}
+                        </Label>
+                        <div className="relative">
+                          <Input
+                            type="time"
+                            className="w-full h-9 px-2 border rounded-md text-sm"
+                            value={bookingDetails.scheduledTime}
+                            onChange={(e) => {
+                              setBookingDetails(prev => ({
+                                ...prev,
+                                scheduledTime: e.target.value
+                              }));
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Notes */}
+<div className="space-y-1.5">
+  <Label className="text-sm font-semibold flex items-center gap-1">
+    <FileText className="h-3.5 w-3.5" />
+    {getLocalizedText('Order Notes (Optional)', 'अर्डर नोट (वैकल्पिक)')}
   </Label>
-  
-  <div className="grid grid-cols-2 gap-3">
-    {/* Date */}
-    <div className="space-y-2">
-      <Label className="text-sm text-muted-foreground">
-        {getLocalizedText('Date', 'मिति')}
-      </Label>
-      <div className="relative">
-        <DatePicker
-          value={bookingDetails.scheduledDate}
-          onChange={(value: string) => {
-            console.log('Selected date:', value); 
-            setBookingDetails(prev => ({
-              ...prev,
-              scheduledDate: value
-            }));
-          }}
-          calendarType="BS" 
-          dateFormat="YYYY-MM-DD"
-          showMonthDropdown
-          showYearDropdown
-          isClearable={false}
-          className="w-full border rounded-md !h-10 [&>input]:!h-10 [&>input]:!min-h-0 [&>input]:!py-0 [&>input]:!px-3 [&>input]:pl-10"
-          inputClassName="!h-10 !min-h-0 !py-0 !px-3 !pl-10"
-          placeholder={getLocalizedText('Select date', 'मिति चयन गर्नुहोस्')}
-        />
-     
-      </div>
-    </div>
-   
-    {/* Time */}
-    <div className="space-y-2">
-      <Label className="text-sm text-muted-foreground">
-        {getLocalizedText('Time', 'समय')}
-      </Label>
-      <div className="relative">
-        <Input
-          type="time"
-          className="w-full h-10 px-3 border rounded-md"
-          value={bookingDetails.scheduledTime}
-          onChange={(e) => {
-            setBookingDetails(prev => ({
-              ...prev,
-              scheduledTime: e.target.value
-            }));
-          }}
-        />
-      </div>
+  <div className="relative">
+    <Textarea
+      placeholder={getLocalizedText(
+        'Add any special instructions...',
+        'कुनै विशेष निर्देशन थप्नुहोस्...'
+      )}
+      value={bookingDetails.notes}
+      onChange={(e) => {
+        const text = e.target.value;
+        if (text.length <= 200) {
+          setBookingDetails(prev => ({ 
+            ...prev, 
+            notes: text 
+          }));
+        }
+      }}
+      className="min-h-[70px] resize-y text-sm pr-16"
+      maxLength={200}
+    />
+    <div className="absolute bottom-2 right-2 text-xs text-muted-foreground bg-background/80 px-1 rounded">
+      {bookingDetails.notes.length}/200
     </div>
   </div>
+     <p className="text-[10px] text-muted-foreground">
+                      {getLocalizedText(
+                        'e.g., Please call before arriving',
+                        'जस्तै, आउनु अघि कल गर्नुहोस्'
+                      )}
+                    </p>
+  <p className="text-[10px] text-muted-foreground">
+    {getLocalizedText(
+      'Maximum 200 characters',
+      'अधिकतम २०० क्यारेक्टर'
+    )}
+  </p>
 </div>
+
                   {/* Next Button */}
                   <Button 
-                    className="w-full" 
-                    size="lg"
+                    className="w-full h-9 text-sm" 
                     onClick={() => setStep('address')}
                     disabled={!canProceed.details}
                   >
                     {getLocalizedText('Continue to Address', 'ठेगानामा जानुहोस्')}
-                    <ChevronRight className="ml-2 h-4 w-4" />
+                    <ChevronRight className="ml-1 h-3.5 w-3.5" />
                   </Button>
                 </div>
               )}
 
               {step === 'address' && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {/* Address Selection */}
-                  <div className="space-y-3">
-                    <Label className="text-base font-semibold flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-semibold flex items-center gap-1">
+                      <MapPin className="h-3.5 w-3.5" />
                       {getLocalizedText('Delivery Address', 'डेलिभरी ठेगाना')}
                     </Label>
-                    
-                    {/* Saved Addresses
-                    {savedAddresses.length > 0 && (
-                      <div className="space-y-2">
-                        {savedAddresses.map((addr) => (
-                          <Card
-                            key={addr.id}
-                            className={cn(
-                              "p-4 cursor-pointer transition-all hover:border-primary",
-                              bookingDetails.address?.id === addr.id && "border-primary bg-primary/5"
-                            )}
-                            onClick={() => setBookingDetails(prev => ({ ...prev, address: addr }))}
-                          >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Badge variant="outline" className="bg-primary/5">
-                                    {getLocalizedText('Temporary', 'अस्थायी')}
-                                  </Badge>
-                                  {addr.is_default && (
-                                    <Badge variant="secondary">
-                                      {getLocalizedText('Default', 'पूर्वनिर्धारित')}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <p className="text-sm">{formatAddressDisplay(addr)}</p>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 ml-2"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedAddressForEdit(addr);
-                                  setAddressDialogOpen(true);
-                                }}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </Card>
-                        ))}
-                      </div>
-                    )} */}
-
+               
                     {/* Saved Addresses */}
-{/* Saved Addresses */}
-{savedAddresses.length > 0 && (
-  <div className="space-y-2">
-    {isLoadingAddresses ? (
-      // Loading skeleton
-      <div className="space-y-2">
-        {[1, 2].map((i) => (
-          <Card key={i} className="p-4 animate-pulse">
-            <div className="h-16 bg-muted rounded"></div>
-          </Card>
-        ))}
-      </div>
-    ) : (
-      savedAddresses.map((addr) => (
-        <Card
-          key={addr.id}
-          className={cn(
-            "p-4 cursor-pointer transition-all hover:border-primary",
-            bookingDetails.address?.id === addr.id && "border-primary bg-primary/5"
-          )}
-          onClick={() => setBookingDetails(prev => ({ ...prev, address: addr }))}
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="outline" className="bg-primary/5">
-                  {getLocalizedText('Temporary', 'अस्थायी')}
-                </Badge>
-                {/* Removed is_default badge since it doesn't exist in your table */}
-              </div>
-              <p className="text-sm">{formatAddressDisplay(addr)}</p>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 ml-2"
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedAddressForEdit(addr);
-                setAddressDialogOpen(true);
-              }}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </div>
-        </Card>
-      ))
-    )}
-  </div>
-)}
+                    {savedAddresses.length > 0 && (
+                      <div className="space-y-1.5">
+                        {isLoadingAddresses ? (
+                          <div className="space-y-1.5">
+                            {[1, 2].map((i) => (
+                              <Card key={i} className="p-3 animate-pulse">
+                                <div className="h-12 bg-muted rounded"></div>
+                              </Card>
+                            ))}
+                          </div>
+                        ) : (
+                          savedAddresses.map((addr) => (
+                            <Card
+                              key={addr.id}
+                              className={cn(
+                                "p-3 cursor-pointer transition-all hover:border-primary",
+                                bookingDetails.address?.id === addr.id && "border-primary bg-primary/5"
+                              )}
+                              onClick={() => setBookingDetails(prev => ({ ...prev, address: addr }))}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-1 mb-1">
+                                    <Badge variant="outline" className="bg-primary/5 text-[10px] px-1 py-0">
+                                      {getLocalizedText('Temporary', 'अस्थायी')}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-xs truncate">{formatAddressDisplay(addr)}</p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 flex-shrink-0"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedAddressForEdit(addr);
+                                    setAddressDialogOpen(true);
+                                  }}
+                                >
+                                  <Edit className="h-3.5 w-3.5" />
+                                </Button>
+                              </div>
+                            </Card>
+                          ))
+                        )}
+                      </div>
+                    )}
+                    
                     {/* Add New Address Button */}
                     <Button
                       variant="outline"
-                      className="w-full justify-start gap-2"
+                      className="w-full justify-start gap-1.5 h-9 text-sm"
                       onClick={() => {
                         setSelectedAddressForEdit(null);
                         setAddressDialogOpen(true);
                       }}
                     >
-                      <Plus className="h-4 w-4" />
+                      <Plus className="h-3.5 w-3.5" />
                       {getLocalizedText('Add New Address', 'नयाँ ठेगाना थप्नुहोस्')}
                     </Button>
                   </div>
 
                   {/* Navigation Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex gap-2 pt-2">
                     <Button
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 h-9 text-sm"
                       onClick={() => setStep('details')}
                     >
                       {getLocalizedText('Back', 'पछाडि')}
                     </Button>
                     <Button 
-                      className="flex-1"
+                      className="flex-1 h-9 text-sm"
                       onClick={() => setStep('confirm')}
                       disabled={!canProceed.address}
                     >
@@ -658,29 +621,29 @@ const handleAddressSave = async (addressData: any) => {
               )}
 
               {step === 'confirm' && (
-                <div className="space-y-6">
+                <div className="space-y-3">
                   {/* Booking Summary */}
-                  <div className="space-y-4">
-                    <h3 className="font-semibold">
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-sm">
                       {getLocalizedText('Booking Summary', 'बुकिङ सारांश')}
                     </h3>
                     
                     {/* Service Details */}
-                    <Card className="p-4 space-y-3">
-                      <div className="flex justify-between">
+                    <Card className="p-3 space-y-2">
+                      <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Service', 'सेवा')}
                         </span>
-                        <span className="font-medium">{professional?.service_name}</span>
+                        <span className="font-medium truncate ml-2">{professional?.service_name}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Provider', 'प्रदायक')}
                         </span>
                         <span className="font-medium">{professional?.full_name}</span>
                       </div>
-                      <Separator />
-                      <div className="flex justify-between">
+                      <Separator className="my-1" />
+                      <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Type', 'प्रकार')}
                         </span>
@@ -690,13 +653,13 @@ const handleAddressSave = async (addressData: any) => {
                             : selectedPriceInfo?.quality}
                         </span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Quantity', 'परिमाण')}
                         </span>
                         <span className="font-medium">{bookingDetails.quantity}</span>
                       </div>
-                      <div className="flex justify-between">
+                      <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Unit Price', 'एकाइ मूल्य')}
                         </span>
@@ -706,34 +669,35 @@ const handleAddressSave = async (addressData: any) => {
                       </div>
                     </Card>
 
-{/* Schedule */}
-<Card className="p-4 space-y-3">
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">
-      {getLocalizedText('Date', 'मिति')}
-    </span>
-    <span className="font-medium">
-      {typeof bookingDetails.scheduledDate === 'string' 
-        ? bookingDetails.scheduledDate 
-        : String(bookingDetails.scheduledDate) || 'N/A'}
-    </span>
-  </div>
-  <div className="flex justify-between">
-    <span className="text-muted-foreground">
-      {getLocalizedText('Time', 'समय')}
-    </span>
-    <span className="font-medium">
-         {formatTimeTo12Hour(bookingDetails.scheduledTime)|| 'N/A'}
-    </span>
-  </div>
-</Card>
+                    {/* Schedule */}
+                    <Card className="p-3 space-y-1.5">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {getLocalizedText('Date', 'मिति')}
+                        </span>
+                        <span className="font-medium">
+                          {typeof bookingDetails.scheduledDate === 'string' 
+                            ? bookingDetails.scheduledDate 
+                            : String(bookingDetails.scheduledDate) || 'N/A'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">
+                          {getLocalizedText('Time', 'समय')}
+                        </span>
+                        <span className="font-medium">
+                          {formatTimeTo12Hour(bookingDetails.scheduledTime) || 'N/A'}
+                        </span>
+                      </div>
+                    </Card>
+                    
                     {/* Address */}
                     {bookingDetails.address && (
-                      <Card className="p-4 space-y-3">
-                        <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
-                          <div className="flex-1">
-                            <p className="text-sm">{formatAddressDisplay(bookingDetails.address)}</p>
+                      <Card className="p-3">
+                        <div className="flex items-start gap-1.5">
+                          <MapPin className="h-3.5 w-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs">{formatAddressDisplay(bookingDetails.address)}</p>
                           </div>
                         </div>
                       </Card>
@@ -741,26 +705,26 @@ const handleAddressSave = async (addressData: any) => {
 
                     {/* Notes */}
                     {bookingDetails.notes && (
-                      <Card className="p-4 space-y-3">
-                        <div className="flex items-start gap-2">
-                          <FileText className="h-4 w-4 mt-1 text-muted-foreground" />
-                          <div className="flex-1">
-                            <p className="text-sm text-muted-foreground">
+                      <Card className="p-3">
+                        <div className="flex items-start gap-1.5">
+                          <FileText className="h-3.5 w-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] text-muted-foreground">
                               {getLocalizedText('Notes', 'नोट')}
                             </p>
-                            <p className="text-sm mt-1">{bookingDetails.notes}</p>
+                            <p className="text-xs mt-0.5 break-words">{bookingDetails.notes}</p>
                           </div>
                         </div>
                       </Card>
                     )}
 
                     {/* Total */}
-                    <Card className="p-4 bg-primary/5 border-primary">
+                    <Card className="p-3 bg-primary/5 border-primary">
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold text-lg">
+                        <span className="font-semibold text-sm">
                           {getLocalizedText('Total', 'जम्मा')}
                         </span>
-                        <span className="text-2xl font-bold text-primary">
+                        <span className="text-lg font-bold text-primary">
                           Rs. {totalPrice.toLocaleString()}
                         </span>
                       </div>
@@ -768,30 +732,29 @@ const handleAddressSave = async (addressData: any) => {
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex gap-2 pt-2">
                     <Button
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 h-9 text-sm"
                       onClick={() => setStep('address')}
                       disabled={isSubmitting}
                     >
                       {getLocalizedText('Back', 'पछाडि')}
                     </Button>
                     <Button 
-                      className="flex-1"
-                      size="lg"
+                      className="flex-1 h-9 text-sm"
                       onClick={handleConfirmBooking}
                       disabled={isSubmitting || !canProceed.confirm}
                     >
                       {isSubmitting ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent mr-2" />
+                          <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-current border-t-transparent mr-1" />
                           {getLocalizedText('Booking...', 'बुक गर्दै...')}
                         </>
                       ) : (
                         <>
-                          <Check className="mr-2 h-4 w-4" />
-                          {getLocalizedText('Confirm Booking', 'बुकिङ पुष्टि गर्नुहोस्')}
+                          <Check className="mr-1 h-3.5 w-3.5" />
+                          {getLocalizedText('Confirm', 'पुष्टि गर्नुहोस्')}
                         </>
                       )}
                     </Button>
