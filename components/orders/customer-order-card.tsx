@@ -34,15 +34,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +50,7 @@ import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { CreatePaymentSheet } from '@/components/professional/payments/create-payment-sheet';
 import { useNotificationStore } from '@/stores/notification-store';
 import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { WriteReviewDialog } from '../reviews/write-review-dialog';
 
 interface OrderCardProps {
   order: Order;
@@ -123,8 +116,7 @@ export function OrderCard({ order, isProfessional = false, showActions = true, o
   const { user } = useUserStore();
   const { updateOrderStatus, updateOrder } = useOrderStore();
   const [isExpanded, setIsExpanded] = useState(false);
-  const [reviewRating, setReviewRating] = useState(0);
-  const [reviewText, setReviewText] = useState('');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const { confirm, ConfirmationDialog } = useConfirmationDialog();
@@ -151,6 +143,7 @@ const { createNotification } = useNotificationStore();
 
   const formattedDate = NepaliDateService.formatNepaliMonth(order.scheduled_date);
   const formattedTime = format((order.scheduled_time), 'hh:mm a');
+  const orderDate = NepaliDateService.formatNepaliMonth(order.order_date);
 
   const remainingAmount = order.payment_summary.remaining_amount;
   const paymentPercentage = order.payment_summary.payment_percentage;
@@ -229,36 +222,6 @@ const { createNotification } = useNotificationStore();
 
   const handlePaymentSheetClose = () => {
     setIsPaymentSheetOpen(false);
-  };
-
-  const handleWriteReview = async () => {
-    if (reviewRating === 0) {
-      toast({
-        title: getLocalizedText('Error', 'त्रुटि'),
-        description: getLocalizedText('Please select a rating', 'कृपया मूल्याङ्कन चयन गर्नुहोस्'),
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast({
-        title: getLocalizedText('Review Submitted', 'समीक्षा पेश गरियो'),
-        description: getLocalizedText('Thank you for your feedback!', 'तपाईंको प्रतिक्रियाको लागि धन्यवाद!'),
-      });
-      setReviewRating(0);
-      setReviewText('');
-    } catch (error) {
-      toast({
-        title: getLocalizedText('Error', 'त्रुटि'),
-        description: getLocalizedText('Failed to submit review', 'समीक्षा पेश गर्न असफल'),
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
   };
 
 
@@ -400,7 +363,7 @@ const handleCustomerApproval = async (approved: boolean) => {
                 {locale === 'ne' ? order.service_description_np : order.service_description_en}
               </p>
               
-              {/* Professional/Customer Info - Moved to CardHeader */}
+              {/* Professional/Customer Info  */}
               <div className="flex items-center gap-4 mt-2 pt-2 border-t">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-muted-foreground" />
@@ -411,6 +374,12 @@ const handleCustomerApproval = async (approved: boolean) => {
                   </span>
                   <span className="text-sm font-semibold">
                     {isProfessional ? order.customer_name : order.professional_name}
+                  </span>
+                </div>
+                  <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {getLocalizedText('Ordered:', 'अर्डर मिति:')} {orderDate}
                   </span>
                 </div>
                 
@@ -980,74 +949,33 @@ const handleCustomerApproval = async (approved: boolean) => {
                 </DropdownMenu>
               )}
 
-              {/* Review Dialog for Completed Orders */}
-              {status === OrderStatus.COMPLETED && (
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="default" size="sm" className="flex-1 min-w-[140px]">
-                      <Star className="w-4 h-4 mr-2" />
-                      {getLocalizedText('Write Review', 'समीक्षा लेख्नुहोस्')}
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    {/* Review dialog content  */}
-                    <DialogHeader>
-                      <DialogTitle>
-                        {getLocalizedText('Rate Your Experience', 'आफ्नो अनुभव मूल्याङ्कन गर्नुहोस्')}
-                      </DialogTitle>
-                      <DialogDescription>
-                        {getLocalizedText(
-                          'Share your feedback about',
-                          'आफ्नो प्रतिक्रिया साझा गर्नुहोस्'
-                        )}{' '}
-                        {isProfessional 
-                          ? getLocalizedText('the customer', 'ग्राहक')
-                          : getLocalizedText('the professional', 'प्राविधिक')}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="flex justify-center gap-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setReviewRating(star)}
-                            className="p-1 hover:scale-110 transition-transform"
-                          >
-                            <Star
-                              className={`w-8 h-8 ${
-                                star <= reviewRating
-                                  ? 'fill-yellow-400 text-yellow-400'
-                                  : 'text-muted-foreground'
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                      <Textarea
-                        placeholder={getLocalizedText(
-                          'Share your experience with this service...',
-                          'यस सेवासँगको आफ्नो अनुभव साझा गर्नुहोस्...'
-                        )}
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                        rows={4}
-                      />
-                      <DialogFooter>
-                        <Button
-                          onClick={handleWriteReview}
-                          disabled={isSubmitting}
-                          className="w-full"
-                        >
-                          {isSubmitting 
-                            ? getLocalizedText('Submitting...', 'पेश गर्दै...')
-                            : getLocalizedText('Submit Review', 'समीक्षा पेश गर्नुहोस्')}
-                        </Button>
-                      </DialogFooter>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              )}
+         {/* Write Review Dialog  Customer View */}
+      {!isProfessional && status === OrderStatus.COMPLETED && order.professional_service_id && (
+        <WriteReviewDialog
+          professionalServiceId={order.professional_service_id}
+          targetName={order.professional_name}
+          targetType="professional"
+          onSuccess={() => {
+            toast({
+              title: getLocalizedText('Thank You!', 'धन्यवाद!'),
+              description: getLocalizedText(
+                'Your review has been posted successfully.',
+                'तपाईंको समीक्षा सफलतापूर्वक पोस्ट गरिएको छ।'
+              ),
+            });
+          }}
+          trigger={
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="flex-1 min-w-[140px] bg-yellow-600 hover:bg-yellow-700"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              {getLocalizedText('Write Review', 'समीक्षा लेख्नुहोस्')}
+            </Button>
+          }
+        />
+      )}
             </div>
           </CardFooter>
         )}

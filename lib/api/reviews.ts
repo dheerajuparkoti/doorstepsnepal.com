@@ -2,9 +2,12 @@
 import { api } from '@/config/api-client';
 import { 
   ProfessionalServiceReviewResponse, 
-  FetchReviewsParams 
+  FetchReviewsParams,
+  CreateReviewPayload,
+  CreateReviewResponse
 } from '@/lib/data/reviews';
 
+// GET methods (existing)
 export async function fetchReviews(
   params: FetchReviewsParams
 ): Promise<ProfessionalServiceReviewResponse> {
@@ -68,4 +71,46 @@ export async function fetchReviewsByService(
     page,
     per_page,
   });
+}
+
+// POST method - Create a new review
+export async function createReview(
+  professionalServiceId: number,
+  data: Omit<CreateReviewPayload, 'professional_service_id'>,
+  customerId: number
+): Promise<CreateReviewResponse> {
+  try {
+    const response = await api.post<CreateReviewResponse>(
+      `/professional_services/${professionalServiceId}/reviews`,
+      {
+        rating: data.rating,
+        review: data.review,
+        professional_service_id: professionalServiceId
+      },
+      {
+        params: {
+          customer_id: customerId
+        }
+      }
+    );
+    
+    return response;
+  } catch (error) {
+    console.error('Error creating review:', error);
+    throw error;
+  }
+}
+
+// Alternative method if you want to pass all params together
+export async function submitReview(
+  professionalServiceId: number,
+  rating: number,
+  review: string,
+  customerId: number
+): Promise<CreateReviewResponse> {
+  return createReview(
+    professionalServiceId,
+    { rating, review },
+    customerId
+  );
 }

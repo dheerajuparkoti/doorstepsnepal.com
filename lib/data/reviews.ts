@@ -1,4 +1,4 @@
-// lib/data/reviews.ts
+
 export enum ReviewViewMode {
   CHRONOLOGICAL = 'chronological',
   GROUPED_BY_SERVICE = 'grouped_by_service'
@@ -99,4 +99,19 @@ export interface FetchReviewsParams {
   service_id?: number;
   page?: number;
   per_page?: number;
+}
+
+// New types for creating reviews
+export interface CreateReviewPayload {
+  rating: number;
+  review: string;
+  professional_service_id: number;
+}
+
+export interface CreateReviewResponse {
+  rating: number;
+  review: string;
+  id: number;
+  professional_service_id: number;
+  customer_id: number;
 }

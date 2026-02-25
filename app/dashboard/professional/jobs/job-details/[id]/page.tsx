@@ -26,6 +26,7 @@
 // import { useI18n } from '@/lib/i18n/context';
 // import { useOrderStore } from '@/stores/order-store';
 // import { OrderStatus, PaymentStatus } from '@/lib/data/order';
+// import { Payment} from '@/lib/data/professional/payment';
 // import { Button } from '@/components/ui/button';
 // import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 // import { Badge } from '@/components/ui/badge';
@@ -94,7 +95,9 @@
 //   const orderId = parseInt(params.id as string);
   
 //   const { currentOrder, isLoading, error, fetchOrderById } = useOrderStore();
-
+//   const getLocalizedText = (en: string, np: string) => {
+//     return locale === 'ne' ? np : en;
+//   };
 //   useEffect(() => {
 //     if (orderId) {
 //       fetchOrderById(orderId);
@@ -253,13 +256,21 @@
 //                 <div className="space-y-2">
 //                   <div className="flex items-center gap-2">
 //                     <User className="w-4 h-4 text-muted-foreground" />
-//                     <span className="font-medium">Professional</span>
+//                     <span className="font-medium">Customer</span>
 //                   </div>
-//                   <p>{currentOrder.professional_name}</p>
-//                   {/* <div className="flex items-center gap-2 text-sm text-muted-foreground">
-//                     <Phone className="w-3 h-3" />
-//                     <span>{currentOrder.customer_phone}</span>
-//                   </div> */}
+//                   <p>{currentOrder.customer_name}</p>
+             
+//                    {status !== OrderStatus.PENDING && status !== OrderStatus.CANCELLED ? (
+//                   <div className="flex items-center gap-2">
+//                     <Phone className="w-4 h-4 text-muted-foreground" />
+//                     <span className="text-sm">{currentOrder.customer_phone}</span>
+//                   </div>
+//                 ) : (
+//                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
+//                     <AlertCircle className="w-3 h-3" />
+//                     <span>{getLocalizedText('Phone visible after acceptance', 'फोन स्वीकार पछि मात्र देखिनेछ')}</span>
+//                   </div>
+//                 )}
 //                 </div>
 //               </div>
 
@@ -417,28 +428,39 @@
 //               <CardTitle>Quick Actions</CardTitle>
 //             </CardHeader>
 //             <CardContent className="space-y-3">
-             
-           
+//                  {status === OrderStatus.ACCEPTED && (
+//               <Button variant="outline" className="w-full justify-start">
+//                 <Phone className="w-4 h-4 mr-2" />
+//                 Call Customer
+//               </Button>
+//                  )}
+//               <Button variant="outline" className="w-full justify-start">
+//                 <Mail className="w-4 h-4 mr-2" />
+//                 Send Message
+//               </Button>
+//                {status === OrderStatus.ACCEPTED && (
 //               <Button variant="outline" className="w-full justify-start">
 //                 <User className="w-4 h-4 mr-2" />
-//                 View Professional Profile
+//                 View Customer Profile
 //               </Button>
-              
+//                )}
+//                 {status === OrderStatus.PENDING && (
+//                 <Button variant="outline" className="w-full">
+//                   <XCircle className="w-4 h-4 mr-2" />
+//                   Accept Job
+//                 </Button>
+//               )}
 //               {status === OrderStatus.PENDING && (
 //                 <Button variant="destructive" className="w-full">
 //                   <XCircle className="w-4 h-4 mr-2" />
-//                   Cancel Order
+//                   Cancel Job
 //                 </Button>
 //               )}
 
-//               {status === OrderStatus.COMPLETED && (
-//                 <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
-//                   <Star className="w-4 h-4 mr-2" />
-//                   Rate Service
-//                 </Button>
-//               )}
 //             </CardContent>
 //           </Card>
+
+        
 //         </div>
 //       </div>
 //     </div>
@@ -469,15 +491,16 @@ import {
   Download,
   Share2,
   Star,
-  CreditCard,
-  Loader2
+  Loader2,
+  CreditCard
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useI18n } from '@/lib/i18n/context';
 import { useOrderStore } from '@/stores/order-store';
 import { OrderStatus, PaymentStatus } from '@/lib/data/order';
+import { Payment} from '@/lib/data/professional/payment';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -485,12 +508,8 @@ import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
-
 import { usePayments } from '@/hooks/use-payment'; 
 import { CreatePaymentSheet } from '@/components/professional/payments/create-payment-sheet';
-import { createProfessionalSlug } from '@/lib/utils/slug';
-import { WriteReviewDialog } from '@/components/reviews/write-review-dialog';
-
 
 const statusConfig = {
   [OrderStatus.PENDING]: {
@@ -548,11 +567,10 @@ export default function OrderDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = parseInt(params.id as string);
-    const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
+  const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
+  
   const { currentOrder, isLoading, error, fetchOrderById } = useOrderStore();
-
-
-
+    // Use the payments hook to check for pending payments
     const {
       isLoading: paymentsLoading,
       pendingPayments,
@@ -561,6 +579,7 @@ export default function OrderDetailsPage() {
   const getLocalizedText = (en: string, np: string) => {
     return locale === 'ne' ? np : en;
   };
+
   useEffect(() => {
     if (orderId) {
       fetchOrderById(orderId);
@@ -593,8 +612,6 @@ export default function OrderDetailsPage() {
       });
     }
   };
-
-
 
   const handlePaymentSuccess = () => {
   // Close the payment sheet
@@ -656,6 +673,8 @@ export default function OrderDetailsPage() {
     );
   }
 
+
+
   const status = currentOrder.order_status as OrderStatus;
   const paymentStatus = currentOrder.payment_status as PaymentStatus;
   const statusInfo = statusConfig[status];
@@ -668,6 +687,7 @@ export default function OrderDetailsPage() {
   const paymentSummary = currentOrder.payment_summary;
   // Check if there are any pending payments
   const hasPendingPayments = pendingPayments.length > 0;
+
   const handleMakePayment = () => {
     // Check if there are pending payments before opening the sheet
     if (hasPendingPayments) {
@@ -692,6 +712,7 @@ export default function OrderDetailsPage() {
     paymentStatus !== PaymentStatus.PAID && 
     status !== OrderStatus.CANCELLED && 
     !hasPendingPayments; 
+
   return (
     <div className="container mx-auto p-4 md:p-6">
       {/* Header */}
@@ -722,7 +743,7 @@ export default function OrderDetailsPage() {
             <Share2 className="w-4 h-4 mr-2" />
             {getLocalizedText('Share', 'सेयर')}
           </Button>
-       
+  
         </div>
       </div>
 
@@ -764,9 +785,21 @@ export default function OrderDetailsPage() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">{getLocalizedText('Professional', 'व्यवसायी')}</span>
+                    <span className="font-medium">{getLocalizedText('Customer', 'ग्राहक')}</span>
                   </div>
-                  <p>{currentOrder.professional_name}</p>
+                  <p>{currentOrder.customer_name}</p>
+             
+                  {status !== OrderStatus.PENDING && status !== OrderStatus.CANCELLED ? (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm">{currentOrder.customer_phone}</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>{getLocalizedText('Phone visible after acceptance', 'फोन स्वीकार पछि मात्र देखिनेछ')}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -814,7 +847,7 @@ export default function OrderDetailsPage() {
                 <div className="space-y-1">
                   <p className="font-medium">{currentOrder.customer_address.street_address}</p>
                   <p className="text-sm text-muted-foreground">
-                    {getLocalizedText('Ward', 'वडा')} {currentOrder.customer_address.ward_no}, {currentOrder.customer_address.municipality}<br />
+                  {currentOrder.customer_address.municipality} {currentOrder.customer_address.ward_no},<br />
                     {currentOrder.customer_address.district}, {currentOrder.customer_address.province}
                   </p>
                   <Badge variant="outline" className="mt-2">
@@ -928,7 +961,7 @@ export default function OrderDetailsPage() {
                   {getLocalizedText('Make Payment', 'भुक्तानी गर्नुहोस्')}
                 </Button>
               )} */}
-                        {/* Payment Button - Only show if no pending payments */}
+                     {/* Payment Button - Only show if no pending payments */}
               {shouldShowPaymentButton && (
                 <Button
                   variant="default"
@@ -973,72 +1006,56 @@ export default function OrderDetailsPage() {
               <CardTitle>{getLocalizedText('Quick Actions', 'द्रुत कार्यहरू')}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start"
-                 onClick={() => {
-                                          const slug = createProfessionalSlug(
-                                            currentOrder.professional_name, 
-                                           currentOrder.professional_id
-                                          );
-                                          router.push(`/professionals/${slug}`);
-                                        }}
-              >
-                <User className="w-4 h-4 mr-2" />
-                
-                {getLocalizedText('View Professional Profile', 'व्यवसायीको प्रोफाइल हेर्नुहोस्')}
-              </Button>
-              
+              {status === OrderStatus.ACCEPTED && (
+                <Button variant="outline" className="w-full justify-start">
+                  <Phone className="w-4 h-4 mr-2" />
+                  {getLocalizedText('Call Customer', 'ग्राहकलाई फोन गर्नुहोस्')}
+                </Button>
+              )}
+              {/* <Button variant="outline" className="w-full justify-start">
+                <Mail className="w-4 h-4 mr-2" />
+                {getLocalizedText('Send Message', 'सन्देश पठाउनुहोस्')}
+              </Button> */}
+              {status === OrderStatus.ACCEPTED && (
+                <Button variant="outline" className="w-full justify-start">
+                  <User className="w-4 h-4 mr-2" />
+                  {getLocalizedText('View Customer Profile', 'ग्राहक प्रोफाइल हेर्नुहोस्')}
+                </Button>
+              )}
+              {status === OrderStatus.PENDING && (
+                <Button variant="outline" className="w-full">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {getLocalizedText('Accept Job', 'काम स्वीकार गर्नुहोस्')}
+                </Button>
+              )}
               {status === OrderStatus.PENDING && (
                 <Button variant="destructive" className="w-full">
                   <XCircle className="w-4 h-4 mr-2" />
-                  {getLocalizedText('Cancel Order', 'अर्डर रद्द गर्नुहोस्')}
+                  {getLocalizedText('Cancel Job', 'काम रद्द गर्नुहोस्')}
                 </Button>
               )}
- {/*  WriteReviewDialog for completed orders */}
-    {status === OrderStatus.COMPLETED && currentOrder.professional_service_id && (
-      <WriteReviewDialog
-        professionalServiceId={currentOrder.professional_service_id}
-        targetName={currentOrder.professional_name}
-        targetType="professional"
-        onSuccess={() => {
-          // Optional: Refresh data or show additional message
-          toast({
-            title: getLocalizedText('Thank You!', 'धन्यवाद!'),
-            description: getLocalizedText(
-              'Your review has been posted successfully.',
-              'तपाईंको समीक्षा सफलतापूर्वक पोस्ट गरिएको छ।'
-            ),
-          });
-        }}
-        trigger={
-          <Button className="w-full bg-yellow-600 hover:bg-yellow-700">
-            <Star className="w-4 h-4 mr-2" />
-            {getLocalizedText('Write Review', 'समीक्षा लेख्नुहोस्')}
-          </Button>
-        }
-      />
-    )}
-    </CardContent>
-  </Card>
-
-     
-    
-  
-
-            {/* Add CreatePaymentSheet here - after both cards */}
-            {currentOrder && paymentStatus !== PaymentStatus.PAID && 
-             status !== OrderStatus.CANCELLED && 
-             !hasPendingPayments && (
-             <CreatePaymentSheet
-            isOpen={isPaymentSheetOpen}
-            onClose={() => setIsPaymentSheetOpen(false)}
-            orderId={orderId}
-            remainingAmount={paymentSummary.remaining_amount}
-            isProfessional={true}
-            onPaymentSuccess={handlePaymentSuccess}
-          />
-            )}
+            </CardContent>
+            
+          </Card>
+  {/* Add CreatePaymentSheet here - after both cards */}
+  {currentOrder && paymentStatus !== PaymentStatus.PAID && 
+   status !== OrderStatus.CANCELLED && 
+   !hasPendingPayments && (
+   <CreatePaymentSheet
+  isOpen={isPaymentSheetOpen}
+  onClose={() => setIsPaymentSheetOpen(false)}
+  orderId={orderId}
+  remainingAmount={paymentSummary.remaining_amount}
+  isProfessional={true}
+  onPaymentSuccess={handlePaymentSuccess}
+/>
+  )}
+      
         </div>
+        
       </div>
+      
     </div>
+    
   );
 }

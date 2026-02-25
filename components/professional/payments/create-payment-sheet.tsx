@@ -10,6 +10,7 @@ import { CurrencyFormatter } from '@/lib/utils/formatters';
 import { ProperCaseFormatter } from '@/lib/utils/formatters';
 import { QRCodeSection } from './qr-code-section';
 import { PaymentApi } from '@/lib/api/professional-payment/payment-api';
+import { useAuth } from '@/lib/context/auth-context';
 
 
 const paymentSchema = z.object({
@@ -37,13 +38,12 @@ export function CreatePaymentSheet({
   onClose,
   orderId,
   remainingAmount,
-  isProfessional = false,
   onPaymentSuccess
 }: CreatePaymentSheetProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
-
+  const { mode } = useAuth();
   const {
     register,
     handleSubmit,
@@ -63,6 +63,8 @@ export function CreatePaymentSheet({
 
   const amount = watch('amount');
   const selectedMethod = watch('payment_method');
+
+const isProfessional = mode === 'professional';
 
   const onSubmit = async (data: PaymentFormData) => {
     // For professionals, show confirmation dialog first
