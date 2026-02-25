@@ -1,10 +1,9 @@
-
 import React, { JSX } from 'react';
 import { Withdrawal, WithdrawalStatus, WithdrawalStats } from '@/lib/data/professional/withdrawal';
 import { CurrencyFormatter } from '@/lib/utils/formatters';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { StatusBadge } from '@/components/ui/professional-payment/status-badge';
-import { MasonryGrid } from '@/components/ui/professional-payment/masonry-grid';
+import { useI18n } from '@/lib/i18n/context';
 
 interface WithdrawalListProps {
   withdrawals: Withdrawal[];
@@ -49,6 +48,12 @@ const statusConfig: Record<WithdrawalStatus, { color: string; icon: JSX.Element 
 };
 
 export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceipt }: WithdrawalListProps) {
+  const { t, language } = useI18n();
+
+  const getLocalizedText = (en: string, ne: string) => {
+    return language === 'ne' ? ne : en;
+  };
+
   if (withdrawals.length === 0) {
     return (
       <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
@@ -58,10 +63,10 @@ export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceip
           </svg>
         </div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          No Withdrawals Yet
+          {getLocalizedText('No Withdrawals Yet', 'कुनै रकम निकासी भएको छैन')}
         </h3>
         <p className="text-gray-600 dark:text-gray-400">
-          Your withdrawal history will appear here
+          {getLocalizedText('Your withdrawal history will appear here', 'तपाईंको रकम निकासी इतिहास यहाँ देखिनेछ')}
         </p>
       </div>
     );
@@ -76,7 +81,7 @@ export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceip
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
           </svg>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Recent Withdrawals
+            {getLocalizedText('Recent Withdrawals', 'हालैका निकासीहरू')}
           </h2>
         </div>
         
@@ -85,21 +90,21 @@ export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceip
             onClick={onViewAll}
             className="text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300"
           >
-            View All ({stats.totalRequests})
+            {getLocalizedText('View All', 'सबै हेर्नुहोस्')} ({stats.totalRequests})
           </button>
         )}
       </div>
 
-      {/* Withdrawals Grid */}
-      <MasonryGrid
-        items={withdrawals}
-        columnCount={{ default: 1, sm: 1, md: 2, lg: 2, xl: 2 }}
-        gap={12}
-        renderItem={(withdrawal) => {
+      {/* Withdrawals Grid - Simple flexbox with automatic wrapping */}
+      <div className="flex flex-wrap gap-4">
+        {withdrawals.map((withdrawal) => {
           const status = statusConfig[withdrawal.status];
           
           return (
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
+            <div
+              key={withdrawal.id}
+              className="flex-1 min-w-[300px] bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
+            >
               <div className="p-4">
                 {/* Header with Amount and Status */}
                 <div className="flex items-start justify-between mb-3">
@@ -108,7 +113,7 @@ export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceip
                       {CurrencyFormatter.format(withdrawal.amount)}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-500">
-                      ID: {withdrawal.reference_id}
+                      {getLocalizedText('ID', 'आईडी')}: {withdrawal.reference_id}
                     </p>
                   </div>
                   <StatusBadge
@@ -134,7 +139,14 @@ export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceip
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                     </svg>
                     <span className="text-gray-600 dark:text-gray-400">
-                      {withdrawal.payout_method}
+                      {withdrawal.payout_method === 'bank' 
+                        ? getLocalizedText('Bank Transfer', 'बैंक स्थानान्तरण')
+                        : withdrawal.payout_method === 'esewa' 
+                        ? getLocalizedText('eSewa', 'खल्ती')
+                        : withdrawal.payout_method === 'khalti'
+                        ? getLocalizedText('Khalti', 'खल्ती')
+                        : withdrawal.payout_method
+                      }
                     </span>
                   </div>
                 </div>
@@ -148,14 +160,14 @@ export function WithdrawalList({ withdrawals, stats, onViewAll, onDownloadReceip
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    <span>Receipt</span>
+                    <span>{getLocalizedText('Receipt', 'रसिद')}</span>
                   </button>
                 </div>
               </div>
             </div>
           );
-        }}
-      />
+        })}
+      </div>
     </div>
   );
 }

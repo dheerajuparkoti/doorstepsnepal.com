@@ -1,14 +1,15 @@
-
 import React from 'react';
 import { ProfessionalWalletStats } from '@/lib/data/professional/wallet';
 import { CurrencyFormatter } from '@/lib/utils/formatters';
-import { MasonryGrid } from '@/components/ui/professional-payment/masonry-grid';
+import { useI18n } from '@/lib/i18n/context';
 
 interface WalletStatisticsProps {
   wallet: ProfessionalWalletStats;
 }
 
 export function WalletStatistics({ wallet }: WalletStatisticsProps) {
+  const { t, language } = useI18n();
+  
   const {
     total_earned,
     total_commission,
@@ -16,9 +17,13 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
     netEarnings
   } = wallet;
 
+  const getLocalizedText = (en: string, ne: string) => {
+    return language === 'ne' ? ne : en;
+  };
+
   const stats = [
     {
-      title: 'Total Earned',
+      title: getLocalizedText('Total Earned', 'कुल आम्दानी'),
       amount: total_earned,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,10 +31,10 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
         </svg>
       ),
       color: 'amber',
-      subtitle: 'Lifetime earnings'
+      subtitle: getLocalizedText('Lifetime earnings', 'कुल आम्दानी')
     },
     {
-      title: 'Commission Paid',
+      title: getLocalizedText('Commission Paid', 'कमिसन भुक्तानी'),
       amount: total_commission,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -37,10 +42,10 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
         </svg>
       ),
       color: 'red',
-      subtitle: 'Platform fees'
+      subtitle: getLocalizedText('Platform fees', 'प्लेटफर्म शुल्क')
     },
     {
-      title: 'Total Withdrawn',
+      title: getLocalizedText('Total Withdrawn', 'कुल निकासी'),
       amount: total_withdrawn,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,10 +53,10 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
         </svg>
       ),
       color: 'green',
-      subtitle: 'Amount withdrawn'
+      subtitle: getLocalizedText('Amount withdrawn', 'निकासी रकम')
     },
     {
-      title: 'Net Earnings',
+      title: getLocalizedText('Net Earnings', 'खुद आम्दानी'),
       amount: netEarnings,
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +64,7 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
         </svg>
       ),
       color: 'blue',
-      subtitle: 'After Platform fees'
+      subtitle: getLocalizedText('After Platform fees', 'प्लेटफर्म शुल्क पछि')
     }
   ];
 
@@ -98,28 +103,29 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-gray-900 dark:text-white px-1">
-        Earnings Overview
+        {getLocalizedText('Earnings Overview', 'आम्दानी सारांश')}
       </h2>
       
-      <MasonryGrid
-        items={stats}
-        columnCount={{ default: 1, sm: 1, md: 2, lg: 2, xl: 2 }}
-        gap={12}
-        renderItem={(stat) => {
+      {/* Simple flexbox with automatic wrapping */}
+      <div className="flex flex-wrap gap-4">
+        {stats.map((stat) => {
           const colors = colorClasses[stat.color as keyof typeof colorClasses];
           
           return (
-            <div className={`
-              p-4 rounded-xl border ${colors.border} ${colors.bg}
-              transition-all hover:shadow-md
-            `}>
+            <div
+              key={stat.title}
+              className={`
+                flex-1 min-w-[240px] p-5 rounded-xl border ${colors.border} ${colors.bg}
+                transition-all hover:shadow-md hover:scale-[1.02] duration-200
+              `}
+            >
               <div className="flex items-start justify-between mb-3">
-                <div className={`p-2 rounded-lg ${colors.bg}`}>
+                <div className={`p-2.5 rounded-lg ${colors.bg}`}>
                   <div className={colors.text}>
                     {stat.icon}
                   </div>
                 </div>
-                <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors.badge}`}>
+                <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${colors.badge}`}>
                   {calculatePercentage(stat.amount)}
                 </span>
               </div>
@@ -128,7 +134,7 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
                 {stat.title}
               </p>
               
-              <p className={`text-xl font-bold ${colors.text} mb-1`}>
+              <p className={`text-2xl font-bold ${colors.text} mb-1`}>
                 {CurrencyFormatter.format(stat.amount)}
               </p>
               
@@ -137,8 +143,8 @@ export function WalletStatistics({ wallet }: WalletStatisticsProps) {
               </p>
             </div>
           );
-        }}
-      />
+        })}
+      </div>
     </div>
   );
 }

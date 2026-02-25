@@ -59,7 +59,7 @@ export default function ProfessionalWallet() {
     return (
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <NetworkBanner />
-        <div className="space-y-6">
+        <div className="space-y-8">
           <LoadingShimmer type="profile" />
           <LoadingShimmer type="grid" count={4} />
           <LoadingShimmer type="card" count={2} />
@@ -131,7 +131,7 @@ export default function ProfessionalWallet() {
   if (!walletStats) return null;
 
   return (
-    <div className="container mx-auto px-4 py-6 max-w-7xl">
+    <>
       <NetworkBanner />
       
       <RefreshControl onRefresh={handleRefresh}>
@@ -172,6 +172,6 @@ export default function ProfessionalWallet() {
         availableBalance={walletStats.current_balance}
         onSubmit={createWithdrawalRequest}
       />
-    </div>
+    </>
   );
 }

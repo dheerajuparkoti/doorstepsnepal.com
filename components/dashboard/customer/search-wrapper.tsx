@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { SearchSection } from "@/components/home/search-section";
-import { fetchProfessionalServices } from "@/lib/api/professional-services";
-import type { ProfessionalService } from "@/lib/data/professional-services";
+import { fetchServices } from "@/lib/api/service";
+import type { Service } from "@/lib/data/service";
 import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 
 export default function SearchWrapper() {
@@ -13,42 +14,40 @@ export default function SearchWrapper() {
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("Fetching professional services for search...");
-        
-        // SINGLE API CALL - Fetch all professional services at once
-        const response = await fetchProfessionalServices(1, 10000);
-        
-        if (!response?.professional_services) {
-          console.log("No professional services found");
+        console.log("Fetching services for search...");
+
+        // SINGLE API CALL - Fetch all services
+        const response = await fetchServices(
+          1,        // page
+          10000,    // size
+          undefined,
+          undefined,
+          undefined
+        );
+
+        if (!response?.services) {
+          console.log("No services found");
           setData([]);
           return;
         }
 
-        const professionalServices: ProfessionalService[] = response.professional_services;
-        console.log(`Fetched ${professionalServices.length} professional services`);
+        const services: Service[] = response.services;
+        console.log(`Fetched ${services.length} services`);
 
-        // NO ADDITIONAL API CALLS - Just transform the existing data
-        const professionalsData = professionalServices.map((ps) => ({
-          id: ps.professional_id,
-          full_name: ps.professional?.user?.full_name || "Unknown Professional",
-          profile_image: ps.professional?.user?.profile_image,
-          // Services array already contains all needed info
-          services: [{
-            service_id: ps.service_id,
-            service: {
-              id: ps.service.id,
-              name_en: ps.service.name_en,
-              name_np: ps.service.name_np,
-            },
-            professional: ps.professional, // This already has all professional data
-          }],
-          // Service name string for searching
-          service_name: `${ps.service.name_en}, ${ps.service.name_np}`,
+        // Transform services data 
+        const servicesData = services.map((service) => ({
+          id: service.id,
+          name_en: service.name_en,
+          name_np: service.name_np,
+          image: service.image,
+          description_en: service.description_en,
+          description_np: service.description_np,
+          category: service.category,
+          sub_category: service.sub_category,
         }));
 
-        console.log(`Processed ${professionalsData.length} professionals with services`);
-        setData(professionalsData);
-        
+        setData(servicesData);
+
       } catch (error) {
         console.error("Error in SearchWrapper:", error);
         setData([]);
@@ -58,11 +57,11 @@ export default function SearchWrapper() {
     }
 
     fetchData();
-  }, []); // Empty dependency array = runs once on mount
+  }, []);
 
   if (loading) {
     return <SearchSkeleton />;
   }
 
-  return <SearchSection professionalsData={data || []} />;
+  return <SearchSection servicesData={data || []} />;
 }

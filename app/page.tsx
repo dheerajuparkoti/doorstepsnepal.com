@@ -18,13 +18,13 @@ import { FeaturedServicesSectionSSR } from "@/components/home/ssr/featured-servi
 import { FeaturedServicesCarouselSkeleton } from "@/components/home/skeleton/featured-services-carousel-skeleton";
 import { FeaturedServicesCarouselSection } from "@/components/home/ssr/featured-services-carousel-ssr";
 
-// Import the new SSR component
+
 import { SearchSectionSSR } from "@/components/home/ssr/search-section-ssr";
 import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
-import { generateToken } from "./notifications/fcm-web";
-// import FCMInitializer from "./notifications/fcm-initializer";
+
+
 
   
 export default function HomePage() {

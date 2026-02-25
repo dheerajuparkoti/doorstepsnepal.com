@@ -1,4 +1,4 @@
-// components/professional/sections/professional-header-carousel.tsx
+
 'use client';
 
 import Image from "next/image";

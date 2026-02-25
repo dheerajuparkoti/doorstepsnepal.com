@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Withdrawal } from '@/lib/data/professional/withdrawal';
 import { CurrencyFormatter } from '@/lib/utils/formatters';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { StatusBadge } from '@/components/ui/professional-payment/status-badge';
 import { BottomSheet } from '@/components/ui/professional-payment/bottom-sheet';
+import { useI18n } from '@/lib/i18n/context';
 
 interface WithdrawalCardProps {
   withdrawal: Withdrawal;
@@ -47,15 +47,16 @@ const statusConfig = {
 };
 
 export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCardProps) {
+  const { t, language } = useI18n();
   const [showDetails, setShowDetails] = useState(false);
   const status = statusConfig[withdrawal.status];
-      console.log('withdrawal data →', withdrawal);
+
+  const getLocalizedText = (en: string, ne: string) => {
+    return language === 'ne' ? ne : en;
+  };
 
   return (
     <>
-
-
-
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow">
         <div className="p-4">
           {/* Header */}
@@ -65,7 +66,7 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
                 {CurrencyFormatter.format(withdrawal.amount)}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-500 mt-0.5">
-                ID: {withdrawal.reference_id}
+                {getLocalizedText('ID:', 'आईडी:')} {withdrawal.reference_id}
               </p>
             </div>
             <StatusBadge
@@ -83,7 +84,6 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <span className="text-gray-600 dark:text-gray-400">
-                {/* {withdrawal.request_date_np} */}
                 {NepaliDateService.formatHeader(withdrawal.request_date_np)}
               </span>
             </div>
@@ -106,7 +106,7 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Details</span>
+              <span>{getLocalizedText('Details', 'विवरण')}</span>
             </button>
             <button
               onClick={() => onDownloadReceipt(withdrawal)}
@@ -115,7 +115,7 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
               </svg>
-              <span>Receipt</span>
+              <span>{getLocalizedText('Receipt', 'रसिद')}</span>
             </button>
           </div>
         </div>
@@ -125,35 +125,43 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
       <BottomSheet
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
-        title="Withdrawal Details"
+        title={getLocalizedText('Withdrawal Details', 'रकम निकासी विवरण')}
       >
         <div className="p-4 space-y-6">
           {/* Transaction Info */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-              TRANSACTION INFORMATION
+              {getLocalizedText('TRANSACTION INFORMATION', 'कारोबार जानकारी')}
             </h3>
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">ID</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('ID', 'आईडी')}
+                </span>
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
                   {withdrawal.id}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Amount</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Amount', 'रकम')}
+                </span>
                 <span className="text-sm font-bold text-gray-900 dark:text-white">
                   {CurrencyFormatter.format(withdrawal.amount)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Reference</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Reference', 'सन्दर्भ')}
+                </span>
                 <span className="text-sm font-mono text-gray-900 dark:text-white">
                   {withdrawal.reference_id}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Status</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Status', 'स्थिति')}
+                </span>
                 <StatusBadge
                   status={withdrawal.status}
                   variant="outline"
@@ -162,7 +170,9 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
                 />
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Payout Method</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Payout Method', 'भुक्तानी विधि')}
+                </span>
                 <span className="text-sm text-gray-900 dark:text-white">
                   {withdrawal.payout_method}
                 </span>
@@ -173,26 +183,31 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
           {/* Professional Info */}
           <div>
             <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-              PROFESSIONAL INFORMATION
+              {getLocalizedText('PROFESSIONAL INFORMATION', 'प्रोफेशनल जानकारी')}
             </h3>
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 space-y-3">
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Professional ID</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Professional ID', 'प्रोफेशनल आईडी')}
+                </span>
                 <span className="text-sm font-medium text-gray-900 dark:text-white">
                   PRO-{withdrawal.professional_id}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Request Date</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Request Date', 'अनुरोध मिति')}
+                </span>
                 <span className="text-sm text-gray-900 dark:text-white">
-           
                   {NepaliDateService.formatWithTime(withdrawal.request_date_np)}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Notes</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  {getLocalizedText('Notes', 'टिप्पणी')}
+                </span>
                 <span className="text-sm text-gray-900 dark:text-white">
-                  {withdrawal.notes || 'N/A'}
+                  {withdrawal.notes || getLocalizedText('N/A', 'उपलब्ध छैन')}
                 </span>
               </div>
             </div>
@@ -209,7 +224,7 @@ export function WithdrawalCard({ withdrawal, onDownloadReceipt }: WithdrawalCard
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
             </svg>
-            <span>Download Receipt</span>
+            <span>{getLocalizedText('Download Receipt', 'रसिद डाउनलोड गर्नुहोस्')}</span>
           </button>
         </div>
       </BottomSheet>

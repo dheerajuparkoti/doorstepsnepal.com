@@ -26,7 +26,8 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
-  Banknote
+  Banknote,
+  Info
 } from 'lucide-react';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 
@@ -111,11 +112,20 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
   const totalAmount = order.total_price;
 
   const handleViewDetails = () => {
-    router.push(`/orders/${order.id}`);
+
+    if (isProfessional){
+ router.push(`/dashboard/professional/jobs/job-details/${order.id}`);
+    }
+    else{
+ router.push(`/dashboard/customer/bookings/booking-details/${order.id}`);
+    }
+
+
   };
 
-  const handleMakePayment = () => {
-    router.push(`/payment/${order.id}?professional=${isProfessional}`);
+ 
+  const handleViewPaymentInfo = () => {
+    router.push(`/dashboard/payments/orders/${order.id}`);
   };
 
   return (
@@ -204,35 +214,30 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
             </div>
           </div>
         </div>
+<Separator className="my-3" />
+   {/* Actions */}
+<div className="flex gap-2">
+  <Button
+    variant="ghost"
+    size="sm"
+    className="h-8 text-xs flex-1"
+    onClick={handleViewDetails}
+  >
+    <Eye className="w-3 h-3 mr-1" />
+    {getLocalizedText('Details', 'विवरण')}
+  </Button>
 
-        <Separator className="my-3" />
-
-        {/* Actions */}
-        <div className="flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 text-xs"
-            onClick={handleViewDetails}
-          >
-            <Eye className="w-3 h-3 mr-1" />
-            {getLocalizedText('Details', 'विवरण')}
-          </Button>
-
-          {/* make Payment */}
-          {/* {paymentStatus !== PaymentStatus.PAID && status !== OrderStatus.CANCELLED && (
-            <Button
-              size="sm"
-              className="h-8 text-xs bg-green-600 hover:bg-green-700"
-              onClick={handleMakePayment}
-            >
-              <CreditCard className="w-3 h-3 mr-1" />
-              {isProfessional 
-                ? getLocalizedText('Receive Payment', 'भुक्तानी प्राप्त गर्नुहोस्')
-                : getLocalizedText('Make Payment', 'भुक्तानी गर्नुहोस्')}
-            </Button>
-          )} */}
-        </div>
+  {paymentStatus !== PaymentStatus.PAID && status !== OrderStatus.CANCELLED && (
+    <Button
+      size="sm"
+      className="h-8 text-xs bg-green-600 hover:bg-green-700 flex-1"
+      onClick={handleViewPaymentInfo}
+    >
+      <CreditCard className="w-3 h-3 mr-1" />
+      {getLocalizedText('Payment Info', 'भुक्तानी जानकारी')}
+    </Button>
+  )}
+</div>
       </CardContent>
     </Card>
   );

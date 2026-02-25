@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { WithdrawalStatus } from '@/lib/data/professional/withdrawal';
+import { useI18n } from '@/lib/i18n/context';
 
 interface WithdrawalFiltersProps {
   quickFilters: string[];
@@ -13,10 +13,10 @@ interface WithdrawalFiltersProps {
 }
 
 const statusOptions = [
-  { value: 'pending', label: 'Pending', color: 'amber' },
-  { value: 'approved', label: 'Approved', color: 'blue' },
-  { value: 'rejected', label: 'Rejected', color: 'red' },
-  { value: 'completed', label: 'Completed', color: 'green' }
+  { value: 'pending', label: 'Pending', neLabel: 'पेन्डिङ', color: 'amber' },
+  { value: 'approved', label: 'Approved', neLabel: 'स्वीकृत', color: 'blue' },
+  { value: 'rejected', label: 'Rejected', neLabel: 'अस्वीकृत', color: 'red' },
+  { value: 'completed', label: 'Completed', neLabel: 'पूरा', color: 'green' }
 ];
 
 export function WithdrawalFilters({
@@ -28,12 +28,39 @@ export function WithdrawalFilters({
   onClearFilters,
   showClearButton
 }: WithdrawalFiltersProps) {
+  const { language } = useI18n();
+
+  const getLocalizedText = (en: string, ne: string) => {
+    return language === 'ne' ? ne : en;
+  };
+
+  const getStatusLabel = (status: typeof statusOptions[0]) => {
+    return language === 'ne' ? status.neLabel : status.label;
+  };
+
+  const getFilterLabel = (filter: string) => {
+    const filterTranslations: Record<string, { en: string; ne: string }> = {
+      Today: { en: 'Today', ne: 'आज' },
+      Yesterday: { en: 'Yesterday', ne: 'हिजो' },
+      'This Week': { en: 'This Week', ne: 'यस हप्ता' },
+      'This Month': { en: 'This Month', ne: 'यस महिना' },
+      'Last Month': { en: 'Last Month', ne: 'गत महिना' },
+      'This Year': { en: 'This Year', ne: 'यस वर्ष' }
+    };
+
+    return filterTranslations[filter]
+      ? language === 'ne'
+        ? filterTranslations[filter].ne
+        : filterTranslations[filter].en
+      : filter;
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4">
+    <div className="bg-card text-card-foreground rounded-xl border border-border p-4 space-y-4">
       {/* Quick Filters */}
       <div>
-        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-          QUICK FILTERS
+        <p className="text-xs font-medium text-muted-foreground mb-2">
+          {getLocalizedText('QUICK FILTERS', 'द्रुत फिल्टर')}
         </p>
         <div className="flex flex-wrap gap-2">
           {quickFilters.map((filter) => (
@@ -41,14 +68,15 @@ export function WithdrawalFilters({
               key={filter}
               onClick={() => onFilterChange(filter)}
               className={`
-                px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                ${selectedFilter === filter
-                  ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-2 border-primary-500'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
+                px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                ${
+                  selectedFilter === filter
+                    ? 'bg-primary text-primary-foreground shadow-md hover:bg-primary/90 border border-transparent'
+                    : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
                 }
               `}
             >
-              {filter}
+              {getFilterLabel(filter)}
             </button>
           ))}
         </div>
@@ -56,35 +84,37 @@ export function WithdrawalFilters({
 
       {/* Status Filter */}
       <div>
-        <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">
-          STATUS FILTER
+        <p className="text-xs font-medium text-muted-foreground mb-2">
+          {getLocalizedText('STATUS FILTER', 'स्थिति फिल्टर')}
         </p>
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => onStatusChange(null)}
             className={`
-              px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-              ${!selectedStatus
-                ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 border-2 border-primary-500'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
+              px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+              ${
+                !selectedStatus
+                  ? 'bg-primary text-primary-foreground shadow-md hover:bg-primary/90 border border-transparent'
+                  : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
               }
             `}
           >
-            All Statuses
+            {getLocalizedText('All Statuses', 'सबै स्थिति')}
           </button>
           {statusOptions.map((status) => (
             <button
               key={status.value}
               onClick={() => onStatusChange(status.value)}
               className={`
-                px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
-                ${selectedStatus === status.value
-                  ? `bg-${status.color}-100 dark:bg-${status.color}-900/40 text-${status.color}-700 dark:text-${status.color}-300 border-2 border-${status.color}-500`
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700'
+                px-3 py-1.5 rounded-lg text-sm font-medium transition-all
+                ${
+                  selectedStatus === status.value
+                    ? `bg-${status.color}-500 text-white shadow-md hover:bg-${status.color}-600 border border-transparent`
+                    : 'bg-muted text-muted-foreground border border-border hover:bg-muted/80'
                 }
               `}
             >
-              {status.label}
+              {getStatusLabel(status)}
             </button>
           ))}
         </div>
@@ -95,12 +125,22 @@ export function WithdrawalFilters({
         <div className="pt-2">
           <button
             onClick={onClearFilters}
-            className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+            className="flex items-center space-x-1 px-3 py-1.5 text-sm font-medium text-destructive hover:text-destructive/80 hover:bg-destructive/10 rounded-lg transition-colors"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
-            <span>Clear all filters</span>
+            <span>{getLocalizedText('Clear all filters', 'सबै फिल्टर हटाउनुहोस्')}</span>
           </button>
         </div>
       )}
