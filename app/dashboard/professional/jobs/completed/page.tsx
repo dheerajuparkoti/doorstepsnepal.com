@@ -39,6 +39,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/lib/context/auth-context';
+import { NepaliDateService } from '@/lib/utils/nepaliDate';
 
 export default function CompletedJobsPage() {
   const { t, locale } = useI18n();
@@ -153,10 +154,6 @@ export default function CompletedJobsPage() {
     return Math.floor(completedJobs.length * 0.7); // Assuming 70% have reviews
   };
 
-  const getAverageRating = () => {
-
-    return 4.5; // Assuming average rating
-  };
 
   const getRepeatCustomers = () => {
     const customerCounts: { [key: string]: number } = {};
@@ -387,7 +384,7 @@ export default function CompletedJobsPage() {
           <Separator className="my-2" />
 
           {/* Performance Metrics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -404,36 +401,7 @@ export default function CompletedJobsPage() {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      {locale === 'ne' ? 'औसत रेटिंग' : 'Average Rating'}
-                    </p>
-                    <div className="flex items-center">
-                      <p className="text-2xl font-bold text-yellow-600 mr-2">
-                        {getAverageRating()}
-                      </p>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < Math.floor(getAverageRating())
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <Award className="w-8 h-8 text-yellow-500" />
-                </div>
-              </CardContent>
-            </Card>
-            
+           
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
@@ -501,17 +469,20 @@ export default function CompletedJobsPage() {
                       {locale === 'ne' ? 'यस महिना' : 'This Month'}
                     </span>
                   </div>
-                  <p className="text-lg font-bold">
-                    {completedJobs.filter(order => {
-                      const orderDate = new Date(order.order_date);
-                      const now = new Date();
-                      return orderDate.getMonth() === now.getMonth() && 
-                             orderDate.getFullYear() === now.getFullYear();
-                    }).length}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {locale === 'ne' ? 'जबहरू सम्पन्न' : 'Jobs Completed'}
-                  </p>
+<p className="text-lg font-bold">
+  {completedJobs.filter(order => {
+    const orderDateBS = order.order_date.split(' ')[0]; 
+    const [year, month] = orderDateBS.split('-').map(Number);
+
+    const now = NepaliDateService.now();
+
+    // Compare BS year/month correctly
+    return year === now.getYear() && month === now.getMonth(); 
+  }).length}
+</p>
+<p className="text-xs text-muted-foreground">
+  {locale === 'ne' ? 'जबहरू सम्पन्न' : 'Jobs Completed'}
+</p>
                 </div>
                 <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg">
                   <div className="flex items-center gap-2 mb-2">
