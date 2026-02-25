@@ -23,7 +23,8 @@ import {
   TrendingDown,
   AlertTriangle,
   RotateCcw,
-  Info
+  Info,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -387,7 +388,7 @@ export default function CancelledJobsPage() {
                       Rs. {getTotalCancelledValue().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-red-500" />
+                  <Banknote className="w-8 h-8 text-red-500" />
                 </div>
               </CardContent>
             </Card>
@@ -446,7 +447,7 @@ export default function CancelledJobsPage() {
           </Card>
 
           {/* Rebooking Opportunities */}
-          <Card className="mb-4">
+          {/* <Card className="mb-4">
             <CardContent className="p-4">
               <h3 className="font-semibold mb-3">
                 {locale === 'ne' ? 'पुनः बुक गर्ने अवसरहरू' : 'Rebooking Opportunities'}
@@ -462,7 +463,7 @@ export default function CancelledJobsPage() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Cancellation Reasons Summary */}
           <Card className="mb-4">

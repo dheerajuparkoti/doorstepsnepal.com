@@ -24,7 +24,8 @@ import {
   Calendar,
   Clock,
   MapPin,
-  User
+  User,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -423,7 +424,7 @@ export default function AcceptedBookingsPage() {
                       Rs. {acceptedOrders.reduce((sum, order) => sum + order.total_price, 0)}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-green-500" />
+                     <Banknote className="w-8 h-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>

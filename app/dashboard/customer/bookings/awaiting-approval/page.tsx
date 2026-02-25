@@ -23,7 +23,8 @@ import {
   Phone,
   User,
   CheckCircle,
-  MessageSquare
+  MessageSquare,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -402,7 +403,7 @@ export default function InspectedBookingsPage() {
                       Rs. {inspectedOrders.reduce((sum, order) => sum + order.total_price, 0)}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-purple-500" />
+                     <Banknote className="w-8 h-8 text-purple-500" />
                 </div>
               </CardContent>
             </Card>

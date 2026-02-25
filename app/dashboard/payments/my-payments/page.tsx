@@ -26,7 +26,8 @@ import {
   Receipt,
   Users,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -415,7 +416,7 @@ export default function PaymentDashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
           <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-4 h-4 text-blue-600" />
+               <Banknote className="w-4 h-4 text-blue-600" />
             <span className="text-sm font-medium">
               {isProfessional ? 'Total Value' : 'Total Spend'}
             </span>

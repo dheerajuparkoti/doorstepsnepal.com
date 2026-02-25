@@ -24,7 +24,8 @@ import {
   MessageSquare,
   User,
   Eye,
-  ThumbsUp
+  ThumbsUp,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -389,7 +390,7 @@ export default function CompletedBookingsPage() {
                       Rs. {getTotalValue().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-green-500" />
+                     <Banknote className="w-8 h-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>

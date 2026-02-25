@@ -23,7 +23,8 @@ import {
   ThumbsUp,
   Award,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -398,7 +399,7 @@ export default function CompletedJobsPage() {
                       Rs. {getTotalEarnings().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-green-500" />
+                     <Banknote className="w-8 h-8 text-green-500" />
                 </div>
               </CardContent>
             </Card>

@@ -21,7 +21,8 @@ import {
   Calendar,
   DollarSign,
   MapPin,
-  User
+  User,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -373,7 +374,7 @@ export default function PendingJobsPage() {
                       Rs. {getTotalPendingValue().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-yellow-500" />
+                     <Banknote className="w-8 h-8 text-yellow-500" />
                 </div>
               </CardContent>
             </Card>

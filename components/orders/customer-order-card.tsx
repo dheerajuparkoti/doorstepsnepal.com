@@ -22,7 +22,8 @@ import {
   ChevronDown,
   ChevronUp,
   Info,
-  Loader2
+  Loader2,
+  Banknote
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useI18n } from '@/lib/i18n/context';
@@ -433,13 +434,13 @@ const handleCustomerApproval = async (approved: boolean) => {
                   <span className="text-muted-foreground">
                     {getLocalizedText('Quality Type:', 'गुणस्तर प्रकार:')}
                   </span>
-                  <span className="font-medium">{order.quality_type_id}</span>
+                  <span className="font-medium">{order.quality_type_name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
                     {getLocalizedText('Price Unit:', 'मूल्य एकाइ:')}
                   </span>
-                  <span className="font-medium">{order.price_unit_id}</span>
+                  <span className="font-medium">{order.price_unit_name}</span>
                 </div>
               </div>
             </div>
@@ -467,7 +468,7 @@ const handleCustomerApproval = async (approved: boolean) => {
             {/* Payment Info */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
+                   <Banknote className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm font-medium">
                   {getLocalizedText('Payment', 'भुक्तानी')}
                 </span>

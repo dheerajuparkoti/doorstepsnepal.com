@@ -39,7 +39,9 @@ export interface Order {
   service_description_en: string;
   service_description_np: string;
   price_unit_id: number;
+  price_unit_name?:string;
   quality_type_id: number;
+  quality_type_name?:string;
   quantity: number;
   total_price: number;
   initial_price :number;

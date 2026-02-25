@@ -24,7 +24,8 @@ import {
   Phone,
   Eye,
   MessageSquare,
-  Calculator
+  Calculator,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -384,7 +385,7 @@ export default function AcceptedJobsPage() {
                       Rs. {getTotalAcceptedValue().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-blue-500" />
+                     <Banknote className="w-8 h-8 text-blue-500" />
                 </div>
               </CardContent>
             </Card>

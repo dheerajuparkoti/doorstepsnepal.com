@@ -22,7 +22,8 @@ import {
   CheckCircle,
   FileText,
   Clock,
-  Calculator
+  Calculator,
+  Banknote
 } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -381,7 +382,7 @@ export default function InspectedJobsPage() {
                       Rs. {getTotalInspectedValue().toLocaleString()}
                     </p>
                   </div>
-                  <DollarSign className="w-8 h-8 text-purple-500" />
+                     <Banknote className="w-8 h-8 text-purple-500" />
                 </div>
               </CardContent>
             </Card>
@@ -423,7 +424,7 @@ export default function InspectedJobsPage() {
           <Card className="mb-4 border-orange-200 bg-orange-50 dark:bg-orange-950/20">
             <CardContent className="p-4">
               <div className="flex items-start gap-3">
-                <DollarSign className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                   <Banknote className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-orange-800 dark:text-orange-300 mb-1">
                     {locale === 'ne' ? 'भुक्तानी अनुस्मारक' : 'Payment Reminder'}

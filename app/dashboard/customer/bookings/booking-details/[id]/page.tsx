@@ -404,7 +404,7 @@
 
 //               {paymentStatus !== PaymentStatus.PAID && status !== OrderStatus.CANCELLED && (
 //                 <Button className="w-full" size="lg">
-//                   <DollarSign className="w-4 h-4 mr-2" />
+//                      <Banknote className="w-4 h-4 mr-2" />
 //                   Make Payment
 //                 </Button>
 //               )}
@@ -490,6 +490,8 @@ import { usePayments } from '@/hooks/use-payment';
 import { CreatePaymentSheet } from '@/components/professional/payments/create-payment-sheet';
 import { createProfessionalSlug } from '@/lib/utils/slug';
 import { WriteReviewDialog } from '@/components/reviews/write-review-dialog';
+import { useCancelOrder } from '@/hooks/user-cancel-order';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 
 
 const statusConfig = {
@@ -551,7 +553,8 @@ export default function OrderDetailsPage() {
     const [isPaymentSheetOpen, setIsPaymentSheetOpen] = useState(false);
   const { currentOrder, isLoading, error, fetchOrderById } = useOrderStore();
 
-
+const { confirm, ConfirmationDialog } = useConfirmationDialog();
+const { cancelOrder, isCancelling } = useCancelOrder();
 
     const {
       isLoading: paymentsLoading,
@@ -570,6 +573,43 @@ export default function OrderDetailsPage() {
   const handlePrint = () => {
     window.print();
   };
+
+const handleCancelOrder = async () => {
+  // Check if any payments have been made
+  const hasPayments = (currentOrder?.total_paid_amount || 0) > 0;
+  const paidAmount = currentOrder?.total_paid_amount || 0;
+  
+  // Prepare confirmation message based on payment status
+  let description = '';
+  if (hasPayments) {
+    description = getLocalizedText(
+      `Are you sure you want to cancel this order? Rs. ${paidAmount.toLocaleString()} already paid is non-refundable. This action cannot be undone.`,
+      `के तपाईं यो अर्डर रद्द गर्न निश्चित हुनुहुन्छ? रु. ${paidAmount.toLocaleString()} भुक्तानी गरिएको रकम फिर्ता योग्य छैन। यो कार्य पूर्ववत गर्न सकिँदैन।`
+    );
+  } else {
+    description = getLocalizedText(
+      'Are you sure you want to cancel this order? This action cannot be undone.',
+      'के तपाईं यो अर्डर रद्द गर्न निश्चित हुनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।'
+    );
+  }
+
+  // Show confirmation dialog first
+  const confirmed = await confirm({
+    title: hasPayments 
+      ? getLocalizedText('Cancel Order? (Non-Refundable)', 'अर्डर रद्द गर्ने? (फिर्ता नहुने)')
+      : getLocalizedText('Cancel Order?', 'अर्डर रद्द गर्ने?'),
+    description: description,
+    confirmText: getLocalizedText('Yes, Cancel Order', 'हो, अर्डर रद्द गर्नुहोस्'),
+    cancelText: getLocalizedText('No, Keep Order', 'होइन, अर्डर राख्नुहोस्'),
+    variant: 'destructive',
+  });
+
+  if (!confirmed) return;
+
+  // Proceed with cancellation using the hook
+  await cancelOrder(orderId);
+};
+
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -789,43 +829,53 @@ export default function OrderDetailsPage() {
                   <p>{formattedTime}</p>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">{getLocalizedText('Quantity & Quality', 'मात्रा र गुणस्तर')}</span>
-                  </div>
-                  <p>
-                    {currentOrder.quantity} {getLocalizedText('units', 'एकाइ')} • 
-                    {getLocalizedText(' Quality Type ', ' गुणस्तर प्रकार ')}{currentOrder.quality_type_id}
-                  </p>
-                </div>
+            <div className="space-y-2">
+  <div className="flex items-center gap-2">
+    <FileText className="w-4 h-4 text-muted-foreground" />
+    <span className="font-medium">
+{getLocalizedText('Quantity, Unit & Quality', 'मात्रा, मूल्य एकाइ र गुणस्तर')}
+    </span>
+  </div>
+
+  <p className="text-sm text-muted-foreground">
+    {currentOrder.quantity} {currentOrder.price_unit_name} • {currentOrder.quality_type_name}
+  </p>
+</div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Address Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{getLocalizedText('Service Address', 'सेवा ठेगाना')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-muted-foreground mt-1" />
-                <div className="space-y-1">
-                  <p className="font-medium">{currentOrder.customer_address.street_address}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {getLocalizedText('Ward', 'वडा')} {currentOrder.customer_address.ward_no}, {currentOrder.customer_address.municipality}<br />
-                    {currentOrder.customer_address.district}, {currentOrder.customer_address.province}
-                  </p>
-                  <Badge variant="outline" className="mt-2">
-                    {currentOrder.customer_address.type === 'temporary' 
-                      ? getLocalizedText('Temporary Address', 'अस्थायी ठेगाना')
-                      : getLocalizedText('Permanent Address', 'स्थायी ठेगाना')}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Address Information */}
+<Card>
+  <CardHeader>
+    <CardTitle>{getLocalizedText('Service Address', 'सेवा ठेगाना')}</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="flex items-start gap-3">
+      <MapPin className="w-5 h-5 text-muted-foreground mt-1" />
+      <div className="space-y-1">
+        {currentOrder.customer_address ? (
+          <>
+            <p className="font-medium">{currentOrder.customer_address.street_address || '-'}</p>
+            <p className="text-sm text-muted-foreground">
+              {getLocalizedText('Ward', 'वडा')} {currentOrder.customer_address.ward_no || '-'}, {currentOrder.customer_address.municipality || '-'}<br />
+              {currentOrder.customer_address.district || '-'}, {currentOrder.customer_address.province || '-'}
+            </p>
+            <Badge variant="outline" className="mt-2">
+              {currentOrder.customer_address.type === 'temporary' 
+                ? getLocalizedText('Temporary Address', 'अस्थायी ठेगाना')
+                : getLocalizedText('Permanent Address', 'स्थायी ठेगाना')}
+            </Badge>
+          </>
+        ) : (
+          <p className="text-muted-foreground">
+            {getLocalizedText('Address not available', 'ठेगाना उपलब्ध छैन')}
+          </p>
+        )}
+      </div>
+    </div>
+  </CardContent>
+</Card>
 
           {/* Notes */}
           <Tabs defaultValue="order-notes" className="w-full">
@@ -872,100 +922,94 @@ export default function OrderDetailsPage() {
 
         {/* Right Column - Payment & Actions */}
         <div className="space-y-6">
-          {/* Payment Summary */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{getLocalizedText('Payment Summary', 'भुक्तानी सारांश')}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{getLocalizedText('Total Price', 'कुल मूल्य')}</span>
-                  <span className="font-bold text-lg">Rs. {currentOrder.total_price}</span>
-                </div>
-                <div className="flex justify-between text-green-600">
-                  <span>{getLocalizedText('Amount Paid', 'भुक्तानी रकम')}</span>
-                  <span>Rs. {currentOrder.total_paid_amount}</span>
-                </div>
-                {paymentSummary.remaining_amount > 0 && (
-                  <div className="flex justify-between text-orange-600">
-                    <span>{getLocalizedText('Balance Due', 'बाँकी रकम')}</span>
-                    <span>Rs. {paymentSummary.remaining_amount}</span>
-                  </div>
-                )}
-              </div>
+    {/* Payment Summary */}
+<Card>
+  <CardHeader>
+    <CardTitle>{getLocalizedText('Payment Summary', 'भुक्तानी सारांश')}</CardTitle>
+  </CardHeader>
+  <CardContent className="space-y-4">
+    <div className="space-y-2">
+      <div className="flex justify-between">
+        <span className="text-muted-foreground">{getLocalizedText('Total Price', 'कुल मूल्य')}</span>
+        <span className="font-bold text-lg">Rs. {currentOrder.total_price || 0}</span>
+      </div>
+      <div className="flex justify-between text-green-600">
+        <span>{getLocalizedText('Amount Paid', 'भुक्तानी रकम')}</span>
+        <span>Rs. {currentOrder.total_paid_amount || 0}</span>
+      </div>
+      {paymentSummary?.remaining_amount > 0 && (
+        <div className="flex justify-between text-orange-600">
+          <span>{getLocalizedText('Balance Due', 'बाँकी रकम')}</span>
+          <span>Rs. {paymentSummary?.remaining_amount || 0}</span>
+        </div>
+      )}
+    </div>
 
-              {paymentSummary.payment_percentage > 0 && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>{getLocalizedText('Payment Progress', 'भुक्तानी प्रगति')}</span>
-                    <span>{paymentSummary.payment_percentage.toFixed(1)}%</span>
-                  </div>
-                  <Progress value={paymentSummary.payment_percentage} className="h-2" />
-                </div>
-              )}
+    {paymentSummary?.payment_percentage > 0 && (
+      <div className="space-y-2">
+        <div className="flex justify-between text-sm">
+          <span>{getLocalizedText('Payment Progress', 'भुक्तानी प्रगति')}</span>
+          <span>{paymentSummary?.payment_percentage?.toFixed(1) || 0}%</span>
+        </div>
+        <Progress value={paymentSummary?.payment_percentage || 0} className="h-2" />
+      </div>
+    )}
 
-              <Separator />
+    <Separator />
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">{getLocalizedText('Payment Status', 'भुक्तानी स्थिति')}</p>
-                  <Badge className={paymentInfo.color}>
-                    {locale === 'ne' ? paymentInfo.labelNp : paymentInfo.label}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">{getLocalizedText('Order Status', 'अर्डर स्थिति')}</p>
-                  <Badge className={statusInfo.color}>
-                    {locale === 'ne' ? statusInfo.labelNp : statusInfo.label}
-                  </Badge>
-                </div>
-              </div>
+    <div className="grid grid-cols-2 gap-4 text-sm">
+      <div>
+        <p className="text-muted-foreground">{getLocalizedText('Payment Status', 'भुक्तानी स्थिति')}</p>
+        <Badge className={paymentInfo?.color || ''}>
+          {locale === 'ne' ? paymentInfo?.labelNp || '' : paymentInfo?.label || ''}
+        </Badge>
+      </div>
+      <div>
+        <p className="text-muted-foreground">{getLocalizedText('Order Status', 'अर्डर स्थिति')}</p>
+        <Badge className={statusInfo?.color || ''}>
+          {locale === 'ne' ? statusInfo?.labelNp || '' : statusInfo?.label || ''}
+        </Badge>
+      </div>
+    </div>
 
-              {/* {paymentStatus !== PaymentStatus.PAID && status !== OrderStatus.CANCELLED && (
-                <Button className="w-full" size="lg">
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  {getLocalizedText('Make Payment', 'भुक्तानी गर्नुहोस्')}
-                </Button>
-              )} */}
-                        {/* Payment Button - Only show if no pending payments */}
-              {shouldShowPaymentButton && (
-                <Button
-                  variant="default"
-                  size="lg"
-                  onClick={handleMakePayment}
-                  className="flex-1 w-full bg-green-600 hover:bg-green-700"
-                  disabled={paymentsLoading} 
-                >
-                  {paymentsLoading ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <CreditCard className="w-4 h-4 mr-2" />
-                  )}
-                  {getLocalizedText('Make Payment', 'भुक्तानी गर्नुहोस्')}
-                </Button>
-              )}
+    {/* Payment Button - Only show if no pending payments */}
+    {shouldShowPaymentButton && (
+      <Button
+        variant="default"
+        size="lg"
+        onClick={handleMakePayment}
+        className="flex-1 w-full bg-green-600 hover:bg-green-700"
+        disabled={paymentsLoading} 
+      >
+        {paymentsLoading ? (
+          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        ) : (
+          <CreditCard className="w-4 h-4 mr-2" />
+        )}
+        {getLocalizedText('Make Payment', 'भुक्तानी गर्नुहोस्')}
+      </Button>
+    )}
 
-              {/* Disabled Payment Button when pending payments exist */}
-              {paymentStatus !== PaymentStatus.PAID && 
-               status !== OrderStatus.CANCELLED && 
-               hasPendingPayments && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled
-                  className="flex-1 min-w-[140px] opacity-50 cursor-not-allowed"
-                  title={getLocalizedText(
-                    'Cannot add payment while pending payments exist',
-                    'पेन्डिङ भुक्तानीहरू भएको बेला भुक्तानी थप्न सकिँदैन'
-                  )}
-                >
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {getLocalizedText('Payment Pending', 'भुक्तानी पेन्डिङ')}
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+    {/* Disabled Payment Button when pending payments exist */}
+    {paymentStatus !== PaymentStatus.PAID && 
+     status !== OrderStatus.CANCELLED && 
+     hasPendingPayments && (
+      <Button
+        variant="outline"
+        size="sm"
+        disabled
+        className="flex-1 min-w-[140px] opacity-50 cursor-not-allowed"
+        title={getLocalizedText(
+          'Cannot add payment while pending payments exist',
+          'पेन्डिङ भुक्तानीहरू भएको बेला भुक्तानी थप्न सकिँदैन'
+        )}
+      >
+        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+        {getLocalizedText('Payment Pending', 'भुक्तानी पेन्डिङ')}
+      </Button>
+    )}
+  </CardContent>
+</Card>
 
           {/* Actions */}
           <Card>
@@ -986,13 +1030,22 @@ export default function OrderDetailsPage() {
                 
                 {getLocalizedText('View Professional Profile', 'व्यवसायीको प्रोफाइल हेर्नुहोस्')}
               </Button>
-              
-              {status === OrderStatus.PENDING && (
-                <Button variant="destructive" className="w-full">
-                  <XCircle className="w-4 h-4 mr-2" />
-                  {getLocalizedText('Cancel Order', 'अर्डर रद्द गर्नुहोस्')}
-                </Button>
-              )}
+
+{status === OrderStatus.PENDING &&  !hasPendingPayments &&(
+  <Button 
+    variant="destructive" 
+    className="w-full"
+    onClick={handleCancelOrder}
+    disabled={isCancelling}
+  >
+    {isCancelling ? (
+      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+    ) : (
+      <XCircle className="w-4 h-4 mr-2" />
+    )}
+    {getLocalizedText('Cancel Order', 'अर्डर रद्द गर्नुहोस्')}
+  </Button>
+)}
  {/*  WriteReviewDialog for completed orders */}
     {status === OrderStatus.COMPLETED && currentOrder.professional_service_id && (
       <WriteReviewDialog
@@ -1039,6 +1092,8 @@ export default function OrderDetailsPage() {
             )}
         </div>
       </div>
+      <ConfirmationDialog />
     </div>
+    
   );
 }

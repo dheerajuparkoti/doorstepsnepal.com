@@ -25,7 +25,8 @@ import {
   ArrowRight,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Banknote
 } from 'lucide-react';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 
@@ -164,7 +165,7 @@ export function CompactPaymentCard({ order, isProfessional = false }: CompactPay
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
-              <DollarSign className="w-4 h-4 text-muted-foreground" />
+                 <Banknote className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm font-medium">
                 {getLocalizedText('Payment Summary', 'भुक्तानी सारांश')}
               </span>
