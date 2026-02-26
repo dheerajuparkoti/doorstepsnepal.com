@@ -334,6 +334,8 @@ const setupProfile = async (data: any) => {
       gender: data.gender,
       age_group: data.age_group,
       email: data.email || user.email,
+      professional_id: data.professional_id,
+
     });
 
     // Create updated user object with the response from API
@@ -349,6 +351,7 @@ const setupProfile = async (data: any) => {
       type: data.user_type,
       mode: data.user_type,
       is_setup_complete: true,
+      professional_id: data.professional_id,
       //  For professionals, onboarding starts as incomplete
       // For customers, onboarding is considered complete (or N/A)
       is_onboarding_complete: data.user_type === "professional" ? false : true,
@@ -366,6 +369,7 @@ const setupProfile = async (data: any) => {
     localStorage.setItem("userName", data.full_name);
     localStorage.setItem("userPhone", user.phone || user.phone_number || "");
     localStorage.setItem("userEmail", data.email || "");
+    localStorage.setItem("professional_id",data.professional_id||0);
     localStorage.setItem("userGender", data.gender);
     localStorage.setItem("userAgeGroup", data.age_group);
     localStorage.setItem("userMode", data.user_type);
@@ -397,6 +401,7 @@ const setupProfile = async (data: any) => {
     localStorage.removeItem("userGender");
     localStorage.removeItem("userAgeGroup");
     localStorage.removeItem("userMode");
+    localStorage.removeItem("professional_id");
     
     // Clear cookies
     clearAuthCookies();
@@ -426,6 +431,7 @@ const setupProfile = async (data: any) => {
       if (userData.email) {
         localStorage.setItem("userEmail", updatedUser.email || "");
       }
+   
       if (userData.gender) {
         localStorage.setItem("userGender", updatedUser.gender || "");
       }

@@ -1,4 +1,4 @@
-// stores/notification-store.ts
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware'; 
 import { devtools } from 'zustand/middleware';
@@ -99,7 +99,7 @@ export const useNotificationStore = create<NotificationState>()(
       notif.type === 'withdrawal_rejected' ||
       (notif.type === 'Order Update' && 
        (notif.title === 'Inspection Approved' || 
-        notif.title === 'Inspection Rejected'));
+        notif.title === 'Inspection Rejected'|| notif.title === 'Order Cancelled'));
     
 
     const isTargetMode = isProfessionalMode ? !isProNotif : isProNotif;

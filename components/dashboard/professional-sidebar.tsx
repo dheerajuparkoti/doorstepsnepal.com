@@ -35,7 +35,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
-
+import { useAppStateStore } from '@/stores/app-state-store';
 interface NavItem {
   label: string;
   href: string;
@@ -48,7 +48,7 @@ export function ProfessionalSidebar() {
   const pathname = usePathname();
   // const [openSections, setOpenSections] = useState<string[]>(["profile", "services", "jobs", "settings"]);
   const [openSections, setOpenSections] = useState<string[]>([]);// make labels collapsible
-
+const professionalId = useAppStateStore((state) => state.professionalId);
 
   const navItems: NavItem[] = [
     {
@@ -61,7 +61,8 @@ export function ProfessionalSidebar() {
       href: "/dashboard/profile",
       icon: User,
       children: [
-        { label: t.professional.sidebar.viewProfile, href: "/dashboard/profile/professional", icon: View},
+        { label: t.professional.sidebar.viewProfile,  href: `/dashboard/profile/professional/${professionalId}`,
+          icon: View},
         { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/professional/verify-documents", icon: FileCheck },
         { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/professional/payments", icon: CreditCard },
         { label: t.professional.sidebar.workGallery, href: "/dashboard/professional/gallery", icon: ImageIcon },

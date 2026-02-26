@@ -7,6 +7,7 @@ import {
   SetupProfileRequest,
   User 
 } from '@/lib/data/auth';
+import { useAppStateStore } from '@/stores/app-state-store';
 import { useUserStore } from '@/stores/user-store';
 
 export async function login(phoneNumber: string): Promise<boolean> {
@@ -23,6 +24,31 @@ export async function login(phoneNumber: string): Promise<boolean> {
     throw error;
   }
 }
+
+// export async function verifyOTP(
+//   phoneNumber: string, 
+//   otp: string,
+//   rememberMe: boolean = true
+// ): Promise<VerifyOTPResponse & { remember?: boolean }> {
+//   try {
+//     const response = await api.post<VerifyOTPResponse>(
+//       '/auth/verify_otp', 
+//       { phone_number: phoneNumber, otp },
+//       { skipAuth: true }
+//     );
+    
+//     // Store the token
+//     if (response.access_token) {
+//       setToken(response.access_token, rememberMe);
+//     }
+    
+//     return { ...response, remember: rememberMe };
+//   } catch (error) {
+//     console.error('Verify OTP error:', error);
+//     throw error;
+//   }
+// }
+
 
 export async function verifyOTP(
   phoneNumber: string, 
@@ -41,7 +67,37 @@ export async function verifyOTP(
       setToken(response.access_token, rememberMe);
     }
     
-    return { ...response, remember: rememberMe };
+    // IMPORTANT: Fetch user profile immediately after getting token
+    try {
+      const userProfile = await getUserProfile();
+      
+      // Update user store with full profile
+      useUserStore.getState().setUser(userProfile);
+      
+      // Update app state store with basic info and professional_id
+      useAppStateStore.getState().login(
+        userProfile.id,
+        userProfile.type,
+        userProfile.professional_id // Pass professional_id here
+      );
+      
+      console.log('User stored after OTP verification:', {
+        id: userProfile.id,
+        type: userProfile.type,
+        professional_id: userProfile.professional_id
+      });
+      
+      // Add user to response
+      return { 
+        ...response, 
+        remember: rememberMe,
+        user: userProfile 
+      };
+    } catch (profileError) {
+      console.error('Failed to fetch user profile after OTP:', profileError);
+      // Still return token response even if profile fetch fails
+      return { ...response, remember: rememberMe };
+    }
   } catch (error) {
     console.error('Verify OTP error:', error);
     throw error;
@@ -49,6 +105,47 @@ export async function verifyOTP(
 }
 
 
+// export async function setupProfile(
+//   profileData: {
+//     full_name: string;
+//     gender: string;
+//     age_group: string;
+//     email: string;
+//   }
+// ): Promise<User> {
+//   try {
+//     const results = await Promise.allSettled([
+//       api.patch<User>('/users/fullname', { full_name: profileData.full_name }),
+//       api.patch<User>('/users/gender', { gender: profileData.gender }),
+//       api.patch<User>('/users/age-group', { age_group: profileData.age_group }),
+//       api.patch<User>('/users/email', { email: profileData.email })
+//     ]);
+    
+    
+//     // Check if any requests failed
+//     const failed = results.filter(r => r.status === 'rejected');
+//     if (failed.length > 0) {
+//       console.error('Some profile updates failed:', failed);
+//       throw new Error('Profile setup partially failed');
+//     }
+    
+//     // Get the last successful response 
+//     const response = results[results.length - 1] as PromiseFulfilledResult<User>;
+    
+//     // Update store
+//     if (useUserStore) {
+//       useUserStore.getState().updateUser(response.value);
+//     }
+
+    
+    
+//     console.log("USERS DATA", response.value);
+//     return response.value;
+//   } catch (error) {
+//     console.error('Setup profile error:', error);
+//     throw error;
+//   }
+// }
 
 export async function setupProfile(
   profileData: {
@@ -56,6 +153,7 @@ export async function setupProfile(
     gender: string;
     age_group: string;
     email: string;
+    professional_id ?:number
   }
 ): Promise<User> {
   try {
@@ -65,7 +163,6 @@ export async function setupProfile(
       api.patch<User>('/users/age-group', { age_group: profileData.age_group }),
       api.patch<User>('/users/email', { email: profileData.email })
     ]);
-    
     
     // Check if any requests failed
     const failed = results.filter(r => r.status === 'rejected');
@@ -77,9 +174,19 @@ export async function setupProfile(
     // Get the last successful response 
     const response = results[results.length - 1] as PromiseFulfilledResult<User>;
     
-    // Update store
+    // Update user store
     if (useUserStore) {
       useUserStore.getState().updateUser(response.value);
+    }
+    
+    // Update app state store if professional_id exists
+    if (response.value.professional_id) {
+      useAppStateStore.getState().setProfessionalId(response.value.professional_id);
+    }
+    
+    // Also update userType in app state if it changed
+    if (response.value.type) {
+      useAppStateStore.getState().setUserType(response.value.type);
     }
     
     console.log("USERS DATA", response.value);
@@ -90,11 +197,30 @@ export async function setupProfile(
   }
 }
 
-
 // Get user profile (requires valid token)
+// export async function getUserProfile(): Promise<User> {
+//   return api.get<User>('/users/me');
+// }
+
 export async function getUserProfile(): Promise<User> {
-  return api.get<User>('/users/me');
+  const userData = await api.get<User>('/users/me');
+  
+  // Also update stores when fetching profile
+  if (userData) {
+    // Update user store
+    useUserStore.getState().setUser(userData);
+    
+    // Update app state store
+    useAppStateStore.getState().login(
+      userData.id,
+      userData.type,
+      userData.professional_id
+    );
+  }
+  
+  return userData;
 }
+
 
 // Logout - clear token
 export function logout(): void {

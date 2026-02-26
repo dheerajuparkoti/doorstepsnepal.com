@@ -7,7 +7,7 @@ interface AppStateStore {
   userId: number | null;
   userType: 'customer' | 'professional' | 'admin' | null;
   isAuthenticated: boolean;
-  
+  professionalId: number | null; 
   // App mode
   isProfessionalMode: boolean;
   
@@ -18,6 +18,7 @@ interface AppStateStore {
   // Actions
   setUserId: (userId: number | null) => void;
   setUserType: (userType: 'customer' | 'professional' | 'admin' | null) => void;
+   setProfessionalId: (professionalId: number | null) => void;
   setAuthenticated: (isAuthenticated: boolean) => void;
   
   // Mode toggles
@@ -25,7 +26,7 @@ interface AppStateStore {
   setProfessionalMode: (isProfessionalMode: boolean) => void;
   
   // Auth actions
-  login: (userId: number, userType: 'customer' | 'professional' | 'admin') => void;
+  login: (userId: number, userType: 'customer' | 'professional' | 'admin', professionalId?: number) => void;
   logout: () => void;
   
   // UI Actions
@@ -43,6 +44,7 @@ export const useAppStateStore = create<AppStateStore>()(
       // Initial state
       userId: null,
       userType: null,
+      professionalId: null,
       isAuthenticated: false,
       isProfessionalMode: false,
       isLoading: false,
@@ -51,6 +53,7 @@ export const useAppStateStore = create<AppStateStore>()(
       setUserId: (userId) => set({ userId }),
       
       setUserType: (userType) => set({ userType }),
+      setProfessionalId: (professionalId) => set({ professionalId }),
       
       setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
       
@@ -60,9 +63,10 @@ export const useAppStateStore = create<AppStateStore>()(
       
       setProfessionalMode: (isProfessionalMode) => set({ isProfessionalMode }),
       
-      login: (userId, userType) => set({
+      login: (userId, userType, professionalId) => set({
         userId,
         userType,
+        professionalId: professionalId || null, 
         isAuthenticated: true,
         isProfessionalMode: userType === 'professional',
         error: null,
@@ -96,6 +100,7 @@ export const useAppStateStore = create<AppStateStore>()(
       partialize: (state) => ({
         userId: state.userId,
         userType: state.userType,
+        professionalId: state.professionalId,
         isAuthenticated: state.isAuthenticated,
         isProfessionalMode: state.isProfessionalMode,
       }),

@@ -68,59 +68,108 @@ export default function PaymentDashboardPage() {
   const customerId = user?.id;
   const professionalId = user?.professional_id;
 
+
+
   useEffect(() => {
     if (user) {
       loadOrders();
     }
   }, [user, isProfessional]); // Re-run when user or mode changes
 
-  const loadOrders = async () => {
-    if (!user) {
-      console.warn('No user found, cannot load orders');
-      return;
-    }
+  // const loadOrders = async () => {
+  //   if (!user) {
+  //     console.warn('No user found, cannot load orders');
+  //     return;
+  //   }
 
-    try {
-      setIsRefreshing(true);
+  //   try {
+  //     setIsRefreshing(true);
       
-      if (isProfessional) {
-        // Professional mode - fetch orders by professional ID
-        if (!professionalId) {
-          console.warn('Professional ID not found');
-          toast({
-            title: locale === 'ne' ? 'जानकारी छैन' : 'Information Missing',
-            description: locale === 'ne' 
-              ? 'तपाईंको प्रोफेशनल आईडी फेला परेन' 
-              : 'Your professional ID could not be found',
-            variant: 'default',
-          });
-          return;
-        }
+  //     if (isProfessional) {
+  //       // Professional mode - fetch orders by professional ID
+  //       if (!professionalId) {
+  //         console.warn('Professional ID not found');
+  //         toast({
+  //           title: locale === 'ne' ? 'जानकारी छैन' : 'Information Missing',
+  //           description: locale === 'ne' 
+  //             ? 'तपाईंको प्रोफेशनल आईडी फेला परेन' 
+  //             : 'Your professional ID could not be found',
+  //           variant: 'default',
+  //         });
+  //         return;
+  //       }
         
-        await fetchOrders({ professionalId });
-      } else {
-        // Customer mode - fetch orders by customer ID
-        if (!customerId) {
-          console.warn('Customer ID not found');
-          return;
-        }
+  //       await fetchOrders({ professionalId });
+  //     } else {
+  //       // Customer mode - fetch orders by customer ID
+  //       if (!customerId) {
+  //         console.warn('Customer ID not found');
+  //         return;
+  //       }
         
-        await fetchCustomerOrders(customerId);
-      }
-    } catch (err) {
-      console.error('Error loading payment data:', err);
-      toast({
-        title: locale === 'ne' ? 'त्रुटि' : 'Error',
-        description: locale === 'ne' 
-          ? 'भुक्तानी डाटा लोड गर्न असफल' 
-          : 'Failed to load payment data',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
+  //       await fetchCustomerOrders(customerId);
+  //     }
+  //   } catch (err) {
+  //     console.error('Error loading payment data:', err);
+  //     toast({
+  //       title: locale === 'ne' ? 'त्रुटि' : 'Error',
+  //       description: locale === 'ne' 
+  //         ? 'भुक्तानी डाटा लोड गर्न असफल' 
+  //         : 'Failed to load payment data',
+  //       variant: 'destructive',
+  //     });
+  //   } finally {
+  //     setIsRefreshing(false);
+  //   }
+  // };
 
+
+  const loadOrders = async () => {
+  if (!user) {
+    console.warn('No user found, cannot load orders');
+    return;
+  }
+
+  try {
+    setIsRefreshing(true);
+    
+    if (isProfessional) {
+      if (!professionalId) {
+        console.warn('Professional ID not found');
+        toast({
+          title: locale === 'ne' ? 'जानकारी छैन' : 'Information Missing',
+          description: locale === 'ne' 
+            ? 'तपाईंको प्रोफेशनल आईडी फेला परेन' 
+            : 'Your professional ID could not be found',
+          variant: 'default',
+        });
+        return;
+      }
+      await fetchOrders({ 
+        professional_id: professionalId,
+        per_page: 10000 
+      });
+    } else {
+     
+      if (!customerId) {
+        console.warn('Customer ID not found');
+        return;
+      }
+      await fetchCustomerOrders(customerId);
+    }
+  } catch (err) {
+    console.error('Error loading payment data:', err);
+    toast({
+      title: locale === 'ne' ? 'त्रुटि' : 'Error',
+      description: locale === 'ne' 
+        ? 'भुक्तानी डाटा लोड गर्न असफल' 
+        : 'Failed to load payment data',
+      variant: 'destructive',
+    });
+  } finally {
+    setIsRefreshing(false);
+  }
+};
   const handleRefresh = () => {
     loadOrders();
   };

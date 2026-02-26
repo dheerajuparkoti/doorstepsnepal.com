@@ -67,6 +67,13 @@ export function DashboardTopbar() {
   const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
   const [pendingMode, setPendingMode] = useState<"customer" | "professional" | null>(null);
   
+
+   const needsOnboarding = (() => {
+    if (!user) return false;
+    const isProfessional = user.user_type === "professional" || user.type === "professional";
+    return isProfessional && !user.professional_id;
+  })();
+
   // Use individual selectors for better performance
   const unreadCount = useUnreadCount();
   const isLoading = useIsLoading();
@@ -118,30 +125,48 @@ export function DashboardTopbar() {
       : "/dashboard/profile/customer";
 
   // Handle mode switch with onboarding check
-  const handleModeSwitch = (newMode: "customer" | "professional") => {
-    // If switching to professional mode, check if onboarding is complete
-    if (newMode === "professional") {
+  // const handleModeSwitch = (newMode: "customer" | "professional") => {
+  //   // If switching to professional mode, check if onboarding is complete
+  //   if (newMode === "professional") {
 
 
      
     
 
-      if (needsOnboarding) {
+  //     if (needsOnboarding) {
   
+  //       setPendingMode(newMode);
+  //       setShowOnboardingDialog(true);
+  //       return;
+  //     }
+  //   }
+    
+  //   // If switching to customer or professional onboarding is complete, proceed
+  //   performModeSwitch(newMode);
+  // };
+
+ const handleModeSwitch = (newMode: "customer" | "professional") => {
+    // Now this will use the current, correct value
+    if (newMode === "professional") {
+      if (needsOnboarding) {
         setPendingMode(newMode);
         setShowOnboardingDialog(true);
         return;
       }
     }
-    
-    // If switching to customer or professional onboarding is complete, proceed
     performModeSwitch(newMode);
   };
+
+
+
+
   const performModeSwitch = (newMode: "customer" | "professional") => {
     setMode(newMode);
    
     router.push("/dashboard");
   };
+
+   
 
   // Handle onboarding dialog confirmation
   const handleStartOnboarding = () => {
@@ -289,7 +314,7 @@ export function DashboardTopbar() {
         </div>
       </header>
 
-      {/* Onboarding Required Dialog */}
+      
      {/* Onboarding Required Dialog */}
 <Dialog open={showOnboardingDialog} onOpenChange={setShowOnboardingDialog}>
   <DialogContent className="sm:max-w-md">

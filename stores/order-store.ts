@@ -86,32 +86,62 @@ export const useOrderStore = create<OrderState>()(
           set({ filters: initialState.filters });
         },
 
-        fetchOrders: async (filters = {}) => {
-          set({ isLoading: true, error: null });
-          try {
-            const currentFilters = get().filters;
-            const mergedFilters = { ...currentFilters, ...filters };
+        // fetchOrders: async (filters = {}) => {
+        //   set({ isLoading: true, error: null });
+        //   try {
+        //     const currentFilters = get().filters;
+        //     const mergedFilters = { ...currentFilters, ...filters };
             
-            const response = await OrderAPI.getOrders(mergedFilters);
+        //     const response = await OrderAPI.getOrders(mergedFilters);
             
-            set({
-              orders: response.orders,
-              pagination: {
-                total: response.total,
-                page: response.page,
-                per_page: response.per_page,
-                total_pages: response.total_pages,
-              },
-              isLoading: false,
-            });
-          } catch (error) {
-            set({
-              error: error instanceof Error ? error.message : 'Failed to fetch orders',
-              isLoading: false,
-            });
-          }
-        },
-
+        //     set({
+        //       orders: response.orders,
+        //       pagination: {
+        //         total: response.total,
+        //         page: response.page,
+        //         per_page: response.per_page,
+        //         total_pages: response.total_pages,
+        //       },
+        //       isLoading: false,
+        //     });
+        //   } catch (error) {
+        //     set({
+        //       error: error instanceof Error ? error.message : 'Failed to fetch orders',
+        //       isLoading: false,
+        //     });
+        //   }
+        // },
+        
+fetchOrders: async (filters: OrderFilters = {}) => {
+  set({ isLoading: true, error: null });
+  try {
+    const currentFilters = get().filters;
+    const mergedFilters = { ...currentFilters, ...filters };
+    
+    console.log('Fetching orders with merged filters:', mergedFilters);
+    
+    const response = await OrderAPI.getOrders(mergedFilters);
+    
+    console.log('Received orders response:', response);
+    
+    set({
+      orders: response.orders,
+      pagination: {
+        total: response.total,
+        page: response.page,
+        per_page: response.per_page,
+        total_pages: response.total_pages,
+      },
+      isLoading: false,
+    });
+  } catch (error) {
+    console.error('Error in fetchOrders:', error);
+    set({
+      error: error instanceof Error ? error.message : 'Failed to fetch orders',
+      isLoading: false,
+    });
+  }
+},
         fetchCustomerOrders: async (customerId: number) => {
           set({ isLoading: true, error: null });
           try {

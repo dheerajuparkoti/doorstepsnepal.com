@@ -67,6 +67,7 @@ export default function AcceptedJobsPage() {
     try {
       setIsRefreshing(true);
       await fetchOrders({
+        
         professional_id: currentProfessionalId,
         status: OrderStatus.ACCEPTED,
       });

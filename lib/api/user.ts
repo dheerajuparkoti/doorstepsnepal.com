@@ -2,7 +2,78 @@
 import { User } from '@/lib/data/user';
 import { api, removeToken } from '@/config/api-client';
 import { useUserStore } from '@/stores/user-store';
+import { useAppStateStore } from '@/stores/app-state-store';
 
+// export async function getUserProfile(): Promise<User> {
+//   console.log("Fetching user profile...");
+  
+//   try {
+//     const response = await api.get<any>('/users/me', { 
+//       cache: 'no-store' 
+//     });
+    
+
+//     const userData: User = {
+//       id: response.id,
+//       phone_number: response.phone_number,
+//       phone: response.phone_number,
+//       full_name: response.full_name || "",
+//       name: response.full_name || "",
+//       nameNe: response.full_name || "",
+//       email: response.email || "",
+//       gender: response.gender || "",
+//       age_group: response.age_group || "",
+//       profile_image: response.profile_image || "",
+//       avatar: response.profile_image || "",
+//       type: response.type || "customer",
+//       mode: response.type || "customer",
+//       is_setup_complete: response.is_setup_complete || false,
+//       is_onboarding_complete: response.is_onboarding_complete || false,
+//       isVerified: true,
+//       isProfessionalVerified: response.type === "professional",
+
+//       // Optional fields
+//       order_count: response.order_count,
+//       total_spent: response.total_spent,
+//       full_address: response.full_address,
+//       member_since: response.member_since,
+//       deletion_requested: response.deletion_requested,
+//       deletion_requested_at: response.deletion_requested_at,
+//       is_deleted: response.is_deleted,
+//       is_admin_approved: response.is_admin_approved,
+//       professional_id: response.professional_id,
+//     };
+    
+
+//     // Update Zustand store
+//     const { setUser } = useUserStore.getState();
+//     setUser(userData);
+    
+//     return userData;
+//     // Update Zustand store if needed
+//     // if (useUserStore) {
+//     //   useUserStore.getState().updateUser(userData);
+//     // }
+    
+//     // return userData;
+//   } catch (error) {
+//     console.error('Get user profile error:', error);
+    
+//     // If it's a 401 error, clear auth state
+//     if (error instanceof Error && error.message.includes('401')) {
+//       console.log("401 error detected, clearing auth state");
+//       removeToken();
+      
+//       if (useUserStore) {
+//         useUserStore.getState().clearUser();
+//       }
+//     }
+    
+//     throw error;
+//   }
+// }
+
+// lib/api/user.ts (partial update)
 export async function getUserProfile(): Promise<User> {
   console.log("Fetching user profile...");
   
@@ -11,7 +82,6 @@ export async function getUserProfile(): Promise<User> {
       cache: 'no-store' 
     });
     
-
     const userData: User = {
       id: response.id,
       phone_number: response.phone_number,
@@ -30,8 +100,6 @@ export async function getUserProfile(): Promise<User> {
       is_onboarding_complete: response.is_onboarding_complete || false,
       isVerified: true,
       isProfessionalVerified: response.type === "professional",
-
-      // Optional fields
       order_count: response.order_count,
       total_spent: response.total_spent,
       full_address: response.full_address,
@@ -43,35 +111,29 @@ export async function getUserProfile(): Promise<User> {
       professional_id: response.professional_id,
     };
     
-
-    // Update Zustand store
-    const { setUser } = useUserStore.getState();
-    setUser(userData);
+    // Update both stores
+    useUserStore.getState().setUser(userData);
+    useAppStateStore.getState().login(
+      userData.id,
+      userData.type,
+      userData.professional_id
+    );
     
     return userData;
-    // Update Zustand store if needed
-    // if (useUserStore) {
-    //   useUserStore.getState().updateUser(userData);
-    // }
-    
-    // return userData;
   } catch (error) {
     console.error('Get user profile error:', error);
     
-    // If it's a 401 error, clear auth state
     if (error instanceof Error && error.message.includes('401')) {
       console.log("401 error detected, clearing auth state");
       removeToken();
       
-      if (useUserStore) {
-        useUserStore.getState().clearUser();
-      }
+      useUserStore.getState().clearUser();
+      useAppStateStore.getState().logout();
     }
     
     throw error;
   }
 }
-
 // Update full name
 export async function updateFullName(full_name: string): Promise<User> {
   const response = await api.patch<User>('/users/fullname', { full_name });

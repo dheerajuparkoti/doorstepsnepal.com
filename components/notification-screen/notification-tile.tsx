@@ -26,6 +26,7 @@ import { Notification, getNotificationTitle, getNotificationBody } from "@/lib/d
 import { useNotificationStore } from "@/stores/notification-store";
 import { cn } from "@/lib/utils";
 import { NepaliDateService } from "@/lib/utils/nepaliDate";
+import { useAuth } from "@/lib/context/auth-context";
 
 interface NotificationTileProps {
   notification: Notification;
@@ -33,8 +34,128 @@ interface NotificationTileProps {
 
 export function NotificationTile({ notification }: NotificationTileProps) {
   const router = useRouter();
+   const { mode } = useAuth(); 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { markAsRead, deleteNotification } = useNotificationStore();
+
+ // Helper to determine if notification is for professional
+const isProfessionalNotification = () => {
+  const professionalTypes = [
+    'New Order',
+    'payment_received',
+    'withdrawal_approved',
+    'withdrawal_completed',
+    'withdrawal_rejected',
+    'Order Update'
+  ];
+
+  const professionalTitles = [
+    'Inspection Approved',
+    'Inspection Rejected',
+    'Order Cancelled'
+  ];
+
+  // Check if it's a professional notification
+  return professionalTypes.includes(notification.type) ||
+    (notification.type === 'Order Update' && professionalTitles.includes(notification.title));
+};
+
+// Helper to determine if notification is for customer
+const isCustomerNotification = () => {
+  const customerTitles = [
+    'Inspection Completed',
+    'Payment Successful',
+  ];
+
+  return notification.type === 'Order Update' && customerTitles.includes(notification.title);
+};
+
+// Helper to check if it's a payment notification for customer
+const isCustomerPaymentNotification = () => {
+  return notification.title === 'Payment Successful';
+};
+
+// Helper to check if it's a payment notification for professional
+const isProfessionalPaymentNotification = () => {
+  return notification.type === 'payment_received';
+};
+
+// Get route based on mode and notification type
+const getRouteForNotification = () => {
+  const isProfessional = mode === 'professional';
+  const isProNotif = isProfessionalNotification();
+  const isCustNotif = isCustomerNotification();
+  const isCustomerPayment = isCustomerPaymentNotification();
+  const isProfessionalPayment = isProfessionalPaymentNotification();
+  const orderId = notification.custom_data?.orderId || notification.custom_data?.order_id;
+  const withdrawalId = notification.custom_data?.withdrawal_id;
+
+  // Professional routes
+  if (isProfessional) {
+    // Professional notifications (New Order, Order Updates for approval/rejection, etc.)
+    if (isProNotif) {
+      // payment_received goes to payments page
+      if (isProfessionalPayment && orderId) {
+        return `/dashboard/payments/orders/${orderId}`;
+      }
+      
+      if (orderId) {
+        // Route to professional order details
+        return `/dashboard/professional/jobs/job-details/${orderId}`;
+      }
+      if (withdrawalId) {
+        // Route to professional withdrawal details
+        return `/dashboard/professional/wallet`;
+      }
+      if (notification.type === 'withdrawal_approved' || 
+          notification.type === 'withdrawal_completed' || 
+          notification.type === 'withdrawal_rejected') {
+        return `/dashboard/professional/wallet || ''}`;
+      }
+      // Default professional dashboard
+      return '/dashboard/professional';
+    } 
+    // Customer notifications in professional mode (Inspection Completed, Payment Successful, etc.)
+    else {
+      if (orderId) {
+        // Customer Payment Successful goes to payments page
+        if (isCustomerPayment) {
+          return `/dashboard/payments/orders/${orderId}`;
+        }
+        // Other customer notifications go to booking details
+        return `/dashboard/customer/bookings/booking-details/${orderId}`;
+      }
+      return `/dashboard/notifications/${notification.id}`;
+    }
+  } 
+  // Customer routes
+  else {
+    // Customer notifications (Inspection Completed, Payment Successful, etc.)
+    if (isCustNotif || !isProNotif) {
+      if (orderId) {
+        // Payment Successful goes to payments page
+        if (isCustomerPayment) {
+          return `/dashboard/payments/orders/${orderId}`;
+        }
+        // Other customer notifications go to booking details
+        return `/dashboard/customer/bookings/booking-details/${orderId}`;
+      }
+      // Default customer dashboard
+      return '/dashboard/customer';
+    } 
+    // Professional notifications in customer mode (should be filtered out, but just in case)
+    else {
+      if (orderId) {
+        // Even if professional notification appears in customer mode, payment_received should go to payments
+        if (isProfessionalPayment) {
+          return `/dashboard/payments/orders/${orderId}`;
+        }
+        return `/dashboard/professional/jobs/job-details/${orderId}`;
+      }
+      return `/dashboard/notifications/${notification.id}`;
+    }
+  }
+};
 
   const handleClick = async () => {
     // Mark as read if unread
@@ -42,17 +163,18 @@ export function NotificationTile({ notification }: NotificationTileProps) {
       await markAsRead(notification.id);
     }
 
-    // Handle navigation based on action_route
-    if (notification.action_route === "order") {
-      const orderId = notification.custom_data?.orderId || notification.custom_data?.order_id;
-      if (orderId) {
-        router.push(`/dashboard/orders/${orderId}`);
-      }
+    // Get the appropriate route based on mode
+    const route = getRouteForNotification();
+    
+    // Navigate to the route
+    if (route) {
+      router.push(route);
     } else {
-      // Default: open notification detail
+      // Fallback to notification detail
       router.push(`/dashboard/notifications/${notification.id}`);
     }
   };
+
 
   const handleMarkAsRead = async (e: React.MouseEvent) => {
     e.stopPropagation();

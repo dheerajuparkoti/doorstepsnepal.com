@@ -32,6 +32,7 @@ import ProfessionalServiceAreasOnboarding from './complete/page';
 import { useOnboardingForm } from '@/hooks/use-onboarding-form';
 import { PaymentMethod } from '@/lib/data/professional';
 import { ProtectedRoute } from '@/components/auth/protected-route';
+import { useAuth } from '@/lib/context/auth-context';
 
 const STEPS = [
   { 
@@ -66,7 +67,7 @@ export default function ProfessionalOnboardingPage() {
   const [professionalId, setProfessionalId] = useState<number | null>(null);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false); 
   const [showServiceAreas, setShowServiceAreas] = useState(false);
-
+ const { user,setMode } = useAuth(); 
   
   // Stores
   const { registerProfessional, patchProfile,isRegistering, error, clearError } = useProfessionalStore();
@@ -81,7 +82,30 @@ export default function ProfessionalOnboardingPage() {
     isStepValid,
   } = useOnboardingForm();
 
-  const userId = 178; // TODO: Get from auth
+    // Get userId from auth user
+  const userId = user?.id;
+
+      // Handle back button press
+  useEffect(() => {
+    // Handle browser back button
+    const handlePopState = () => {
+      // Switch back to customer mode
+      setMode('customer');
+      // You might want to show a toast
+      toast.info(
+        locale === 'ne' 
+          ? 'प्रोफेशनल दर्ता रद्द गरियो' 
+          : 'Professional registration cancelled'
+      );
+    };
+
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [setMode, locale]);
+
 
   useEffect(() => {
     if (error) {
@@ -93,6 +117,15 @@ export default function ProfessionalOnboardingPage() {
     }
   }, [error, locale, clearError]);
 
+
+    // Check if user is authenticated
+  useEffect(() => {
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+  }, [user, router]);
+
   // Check if bank details are needed when moving to next step
   const handleNext = async () => {
     const isValid = validateStep(currentStep, getStepData(currentStep));
@@ -103,9 +136,22 @@ export default function ProfessionalOnboardingPage() {
       );
       return;
     }
+    
+
+
+
+ 
 
     // If on step 0 (address step), register partial data
     if (currentStep === 0) {
+       if (!userId) {
+    toast.error(
+      locale === 'ne' 
+        ? 'प्रयोगकर्ता प्रमाणित गर्न सकिएन' 
+        : 'User not authenticated'
+    );
+    return;
+  }
       try {
         const partialData = {
           user_id: userId,
@@ -151,6 +197,7 @@ export default function ProfessionalOnboardingPage() {
   };
 
   const proceedToNextStep = () => {
+    
     const newCompletedSteps = [...completedSteps];
     newCompletedSteps[currentStep] = true;
     setCompletedSteps(newCompletedSteps);
@@ -162,7 +209,20 @@ export default function ProfessionalOnboardingPage() {
       handleSubmit();
     }
   };
-
+ // Handle your custom back button
+  const handleCustomBack = () => {
+    // Switch back to customer mode
+    setMode('customer');
+    
+    toast.info(
+      locale === 'ne' 
+        ? 'प्रोफेशनल दर्ता रद्द गरियो' 
+        : 'Professional registration cancelled'
+    );
+    
+    // Navigate back
+    router.back();
+  };
   const handleBack = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
@@ -177,6 +237,14 @@ export default function ProfessionalOnboardingPage() {
   };
 
   const handleSubmit = async () => {
+    if (!userId) {
+    toast.error(
+      locale === 'ne' 
+        ? 'प्रयोगकर्ता आईडी फेला परेन' 
+        : 'User ID not found'
+    );
+    return;
+  }
     try {
       // Use the professionalId from partial registration if available
       const professionalData = {
@@ -252,13 +320,13 @@ export default function ProfessionalOnboardingPage() {
   const handleDocumentNext = () => {
   // After documents are uploaded, show service areas page
   setShowDocumentVerification(false);
-  setShowServiceAreas(true); // Add this new state
+  setShowServiceAreas(true); 
 };
 
 const handleDocumentSkip = () => {
   // If user skips documents, still go to service areas
   setShowDocumentVerification(false);
-  setShowServiceAreas(true); // Add this new state
+  setShowServiceAreas(true); 
 };
 
 const handleServiceAreasComplete = () => {
@@ -318,14 +386,22 @@ const handleServiceAreasComplete = () => {
           className="mb-8 flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
-            <Button
+            {/* <Button
               variant="ghost"
               size="icon"
               onClick={() => router.back()}
               className="rounded-full hover:bg-white/50 backdrop-blur-sm"
             >
               <ArrowLeft className="h-5 w-5" />
-            </Button>
+            </Button> */}
+              <Button
+    variant="ghost"
+    size="icon"
+    onClick={handleCustomBack}
+    className="rounded-full hover:bg-white/50 backdrop-blur-sm"
+  >
+    <ArrowLeft className="h-5 w-5" />
+  </Button>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                 {locale === 'ne' ? 'प्रोफेशनल खाता' : 'Professional Account'}

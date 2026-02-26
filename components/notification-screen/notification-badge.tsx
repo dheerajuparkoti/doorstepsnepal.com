@@ -32,7 +32,7 @@ export function NotificationBadge({ onClick }: NotificationBadgeProps) {
     if (user?.id) {
       loadNotifications();
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); 
 
   return (
     <DropdownMenu>

@@ -732,9 +732,9 @@ const getTimeProgress = (scheduledTime: Date | string | undefined) => {
               <div className="py-8 text-center text-muted-foreground">
                 <Clock className="mx-auto mb-4 h-12 w-12 opacity-50" />
                 <p>{t.professional.jobs.noSchedule}</p>
-                <Button variant="link" className="mt-2 text-blue-500">
+                {/* <Button variant="link" className="mt-2 text-blue-500">
                   {getLocalizedText('Check available jobs', 'उपलब्ध कामहरू हेर्नुहोस्')}
-                </Button>
+                </Button> */}
               </div>
             )}
           </CardContent>

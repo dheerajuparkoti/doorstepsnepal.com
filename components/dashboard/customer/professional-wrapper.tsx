@@ -47,7 +47,10 @@ export default function ProfessionalsWrapper() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetchProfessionalServices(1, 10000);
+        const response = await fetchProfessionalServices({
+          page:1,
+          per_page:50
+        });
         const professionalServices = response.professional_services || [];
 
         // Deduplicate by professional ID

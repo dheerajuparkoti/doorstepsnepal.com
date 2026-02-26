@@ -13,7 +13,10 @@ export default function FeaturedServicesWrapper() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetchProfessionalServices(1, 30);
+        const response = await fetchProfessionalServices({
+          page:1,
+          per_page:50
+        });
         const services = response.professional_services || [];
         const pricedServices = services.filter(
           (ps: any) => ps.prices && ps.prices.length > 0

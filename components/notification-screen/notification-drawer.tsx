@@ -22,9 +22,9 @@ export function NotificationDrawer() {
 
   const otherModeCount = hasOtherModeNotifications(mode === 'professional');
 
-  const handleViewAll = () => {
-    router.push('/dashboard/notifications');
-  };
+  // const handleViewAll = () => {
+  //   router.push('/dashboard/professional/notifications');
+  // };
 
   const handleMarkAllRead = async () => {
     await markAllAsRead();
@@ -102,7 +102,7 @@ export function NotificationDrawer() {
       <Separator />
 
       {/* Footer */}
-      <div className="p-2">
+      {/* <div className="p-2">
         <Button
           variant="ghost"
           className="w-full justify-center"
@@ -110,7 +110,7 @@ export function NotificationDrawer() {
         >
           View all notifications
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -9,40 +9,74 @@ import {
 } from '@/lib/data/order';
 
 export class OrderAPI {
-  // Get orders with filters
-  // static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
+  
+
+  //  static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
   //   try {
-  //     return await api.get<OrdersResponse>('/orders', {
+  //     return await api.get<OrdersResponse>('/orders/', {
   //       params: filters,
   //       cache: 'no-store',
   //     });
-  //   } catch (error) {
+  //   } catch (error: any) {
   //     console.error('Error fetching orders:', error);
-  //     throw new Error(error instanceof Error ? error.message : 'Failed to fetch orders');
+     
+  //     if (error.response?.status === 404 || error.message.includes('404')) {
+  //       return {
+  //         orders: [],
+  //         total: 0,
+  //         page: 1,
+  //         per_page: filters.per_page || 10,
+  //         total_pages: 0,
+  //       };
+  //     }
+  //     throw new Error(error.message || 'Failed to fetch orders');
   //   }
   // }
 
-   static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
-    try {
-      return await api.get<OrdersResponse>('/orders/', {
-        params: filters,
-        cache: 'no-store',
-      });
-    } catch (error: any) {
-      console.error('Error fetching orders:', error);
-     
-      if (error.response?.status === 404 || error.message.includes('404')) {
-        return {
-          orders: [],
-          total: 0,
-          page: 1,
-          per_page: filters.per_page || 10,
-          total_pages: 0,
-        };
-      }
-      throw new Error(error.message || 'Failed to fetch orders');
+
+  static async getOrders(filters: OrderFilters = {}): Promise<OrdersResponse> {
+  try {
+    // Make sure we're passing the professional_id if it exists
+    const params: any = {
+      page: filters.page || 1,
+      per_page: filters.per_page || 10000,
+    };
+    
+    // Add professional_id if provided
+    if (filters.professional_id) {
+      params.professional_id = filters.professional_id;
     }
+    
+    // Add customer_id if provided
+    if (filters.customer_id) {
+      params.customer_id = filters.customer_id;
+    }
+    
+    // Add other filters as needed
+    if (filters.min_price) params.min_price = filters.min_price;
+    if (filters.max_price) params.max_price = filters.max_price;
+    
+    console.log('Fetching orders with params:', params);
+    
+    return await api.get<OrdersResponse>('/orders/', {
+      params,
+      cache: 'no-store',
+    });
+  } catch (error: any) {
+    console.error('Error fetching orders:', error);
+    
+    if (error.response?.status === 404 || error.message.includes('404')) {
+      return {
+        orders: [],
+        total: 0,
+        page: 1,
+        per_page: filters.per_page || 10000,
+        total_pages: 0,
+      };
+    }
+    throw new Error(error.message || 'Failed to fetch orders');
   }
+}
 
   // Get orders by customer ID
   static async getOrdersByCustomer(
