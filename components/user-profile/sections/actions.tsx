@@ -27,51 +27,19 @@ export function ProfileActions({ user }: ProfileActionsProps) {
   const { logout } = useAuth();
 
   const actions = [
-    {
-      id: 'orders',
-      icon: History,
-      label: language === 'ne' ? 'अर्डर इतिहास' : 'Order History',
-      description: language === 'ne' ? 'तपाईंको अर्डरहरू हेर्नुहोस्' : 'View your orders',
-      href: '/orders',
-      color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-100 dark:bg-blue-950/50',
-    },
-    {
-      id: 'favorites',
-      icon: Heart,
-      label: language === 'ne' ? 'मनपर्ने' : 'Favorites',
-      description: language === 'ne' ? 'तपाईंको मनपर्ने सूची' : 'Your favorite items',
-      href: '/favorites',
-      color: 'text-red-600 dark:text-red-400',
-      bgColor: 'bg-red-100 dark:bg-red-950/50',
-    },
-    ...(user.type === 'professional' ? [{
-      id: 'professional',
-      icon: Briefcase,
-      label: language === 'ne' ? 'व्यावसायिक ड्यासबोर्ड' : 'Professional Dashboard',
-      description: language === 'ne' ? 'आफ्नो सेवाहरू व्यवस्थापन गर्नुहोस्' : 'Manage your services',
-      href: '/professional/dashboard',
-      color: 'text-purple-600 dark:text-purple-400',
-      bgColor: 'bg-purple-100 dark:bg-purple-950/50',
-    }] : []),
+ 
+  
+
     {
       id: 'settings',
       icon: Settings,
       label: language === 'ne' ? 'खाता सेटिङ्ग' : 'Account Settings',
       description: language === 'ne' ? 'आफ्नो खाता व्यवस्थापन गर्नुहोस्' : 'Manage your account',
-      href: '/accountInfo',
+      href: '/dashboard/settings-privacy/account-info',
       color: 'text-gray-600 dark:text-gray-400',
       bgColor: 'bg-gray-100 dark:bg-gray-800',
     },
-    {
-      id: 'privacy',
-      icon: Shield,
-      label: language === 'ne' ? 'गोपनीयता' : 'Privacy & Security',
-      description: language === 'ne' ? 'गोपनीयता सेटिङ्गहरू' : 'Privacy settings',
-      href: '/privacy',
-      color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-100 dark:bg-green-950/50',
-    },
+  
   ];
 
   return (
@@ -102,7 +70,7 @@ export function ProfileActions({ user }: ProfileActionsProps) {
           </button>
         ))}
 
-        <button
+        {/* <button
           onClick={() => {
             logout();
             router.push('/');
@@ -123,7 +91,7 @@ export function ProfileActions({ user }: ProfileActionsProps) {
             </div>
           </div>
           <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-        </button>
+        </button> */}
       </div>
 
       {user.deletion_requested && (
@@ -139,7 +107,7 @@ export function ProfileActions({ user }: ProfileActionsProps) {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => router.push('/accountInfo')}
+              onClick={() => router.push('/dashboard/settings-privacy/account-info')}
               className="w-full mt-2 border-amber-300 dark:border-amber-700 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30"
             >
               Cancel Deletion

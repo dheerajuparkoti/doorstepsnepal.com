@@ -1518,6 +1518,7 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { toast } from '@/components/ui/use-toast';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
+import { ProperCaseFormatter } from '@/lib/utils/formatters';
 
 interface ProfessionalOrderCardProps {
   order: Order;
@@ -1665,9 +1666,15 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
       if (!confirmed) return;
 
       setIsSubmitting(true);
-      
+       console.log("=================ORDER CHECK");
       // Update order status
-      await updateOrder(order.id, { order_status: newStatus });
+     const response= await updateOrder(order.id, { order_status: newStatus });
+      console.log(response);
+      console.log(newStatus);
+
+      console.log("=================ORDER COMPLETED");
+
+
 
       // Send notification to customer based on status change
       let notificationTitle = '';
@@ -1707,6 +1714,9 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
           initial_price: order.initial_price
         }
       });
+
+
+
 
       toast({
         title: getLocalizedText('Status Updated', 'स्थिति अद्यावधिक गरियो'),
@@ -2279,15 +2289,28 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
                           </Label>
                           <div className="flex items-center mt-1">
                             <span className="mr-2 font-medium">Rs.</span>
-                            <Input
-                              id="new-price"
-                              type="number"
-                              value={newPrice}
-                              onChange={(e) => setNewPrice(e.target.value)}
-                              placeholder={getLocalizedText('Enter updated price', 'अद्यावधिक मूल्य प्रविष्ट गर्नुहोस्')}
-                              min="0"
-                              step="100"
-                            />
+                          <Input
+  id="new-price"
+  type="number"
+  value={newPrice}
+  onChange={(e) => setNewPrice(e.target.value)}
+  placeholder={getLocalizedText('Enter updated price', 'अद्यावधिक मूल्य प्रविष्ट गर्नुहोस्')}
+  min="100"
+  step="100"
+  onKeyDown={(e) => {
+ 
+    if (e.key === '-' || e.key === 'e') {
+      e.preventDefault();
+    }
+  }}
+  onBlur={(e) => {
+  
+    const value = parseFloat(e.target.value);
+    if (value < 100) {
+      setNewPrice('100');
+    }
+  }}
+/>
                           </div>
                         </div>
 
@@ -2298,12 +2321,17 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
                           <Textarea
                             id="inspection-notes"
                             value={inspectionNotes}
-                            onChange={(e) => setInspectionNotes(e.target.value)}
+                            // onChange={(e) => setInspectionNotes(e.target.value)}
+                                onChange={(e) => {
+    const formatted = ProperCaseFormatter.format(e.target.value);
+    setInspectionNotes(formatted);  
+  }}  
                             placeholder={getLocalizedText(
                               'Describe site conditions, any changes needed, additional requirements...',
                               'स्थलको अवस्था, आवश्यक परिवर्तनहरू, अतिरिक्त आवश्यकताहरू वर्णन गर्नुहोस्...'
                             )}
                             rows={4}
+                            maxLength={250}
                             className="mt-1"
                           />
                         </div>

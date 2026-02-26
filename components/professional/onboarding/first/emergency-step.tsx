@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n/context';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { motion } from 'framer-motion';
 import {
   Form,
@@ -24,25 +23,7 @@ import {
 } from '@/components/ui/select';
 import { Phone, User, Heart, Users, AlertCircle } from 'lucide-react';
 import { IntlPhoneInput } from '@/components/ui/intl-phone-input';
-
-const emergencySchema = z.object({
-  ec_name: z.string().min(1, 'Name is required').max(50, 'Name too long'),
-  ec_relationship: z.string().min(1, 'Relationship is required').max(30, 'Too long'),
-  ec_phone: z.string().min(1, 'Phone number is required')
-    .regex(/^[0-9]{10}$/, 'Invalid phone number'),
-  referred_by: z.string().min(1, 'Please select an option'),
-  referrer_name: z.string().optional(),
-}).refine((data) => {
-  if (data.referred_by === 'Friend' && !data.referrer_name) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Friend name is required',
-  path: ['referrer_name'],
-});
-
-type EmergencyFormValues = z.infer<typeof emergencySchema>;
+import { getEmergencySchema, EmergencyFormValues } from '@/lib/schemas/emergency-schema';
 
 const REFERRAL_OPTIONS = [
   'Friend',
@@ -59,13 +40,18 @@ interface EmergencyStepProps {
 }
 
 export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
-  const { locale } = useI18n();
+  const { locale, language } = useI18n();
   const [showReferrerName, setShowReferrerName] = useState(
     initialData?.referred_by === 'Friend'
   );
+  const getLocalizedText = (en: string, ne: string) => {
+    return language === 'ne' ? ne : en;
+  };
+
+
 
   const form = useForm<EmergencyFormValues>({
-    resolver: zodResolver(emergencySchema),
+    resolver: zodResolver(getEmergencySchema(getLocalizedText)),
     defaultValues: {
       ec_name: initialData?.ec_name || '',
       ec_relationship: initialData?.ec_relationship || '',
@@ -73,6 +59,7 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
       referred_by: initialData?.referred_by || '',
       referrer_name: initialData?.referrer_name || '',
     },
+    mode: 'onChange', 
   });
 
   const watchReferredBy = form.watch('referred_by');
@@ -81,15 +68,24 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
     setShowReferrerName(watchReferredBy === 'Friend');
     if (watchReferredBy !== 'Friend') {
       form.setValue('referrer_name', '');
+
+      form.clearErrors('referrer_name');
     }
   }, [watchReferredBy, form]);
 
   useEffect(() => {
-    const subscription = form.watch((value) => {
+    const subscription = form.watch((value: any) => {
       onUpdate(value);
     });
     return () => subscription.unsubscribe();
   }, [form, onUpdate]);
+
+
+  const handleNameInput = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+  
+    const sanitized = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    field.onChange(sanitized);
+  };
 
   return (
     <Form {...form}>
@@ -114,6 +110,7 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
                   <FormControl>
                     <Input 
                       {...field} 
+                      onChange={(e) => handleNameInput(e, field)}
                       placeholder={locale === 'ne' ? 'राम बहादुर' : 'Ram Bahadur'}
                       className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
@@ -135,6 +132,7 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
                   <FormControl>
                     <Input 
                       {...field} 
+                      onChange={(e) => handleNameInput(e, field)}
                       placeholder={locale === 'ne' ? 'आमा, बुबा, श्रीमान्' : 'Mother, Father, Spouse'}
                       className="transition-all focus:ring-2 focus:ring-primary/20"
                     />
@@ -158,7 +156,6 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
                   <IntlPhoneInput
                     value={field.value}
                     onChange={field.onChange}
-                    // defaultCountry="NP"
                     className="w-full"
                   />
                 </FormControl>
@@ -183,7 +180,11 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
                 <FormLabel>
                   {locale === 'ne' ? 'तपाईंले हाम्रो बारे कसरी थाहा पाउनुभयो?' : 'How did you hear about us?'} *
                 </FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select 
+                  onValueChange={field.onChange} 
+                  defaultValue={field.value}
+                  value={field.value}
+                >
                   <FormControl>
                     <SelectTrigger className="transition-all focus:ring-2 focus:ring-primary/20">
                       <SelectValue placeholder={locale === 'ne' ? 'छान्नुहोस्' : 'Select an option'} />
@@ -207,6 +208,7 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
             >
               <FormField
                 control={form.control}
@@ -219,6 +221,8 @@ export function EmergencyStep({ initialData, onUpdate }: EmergencyStepProps) {
                     <FormControl>
                       <Input 
                         {...field} 
+                        value={field.value || ''}
+                        onChange={(e) => handleNameInput(e, field)}
                         placeholder={locale === 'ne' ? 'साथीको नाम' : "Enter friend's name"}
                         className="transition-all focus:ring-2 focus:ring-primary/20"
                       />

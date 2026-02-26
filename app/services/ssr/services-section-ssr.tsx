@@ -106,7 +106,7 @@ export async function ServicesSection({
   let subCategories: SubCategory[] = [];
 
 if (categoryId) {
-  const response = await fetchSubCategories(1, 100, categoryId);
+  const response = await fetchSubCategories(1, 1000, categoryId);
   subCategories = response.sub_categories;
 }
 

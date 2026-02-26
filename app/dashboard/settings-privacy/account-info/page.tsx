@@ -722,7 +722,8 @@ import { AddressSection } from '@/components/account/address-section';
 import { useProfessionalStore } from '@/stores/professional-store';
 import { professionalApi } from '@/lib/api/professional';
 import { useI18n } from '@/lib/i18n/context';
-
+import { getProfileSchema } from '@/lib/schemas/profile-schema';
+import { z } from 'zod';
 export default function AccountInfoPage() {
   const { t, language } = useI18n();
   const router = useRouter();
@@ -827,54 +828,59 @@ export default function AccountInfoPage() {
   }, []);
 
   // Handle field update
-  const handleFieldUpdate = useCallback(async (value: string) => {
-    if (!currentEditField || !user) return;
+const handleFieldUpdate = useCallback(async (value: string) => {
+  if (!currentEditField || !user) return;
+  const schema = getProfileSchema(getLocalizedText);
 
-    try {
-      switch (currentEditField.field) {
-        case 'full_name':
-          await updateFullName(value);
-          break;
-        case 'email':
-          await updateEmail(value);
-          break;
-        case 'gender':
-          await updateGender(value);
-          break;
-        case 'age_group':
-          await updateAgeGroup(value);
-          break;
-        case 'phone_number':
-          await updatePhone(value);
-          break;
-        case 'bio':
-          if (user.professional_id) {
-            await patchProfessionalProfile(user.professional_id, { bio: value });
-            toast.success(getLocalizedText('Bio updated successfully', 'बायो सफलतापूर्वक अद्यावधिक गरियो'));
-          }
-          break;
-        case 'experience':
-          if (user.professional_id) {
-            const exp = parseInt(value, 10);
-            if (isNaN(exp) || exp < 1 || exp > 65) {
-              toast.error(getLocalizedText(
-                'Please enter a valid experience (1-65 years)',
-                'कृपया मान्य अनुभव प्रविष्ट गर्नुहोस् (१-६५ वर्ष)'
-              ));
-              return;
-            }
-            await patchProfessionalProfile(user.professional_id, { experience: exp });
-            toast.success(getLocalizedText('Experience updated successfully', 'अनुभव सफलतापूर्वक अद्यावधिक गरियो'));
-          }
-          break;
+  try {
+    
+    if (currentEditField.field === 'full_name') {
+      schema.pick({ full_name: true }).parse({ full_name: value });
+      await updateFullName(value);
+    } else if (currentEditField.field === 'email') {
+      schema.pick({ email: true }).parse({ email: value });
+      await updateEmail(value);
+    } else if (currentEditField.field === 'phone_number') {
+      schema.pick({ phone_number: true }).parse({ phone_number: value });
+      await updatePhone(value);
+    } else if (currentEditField.field === 'gender') {
+      schema.pick({ gender: true }).parse({ gender: value });
+      await updateGender(value);
+    } else if (currentEditField.field === 'age_group') {
+      schema.pick({ age_group: true }).parse({ age_group: value });
+      await updateAgeGroup(value);
+    } else if (currentEditField.field === 'bio') {
+      schema.pick({ bio: true }).parse({ bio: value });
+     
+    } 
+    // Professional fields
+    else if (currentEditField.field === 'bio' && user.professional_id) {
+      await patchProfessionalProfile(user.professional_id, { bio: value });
+      toast.success(getLocalizedText('Bio updated successfully', 'बायो सफलतापूर्वक अद्यावधिक गरियो'));
+    } else if (currentEditField.field === 'experience' && user.professional_id) {
+      const exp = parseInt(value, 10);
+      if (isNaN(exp) || exp < 1 || exp > 65) {
+        toast.error(getLocalizedText(
+          'Please enter a valid experience (1-65 years)',
+          'कृपया मान्य अनुभव प्रविष्ट गर्नुहोस् (१-६५ वर्ष)'
+        ));
+        return;
       }
+      await patchProfessionalProfile(user.professional_id, { experience: exp });
+      toast.success(getLocalizedText('Experience updated successfully', 'अनुभव सफलतापूर्वक अद्यावधिक गरियो'));
+    }
 
-      if (['full_name', 'email', 'gender', 'age_group', 'phone_number'].includes(currentEditField.field)) {
-        await refreshUser();
-      }
-      
-      setEditDialogOpen(false);
-    } catch (error) {
+    // Refresh user for core fields
+    if (['full_name', 'email', 'gender', 'age_group', 'phone_number'].includes(currentEditField.field)) {
+      await refreshUser();
+    }
+
+    setEditDialogOpen(false);
+    toast.success(getLocalizedText("Updated successfully", "सफलतापूर्वक अद्यावधिक गरियो"));
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      toast.error(error.errors[0].message);
+    } else {
       toast.error(getLocalizedText(
         `Failed to update ${currentEditField.title.toLowerCase()}`,
         `${currentEditField.title} अद्यावधिक गर्न असफल`
@@ -882,8 +888,8 @@ export default function AccountInfoPage() {
         description: error instanceof Error ? error.message : getLocalizedText('Please try again', 'कृपया पुनः प्रयास गर्नुहोस्'),
       });
     }
-  }, [currentEditField, user, refreshUser, patchProfessionalProfile, getLocalizedText]);
-
+  }
+}, [currentEditField, user, refreshUser, patchProfessionalProfile, getLocalizedText]);
   // Handle account deletion
   const handleDeleteAccount = useCallback(async () => {
     try {
@@ -1138,7 +1144,9 @@ export default function AccountInfoPage() {
                               getLocalizedText('Full Name', 'पूरा नाम'),
                               user.full_name,
                               'text'
+                          
                             )
+                            
                           }
                         />
 
@@ -1153,6 +1161,8 @@ export default function AccountInfoPage() {
                               getLocalizedText('Email Address', 'इमेल ठेगाना'),
                               user.email || '',
                               'email'
+                        
+                            
                             )
                           }
                         />

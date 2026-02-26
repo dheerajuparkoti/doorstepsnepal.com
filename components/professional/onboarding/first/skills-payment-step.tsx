@@ -31,26 +31,52 @@ import {
   Wallet,
   Smartphone,
   PiggyBank,
-  CreditCard
+  CreditCard,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 
-// Modals
+
 import { SkillPickerModal } from './skill-picker-modal';
 
 const MAX_SKILLS = 7;
+
 
 const skillsPaymentSchema = z.object({
   skills: z.array(z.string()).min(1, 'At least one skill is required'),
   payment_method: z.enum(['cash', 'esewa', 'khalti', 'imepay', 'bank_transfer']),
   phone_number: z.string().optional(),
-}).refine((data) => {
+}).superRefine((data, ctx) => {
+ 
   if (['esewa', 'khalti', 'imepay'].includes(data.payment_method)) {
-    return !!data.phone_number && /^[0-9]{10}$/.test(data.phone_number);
+    const phoneNumber = data.phone_number || '';
+    
+    if (!phoneNumber) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['phone_number'],
+        message: 'Phone number is required for digital payments',
+      });
+    } else if (!/^[0-9]+$/.test(phoneNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['phone_number'],
+        message: 'Phone number must contain only numbers',
+      });
+    } else if (phoneNumber.length !== 10) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['phone_number'],
+        message: 'Phone number must be exactly 10 digits',
+      });
+    } else if (!/^(98|97|96)/.test(phoneNumber)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['phone_number'],
+        message: 'Phone number must start with 98, 97, or 96',
+      });
+    }
   }
-  return true;
-}, {
-  message: 'Valid phone number is required for digital payments',
-  path: ['phone_number'],
 });
 
 type SkillsPaymentFormValues = z.infer<typeof skillsPaymentSchema>;
@@ -71,10 +97,25 @@ export function SkillsPaymentStep({ initialData, onUpdate }: SkillsPaymentStepPr
       payment_method: initialData?.payment_method || 'cash',
       phone_number: initialData?.phone_number || '',
     },
+    mode: 'onChange', // Enable live validation
   });
 
   const paymentMethod = form.watch('payment_method');
   const skills = form.watch('skills');
+  const phoneNumber = form.watch('phone_number');
+
+  // Live phone number validation helper
+  const getPhoneValidationStatus = () => {
+    if (!phoneNumber || paymentMethod === 'cash' || paymentMethod === 'bank_transfer') return null;
+    
+    if (phoneNumber.length === 0) return { valid: false, message: 'Phone number is required' };
+    if (!/^[0-9]+$/.test(phoneNumber)) return { valid: false, message: 'Only numbers allowed' };
+    if (phoneNumber.length < 10) return { valid: false, message: `${10 - phoneNumber.length} digits remaining` };
+    if (phoneNumber.length > 10) return { valid: false, message: 'Maximum 10 digits allowed' };
+    if (!/^(98|97|96)/.test(phoneNumber)) return { valid: false, message: 'Must start with 98, 97, or 96' };
+    
+    return { valid: true, message: 'Valid phone number' };
+  };
 
   const handleAddSkill = (skill: string) => {
     const currentSkills = form.getValues('skills');
@@ -82,13 +123,24 @@ export function SkillsPaymentStep({ initialData, onUpdate }: SkillsPaymentStepPr
       return;
     }
     if (!currentSkills.includes(skill)) {
-      form.setValue('skills', [...currentSkills, skill]);
+      form.setValue('skills', [...currentSkills, skill], { shouldValidate: true });
     }
     setShowSkillPicker(false);
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    form.setValue('skills', skills.filter(s => s !== skillToRemove));
+    form.setValue('skills', skills.filter(s => s !== skillToRemove), { shouldValidate: true });
+  };
+
+  // Phone number input handler with sanitization
+  const handlePhoneInput = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    // Allow only numbers
+    const sanitized = e.target.value.replace(/[^0-9]/g, '');
+    
+    // Limit to 10 digits
+    if (sanitized.length <= 10) {
+      field.onChange(sanitized);
+    }
   };
 
   useEffect(() => {
@@ -97,6 +149,8 @@ export function SkillsPaymentStep({ initialData, onUpdate }: SkillsPaymentStepPr
     });
     return () => subscription.unsubscribe();
   }, [form, onUpdate]);
+
+  const phoneValidation = getPhoneValidationStatus();
 
   return (
     <>
@@ -230,13 +284,14 @@ export function SkillsPaymentStep({ initialData, onUpdate }: SkillsPaymentStepPr
               )}
             />
 
-            {/* Digital Payment Phone Field */}
+            {/* Phone Field */}
             <AnimatePresence>
               {['esewa', 'khalti', 'imepay'].includes(paymentMethod) && (
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
                   <FormField
                     control={form.control}
@@ -248,12 +303,48 @@ export function SkillsPaymentStep({ initialData, onUpdate }: SkillsPaymentStepPr
                           {locale === 'ne' ? 'फोन नम्बर' : 'Phone Number'} *
                         </FormLabel>
                         <FormControl>
-                          <Input 
-                            {...field} 
-                            placeholder="98XXXXXXXX"
-                            className="transition-all focus:ring-2 focus:ring-primary/20"
-                          />
+                          <div className="relative">
+                            <Input 
+                              {...field} 
+                              onChange={(e) => handlePhoneInput(e, field)}
+                              placeholder="98XXXXXXXX"
+                              className={`transition-all focus:ring-2 focus:ring-primary/20 pr-10 ${
+                                phoneNumber && phoneValidation?.valid 
+                                  ? 'border-green-500 focus:ring-green-500' 
+                                  : phoneNumber && !phoneValidation?.valid 
+                                  ? 'border-red-500 focus:ring-red-500' 
+                                  : ''
+                              }`}
+                            />
+                            {phoneNumber && (
+                              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                {phoneValidation?.valid ? (
+                                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <AlertCircle className="w-5 h-5 text-red-500" />
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </FormControl>
+                        
+                        {/* Live validation helper text */}
+                        {phoneNumber && phoneValidation && !phoneValidation.valid && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {phoneValidation.message}
+                          </p>
+                        )}
+                        
+                        {/* Character counter for Nepal phone numbers */}
+                        {paymentMethod !== 'cash' && paymentMethod !== 'bank_transfer' && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {phoneNumber?.length || 0}/10 digits
+                            {phoneNumber?.length === 10 && !/^(98|97|96)/.test(phoneNumber) && 
+                              " - Must start with 98, 97, or 96"
+                            }
+                          </p>
+                        )}
+                        
                         <FormMessage />
                       </FormItem>
                     )}
@@ -277,6 +368,19 @@ export function SkillsPaymentStep({ initialData, onUpdate }: SkillsPaymentStepPr
               </motion.div>
             )}
           </div>
+
+          {/* Form validation summary */}
+          {!form.formState.isValid && form.formState.errors.phone_number && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="p-3 bg-red-50 dark:bg-red-950/30 rounded-lg text-sm text-red-600 dark:text-red-400"
+            >
+              <p className="font-medium">
+                {locale === 'ne' ? 'कृपया फोन नम्बर सही भर्नुहोस्' : 'Please enter a valid phone number'}
+              </p>
+            </motion.div>
+          )}
         </div>
       </Form>
 

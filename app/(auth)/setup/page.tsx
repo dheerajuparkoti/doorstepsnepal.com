@@ -18,6 +18,7 @@ import {
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { User, Briefcase, Home, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toast } from "sonner";
 
 type UserMode = "customer" | "professional";
 
@@ -75,11 +76,17 @@ export default function SetupPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = "Name is required";
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
-    }
+      // Full Name Validation
+  const name = formData.name.trim();
+  if (!name) {
+    newErrors.name = "Name is required";
+  } else if (name.length < 2) {
+    newErrors.name = "Name must be at least 2 characters";
+  } else if (!/^[A-Za-z ]+$/.test(name)) {
+    newErrors.name = "Name can only contain English letters and spaces";
+  } else if ((name.match(/ /g) || []).length > 3) {
+    newErrors.name = "Name can have at most 3 spaces";
+  }
     
     if (!formData.gender) {
       newErrors.gender = "Please select your gender";
@@ -127,8 +134,11 @@ const handleSubmit = async () => {
     }
     
   } catch (err: any) {
-    setError(err.message || "Failed to save profile. Please try again.");
     setIsLoading(false);
+     const message = err?.message || "Failed to save profile. Please try again.";
+  setError(message); 
+  toast.error(message); 
+  setIsLoading(false);
   }
 };
 

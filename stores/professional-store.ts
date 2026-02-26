@@ -146,8 +146,6 @@
 // }));
 
 
-
-// stores/professional-store.ts - WITH SERVICE AREAS
 import { create } from 'zustand';
 import { 
   ProfessionalProfile, 

@@ -13,18 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Search, Check, X } from 'lucide-react';
+import { ALL_SKILLS } from '@/lib/constants/skills/skill';
 
-// Import the same skills list from your skills page
-const ALL_SKILLS = [
-  'Clear Communication', 'Active Listening', 'Professional Language',
-  'Customer Focus', 'Patience', 'Empathy', 'Punctuality', 'Reliability',
-  'Technical Knowledge', 'Attention to Detail', 'Analytical Thinking',
-  'Team Player', 'Collaboration', 'Adaptability', 'Quick Learning',
-  'Safety Protocols', 'First Aid Certified', 'Physical Stamina',
-  'Mobile App Usage', 'Digital Payments', 'Local Language Proficiency',
-  'Licensed Professional', 'Certified Technician', 'Trustworthy',
-  'Systematic Approach', 'Quality Assurance', 'Clean Workspace'
-];
 
 interface SkillPickerModalProps {
   open: boolean;

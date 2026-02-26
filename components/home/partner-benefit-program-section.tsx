@@ -300,7 +300,7 @@ export function PartnerBenefitProgramSection({
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link 
-                href="https://www.doorstepsnepal.com/privacy_policy/professionals"
+                href="/privacy-policy/professional"
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-input bg-background font-medium rounded-lg hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 {language === "ne" ? "अधिक जान्नुहोस्" : "Learn More"}

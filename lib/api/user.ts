@@ -73,7 +73,7 @@ import { useAppStateStore } from '@/stores/app-state-store';
 //   }
 // }
 
-// lib/api/user.ts (partial update)
+
 export async function getUserProfile(): Promise<User> {
   console.log("Fetching user profile...");
   
@@ -217,4 +217,55 @@ export async function cancelAccountDeletion(): Promise<User> {
 // Delete account
 export async function deleteAccount(): Promise<{ message: string }> {
   return api.delete<{ message: string }>('/users/me');
+}
+
+
+
+/**
+ * Get user by ID - For viewing other users' profiles
+ * Any authenticated user can fetch any user by ID
+ */
+export async function getUserById(userId: number): Promise<User> {
+  console.log(`Fetching user with ID: ${userId}...`);
+  
+  try {
+    const response = await api.get<any>(`/users/${userId}`, { 
+      cache: 'no-store' 
+    });
+    
+    
+    const userData: User = {
+      id: response.id,
+      phone_number: response.phone_number,
+      phone: response.phone_number,
+      full_name: response.full_name || "",
+      name: response.full_name || "",
+      nameNe: response.full_name || "",
+      email: response.email || "",
+      gender: response.gender || "",
+      age_group: response.age_group || "",
+      profile_image: response.profile_image || "",
+      avatar: response.profile_image || "",
+      type: response.type || "customer",
+      mode: response.type || "customer",
+      is_setup_complete: response.is_setup_complete || false,
+      is_onboarding_complete: response.is_onboarding_complete || false,
+      isVerified: true,
+      isProfessionalVerified: response.type === "professional",
+      order_count: response.order_count || 0,
+      total_spent: response.total_spent || 0,
+      full_address: response.full_address || "",
+      member_since: response.member_since || 0,
+      deletion_requested: response.deletion_requested || false,
+      deletion_requested_at: response.deletion_requested_at || null,
+      is_deleted: response.is_deleted || false,
+      is_admin_approved: response.is_admin_approved || false,
+      professional_id: response.professional_id,
+    };
+    
+    return userData;
+  } catch (error) {
+    console.error(`Get user by ID ${userId} error:`, error);
+    throw error;
+  }
 }

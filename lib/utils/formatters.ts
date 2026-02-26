@@ -2,16 +2,16 @@
 export class CurrencyFormatter {
   static format(amount: number | null | undefined): string {
     if (amount === undefined || amount === null || isNaN(amount)) {
-      return 'Rs. 0.00';
+      return 'Rs. 0';
     }
-    return `Rs. ${amount.toFixed(2)}`;
+    return `Rs. ${amount.toFixed(0)}`;
   }
 
   static formatWithoutSymbol(amount: number | null | undefined): string {
     if (amount === undefined || amount === null || isNaN(amount)) {
       return '0.00';
     }
-    return amount.toFixed(2);
+    return amount.toFixed(0);
   }
 
   static formatCompact(amount: number | null | undefined): string {
@@ -32,8 +32,8 @@ export class CurrencyFormatter {
 export class ProperCaseFormatter {
   static format(text: string | null | undefined): string {
     if (!text) return '';
-    
-    return text
+     const sanitized = text.replace(/[^A-Za-z0-9 .,;:!?'"()\-@#&%$/\\\n\r]/g, '');
+    return sanitized
       .toLowerCase()
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))

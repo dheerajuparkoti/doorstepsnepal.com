@@ -51,10 +51,10 @@ export async function FeaturedServicesCarouselSection() {
       minDiscountPercentage: 0 // Include all active discounts
     });
     
-    console.log(`🎠 Carousel will show ${offerServices.length} offer services`);
+
 
     if (offerServices.length === 0) {
-      console.log('🚫 No offer services found, hiding section');
+
       return null; // Don't show section if no offers
     }
 

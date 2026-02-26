@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useI18n } from '@/lib/i18n/context';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Sheet,
   SheetContent,
@@ -12,6 +14,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Building, CreditCard, User, MapPin, Search, X } from 'lucide-react';
 import {
   Dialog,
@@ -19,47 +29,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { getBankDetailsSchema, BankDetailsFormValues } from '@/lib/schemas/bank-details-schema';
 
-// Bank data from payments page
-const BANKS_NEPAL = [
-  'Nepal Bank Limited',
-  'Rastriya Banijya Bank',
-  'Agricultural Development Bank',
-  'Nabil Bank',
-  'NIC Asia Bank',
-  'Global IME Bank',
-  'Prabhu Bank',
-  'Everest Bank',
-  'Himalayan Bank',
-  'Kumari Bank',
-  'Laxmi Bank',
-  'Siddhartha Bank',
-  'Sunrise Bank',
-  'Prime Commercial Bank',
-  'NMB Bank',
-  'Machhapuchchhre Bank',
-  'Sanima Bank',
-  'Citizens Bank',
-  'Standard Chartered Bank Nepal',
-];
+import {  BANKS_NEPAL } from '@/lib/constants/banks/nepal';
 
 interface BankDetailsDrawerProps {
   open: boolean;
   onClose: () => void;
-  onComplete: (data: any) => void;
-  initialData?: any;
+  onComplete: (data: BankDetailsFormValues) => void;
+  initialData?: Partial<BankDetailsFormValues>;
 }
 
 export function BankDetailsDrawer({ open, onClose, onComplete, initialData }: BankDetailsDrawerProps) {
-  const { locale } = useI18n();
-  const [formData, setFormData] = useState({
-    bank_account_number: initialData?.bank_account_number || '',
-    bank_account_holder_name: initialData?.bank_account_holder_name || '',
-    bank_name: initialData?.bank_name || '',
-    bank_branch_name: initialData?.bank_branch_name || '',
-  });
+  const { locale, language } = useI18n();
   const [showBankSearch, setShowBankSearch] = useState(false);
   const [bankSearchQuery, setBankSearchQuery] = useState('');
+  const getLocalizedText = (en: string, ne: string) => {
+    return language === 'ne' ? ne : en;
+  };
+
+  const form = useForm<BankDetailsFormValues>({
+    resolver: zodResolver(getBankDetailsSchema(getLocalizedText)),
+    defaultValues: {
+      bank_account_number: initialData?.bank_account_number || '',
+      bank_account_holder_name: initialData?.bank_account_holder_name || '',
+      bank_name: initialData?.bank_name || '',
+      bank_branch_name: initialData?.bank_branch_name || '',
+    },
+    mode: 'onChange',
+  });
 
   const filteredBanks = bankSearchQuery
     ? BANKS_NEPAL.filter(bank => 
@@ -67,22 +65,35 @@ export function BankDetailsDrawer({ open, onClose, onComplete, initialData }: Ba
       )
     : BANKS_NEPAL;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate all fields are filled
-    if (!formData.bank_account_number || !formData.bank_account_holder_name || 
-        !formData.bank_name || !formData.bank_branch_name) {
-      return;
-    }
+  const handleSubmit = (data: BankDetailsFormValues) => {
+    onComplete(data);
+    onClose();
+  };
 
-    onComplete(formData);
+  // Input sanitization for text fields
+  const handleTextInput = (
+    e: React.ChangeEvent<HTMLInputElement>, 
+    field: any,
+    allowNumbers: boolean = false
+  ) => {
+    let sanitized;
+    if (allowNumbers) {
+      // For account number - allow numbers and spaces
+      sanitized = e.target.value.replace(/[^0-9\s]/g, '');
+    } else {
+      // For names - allow only English letters and spaces
+      sanitized = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+    }
+    field.onChange(sanitized);
   };
 
   return (
     <>
       <Sheet open={open} onOpenChange={onClose}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto">
+<SheetContent
+  side="right"
+  className="w-full sm:max-w-md overflow-y-auto p-4 sm:p-6"
+>
           <SheetHeader className="mb-6">
             <SheetTitle className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               {locale === 'ne' ? 'बैंक विवरण' : 'Bank Details'}
@@ -94,83 +105,114 @@ export function BankDetailsDrawer({ open, onClose, onComplete, initialData }: Ba
             </SheetDescription>
           </SheetHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Account Number */}
-            <div className="space-y-2">
-              <Label htmlFor="accountNumber" className="flex items-center gap-2">
-                <CreditCard className="w-4 h-4" />
-                {locale === 'ne' ? 'खाता नम्बर' : 'Account Number'} *
-              </Label>
-              <Input
-                id="accountNumber"
-                value={formData.bank_account_number}
-                onChange={(e) => setFormData({ ...formData, bank_account_number: e.target.value })}
-                placeholder="1234567890123456"
-                required
-                className="transition-all focus:ring-2 focus:ring-primary/20"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              {/* Account Number */}
+              <FormField
+                control={form.control}
+                name="bank_account_number"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      {locale === 'ne' ? 'खाता नम्बर' : 'Account Number'} *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => handleTextInput(e, field, true)}
+                        placeholder="1234567890123456"
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Account Holder Name */}
-            <div className="space-y-2">
-              <Label htmlFor="holderName" className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                {locale === 'ne' ? 'खाता धनीको नाम' : 'Account Holder Name'} *
-              </Label>
-              <Input
-                id="holderName"
-                value={formData.bank_account_holder_name}
-                onChange={(e) => setFormData({ ...formData, bank_account_holder_name: e.target.value })}
-                placeholder={locale === 'ne' ? 'राम बहादुर' : 'Ram Bahadur'}
-                required
-                className="transition-all focus:ring-2 focus:ring-primary/20"
+              {/* Account Holder Name */}
+              <FormField
+                control={form.control}
+                name="bank_account_holder_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      {locale === 'ne' ? 'खाता धनीको नाम' : 'Account Holder Name'} *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => handleTextInput(e, field)}
+                        placeholder={locale === 'ne' ? 'राम बहादुर' : 'Ram Bahadur'}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Bank Name */}
-            <div className="space-y-2">
-              <Label htmlFor="bankName" className="flex items-center gap-2">
-                <Building className="w-4 h-4" />
-                {locale === 'ne' ? 'बैंकको नाम' : 'Bank Name'} *
-              </Label>
-              <div className="relative">
-                <Input
-                  id="bankName"
-                  value={formData.bank_name}
-                  readOnly
-                  placeholder={locale === 'ne' ? 'बैंक छान्नुहोस्' : 'Select bank'}
-                  onClick={() => setShowBankSearch(true)}
-                  className="cursor-pointer pr-10 transition-all focus:ring-2 focus:ring-primary/20"
-                  required
-                />
-                <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-
-            {/* Branch Name */}
-            <div className="space-y-2">
-              <Label htmlFor="branchName" className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                {locale === 'ne' ? 'शाखाको नाम' : 'Branch Name'} *
-              </Label>
-              <Input
-                id="branchName"
-                value={formData.bank_branch_name}
-                onChange={(e) => setFormData({ ...formData, bank_branch_name: e.target.value })}
-                placeholder={locale === 'ne' ? 'काठमाडौं शाखा' : 'Kathmandu Branch'}
-                required
-                className="transition-all focus:ring-2 focus:ring-primary/20"
+              {/* Bank Name */}
+              <FormField
+                control={form.control}
+                name="bank_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Building className="w-4 h-4" />
+                      {locale === 'ne' ? 'बैंकको नाम' : 'Bank Name'} *
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          {...field}
+                          readOnly
+                          placeholder={locale === 'ne' ? 'बैंक छान्नुहोस्' : 'Select bank'}
+                          onClick={() => setShowBankSearch(true)}
+                          className="cursor-pointer pr-10 transition-all focus:ring-2 focus:ring-primary/20"
+                        />
+                        <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Submit Button */}
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-            >
-              {locale === 'ne' ? 'बैंक विवरण बचत गर्नुहोस्' : 'Save Bank Details'}
-            </Button>
-          </form>
+              {/* Branch Name */}
+              <FormField
+                control={form.control}
+                name="bank_branch_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4" />
+                      {locale === 'ne' ? 'शाखाको नाम' : 'Branch Name'} *
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => handleTextInput(e, field)}
+                        placeholder={locale === 'ne' ? 'काठमाडौं शाखा' : 'Kathmandu Branch'}
+                        className="transition-all focus:ring-2 focus:ring-primary/20"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Submit Button */}
+              <Button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                disabled={!form.formState.isValid}
+              >
+                {locale === 'ne' ? 'बैंक विवरण बचत गर्नुहोस्' : 'Save Bank Details'}
+              </Button>
+            </form>
+          </Form>
         </SheetContent>
       </Sheet>
 
@@ -195,6 +237,7 @@ export function BankDetailsDrawer({ open, onClose, onComplete, initialData }: Ba
               />
               {bankSearchQuery && (
                 <button
+                  type="button"
                   onClick={() => setBankSearchQuery('')}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2"
                 >
@@ -207,9 +250,10 @@ export function BankDetailsDrawer({ open, onClose, onComplete, initialData }: Ba
               {filteredBanks.map((bank) => (
                 <button
                   key={bank}
+                  type="button"
                   className="w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
                   onClick={() => {
-                    setFormData({ ...formData, bank_name: bank });
+                    form.setValue('bank_name', bank, { shouldValidate: true });
                     setShowBankSearch(false);
                     setBankSearchQuery('');
                   }}
@@ -217,6 +261,11 @@ export function BankDetailsDrawer({ open, onClose, onComplete, initialData }: Ba
                   <span className="font-medium">{bank}</span>
                 </button>
               ))}
+              {filteredBanks.length === 0 && (
+                <div className="p-4 text-center text-gray-500">
+                  {locale === 'ne' ? 'कुनै बैंक फेला परेन' : 'No banks found'}
+                </div>
+              )}
             </div>
           </div>
         </DialogContent>

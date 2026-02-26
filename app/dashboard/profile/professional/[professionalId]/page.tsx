@@ -45,13 +45,12 @@
 //   );
 // }
 
-// app/dashboard/my-profile/[professionalId]/page.tsx
+
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ProfessionalScreenSSR } from '@/components/professional/ssr/professional-screen-ssr';
 import { ProfessionalScreenSkeleton } from '@/components/professional/skeleton/professional-screen-skeleton';
 
-//  Add 'async' and await params
 export default async function ViewProfessionalPage({ 
   params 
 }: { 
@@ -60,7 +59,7 @@ export default async function ViewProfessionalPage({
 
   const { professionalId } = await params;
   
-  console.log(' ROUTE HIT! Professional ID:', professionalId);
+
   
   const professionalIdNum = parseInt(professionalId);
   
@@ -69,7 +68,6 @@ export default async function ViewProfessionalPage({
     notFound();
   }
 
-  console.log('Valid ID, rendering profile for:', professionalIdNum);
   
   return (
     <Suspense fallback={<ProfessionalScreenSkeleton />}>

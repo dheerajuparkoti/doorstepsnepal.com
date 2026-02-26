@@ -29,7 +29,7 @@ export function AddressStep({ onUpdate }: AddressStepProps) {
         </div>
       </div>
 
-      {/* Reuse the beautiful AddressSection component */}
+      {/* AddressSection component */}
       <AddressSection />
 
       {/* Address tips */}

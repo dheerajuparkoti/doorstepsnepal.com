@@ -379,12 +379,19 @@ export default function ProfessionalShowcasePage() {
                   <Textarea
                     id="description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                   
+                                        onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^[a-zA-Z0-9 ]*$/.test(val) && val.length <= 50) {
+                          setDescription(val);
+                        }
+                      }}
                     placeholder={
                       locale === 'ne' 
                         ? 'उदाहरण: बाथरूम रेनोवेसन, किचन डिजाइन, आदि' 
                         : 'Example: Bathroom renovation, kitchen design, etc.'
                     }
+                    maxLength={50}
                     className="mt-2 min-h-[120px]"
                   />
                 </div>

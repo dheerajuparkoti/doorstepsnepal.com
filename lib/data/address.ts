@@ -34,7 +34,7 @@ export interface UpdateAddressRequest {
 export const ALL_PROVINCES = [
   'Koshi',
   'Madhesh',
-  'Bagmati',
+  'Bagmatti',
   'Gandaki',
   'Lumbini',
   'Karnali',
@@ -44,7 +44,7 @@ export const ALL_PROVINCES = [
 // Only Bagmati and Gandaki for temporary addresses
 export const TEMPORARY_PROVINCES = [
   'Bagmati',
-  'Gandaki',
+  // 'Gandaki',
 ];
 
 
@@ -79,6 +79,11 @@ export const DISTRICT_DATA = {
       'Siraha'
     ],
     'Bagmati': [
+      'Bhaktapur',
+      'Kathmandu',
+      'Lalitpur',
+    ],
+    'Bagmatti': [
       'Bhaktapur',
       'Chitwan',
       'Dhading',

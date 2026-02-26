@@ -1,28 +1,18 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { BottomSheet } from '@/components/ui/professional-payment/bottom-sheet';
 import { PaymentMethod, PaymentCreateRequest } from '@/lib/data/professional/payment';
-import { PAYMENT_CONSTANTS } from '@/lib/data/professional/constants';
 import { CurrencyFormatter } from '@/lib/utils/formatters';
 import { ProperCaseFormatter } from '@/lib/utils/formatters';
 import { QRCodeSection } from './qr-code-section';
 import { PaymentApi } from '@/lib/api/professional-payment/payment-api';
 import { useAuth } from '@/lib/context/auth-context';
+import { useI18n } from '@/lib/i18n/context';
+import { getPaymentSchema, PaymentFormData } from '@/lib/schemas/make-payment-schema';
 
 
-const paymentSchema = z.object({
-  amount: z.number()
-    .min(PAYMENT_CONSTANTS.MINIMUM_AMOUNT, `Minimum payment is Rs. ${PAYMENT_CONSTANTS.MINIMUM_AMOUNT}`)
-    .max(1000000, 'Maximum payment is Rs. 10,00,000'),
-  payment_method: z.nativeEnum(PaymentMethod),
-  transaction_id: z.string().optional(), 
-  notes: z.string().max(100, 'Notes cannot exceed 100 characters').optional()
-});
-
-type PaymentFormData = z.infer<typeof paymentSchema>;
 
 interface CreatePaymentSheetProps {
   isOpen: boolean;
@@ -40,10 +30,20 @@ export function CreatePaymentSheet({
   remainingAmount,
   onPaymentSuccess
 }: CreatePaymentSheetProps) {
+  const { t, language } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
   const { mode } = useAuth();
+
+  const getLocalizedText = (en: string, ne: string) => (language === 'ne' ? ne : en);
+const defaultValues: PaymentFormData = {
+  amount: 0,
+  payment_method: PaymentMethod.CASH as PaymentFormData['payment_method'],
+  transaction_id: undefined,
+  notes: undefined
+};
+
   const {
     register,
     handleSubmit,
@@ -53,13 +53,10 @@ export function CreatePaymentSheet({
     reset,
     setError
   } = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: {
-      payment_method: PaymentMethod.CASH,
-      transaction_id: '',
-      notes: ''
-    }
+    resolver: zodResolver(getPaymentSchema(getLocalizedText)),
+    defaultValues
   });
+
 
   const amount = watch('amount');
   const selectedMethod = watch('payment_method');
@@ -108,7 +105,10 @@ const isProfessional = mode === 'professional';
       } else if (error.message) {
         setApiError(error.message);
       } else {
-        setApiError('Failed to create payment. Please try again.');
+        setApiError(getLocalizedText(
+          'Failed to create payment. Please try again.',
+          'भुक्तानी सिर्जना गर्न असफल। कृपया पुनः प्रयास गर्नुहोस्।'
+        ));
       }
       
       // If there's a field-specific error, set it on the form
@@ -136,7 +136,9 @@ const isProfessional = mode === 'professional';
     <BottomSheet
       isOpen={isOpen}
       onClose={handleCancel}
-      title={showConfirmation ? 'Confirm Payment' : 'Add Payment'}
+      title={showConfirmation 
+        ? getLocalizedText('Confirm Payment', 'भुक्तानी पुष्टि गर्नुहोस्') 
+        : getLocalizedText('Add Payment', 'भुक्तानी थप्नुहोस्')}
     >
       <div className="p-4 space-y-6">
         {/* API Error Message */}
@@ -163,7 +165,7 @@ const isProfessional = mode === 'professional';
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Remaining balance: {CurrencyFormatter.format(remainingAmount)}
+                    {getLocalizedText('Remaining balance:', 'बाँकी रकम:')} {CurrencyFormatter.format(remainingAmount)}
                   </p>
                 </div>
               </div>
@@ -178,10 +180,13 @@ const isProfessional = mode === 'professional';
                   </svg>
                   <div>
                     <p className="text-sm font-medium text-orange-800 dark:text-orange-300">
-                      Professional Action Required
+                      {getLocalizedText('Professional Action Required', 'व्यवसायी कार्य आवश्यक')}
                     </p>
                     <p className="text-sm text-orange-700 dark:text-orange-400">
-                      By adding this payment, you confirm that you have received this amount from the customer. This is a legally binding digital entry.
+                      {getLocalizedText(
+                        'By adding this payment, you confirm that you have received this amount from the customer. This is a legally binding digital entry.',
+                        'यो भुक्तानी थपेर, तपाईंले ग्राहकबाट यो रकम प्राप्त गरेको पुष्टि गर्नुहुन्छ। यो कानूनी रूपमा बाध्यकारी डिजिटल प्रविष्टि हो।'
+                      )}
                     </p>
                   </div>
                 </div>
@@ -191,15 +196,15 @@ const isProfessional = mode === 'professional';
             {/* Amount Field */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Amount
+                {getLocalizedText('Amount', 'रकम')}
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">
-                  Rs.
+                  रू
                 </span>
                 <input
                   type="number"
-                  step="0.01"
+                  step="10"
                   {...register('amount', { valueAsNumber: true })}
                   className={`
                     w-full pl-10 pr-4 py-3 rounded-xl border
@@ -209,7 +214,7 @@ const isProfessional = mode === 'professional';
                     }
                     bg-white dark:bg-gray-800 text-gray-900 dark:text-white
                   `}
-                  placeholder="Enter amount"
+                  placeholder={getLocalizedText('Enter amount', 'रकम प्रविष्ट गर्नुहोस्')}
                 />
               </div>
               {errors.amount && (
@@ -222,7 +227,7 @@ const isProfessional = mode === 'professional';
             {/* Payment Method */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Payment Method
+                {getLocalizedText('Payment Method', 'भुक्तानी विधि')}
               </label>
               <select
                 {...register('payment_method')}
@@ -249,31 +254,39 @@ const isProfessional = mode === 'professional';
             {/* Transaction ID (Optional) - Updated field name */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Transaction ID (Optional)
+                {getLocalizedText('Transaction ID', 'लेनदेन आईडी')} ({getLocalizedText('Optional', 'वैकल्पिक')})
               </label>
               <input
                 type="text"
-                {...register('transaction_id')}
+             {...register('transaction_id')}
+  maxLength={20}
+
+
+  onChange={(e) => {
+    const sanitized = e.target.value.replace(/[^A-Za-z0-9]/g, '');
+    setValue('transaction_id', sanitized, { shouldValidate: true, shouldDirty: true });
+  }}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-primary-500"
-                placeholder="Enter transaction ID"
+                placeholder={getLocalizedText('Enter transaction ID', 'लेनदेन आईडी प्रविष्ट गर्नुहोस्')}
               />
             </div>
 
             {/* Notes (Optional) */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Notes (Optional)
+                {getLocalizedText('Notes', 'नोटहरू')} ({getLocalizedText('Optional', 'वैकल्पिक')})
               </label>
               <textarea
                 {...register('notes')}
                 rows={3}
                 maxLength={100}
+                
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-primary-500"
-                placeholder="Add any additional information..."
-                onChange={(e) => {
-                  e.target.value = ProperCaseFormatter.format(e.target.value);
-                  register('notes').onChange(e);
-                }}
+                placeholder={getLocalizedText('Add any additional information...', 'कुनै अतिरिक्त जानकारी थप्नुहोस्...')}
+           onChange={(e) => {
+    const formatted = ProperCaseFormatter.format(e.target.value);
+    setValue('notes', formatted, { shouldValidate: true, shouldDirty: true });
+  }}
               />
             </div>
           </>
@@ -287,22 +300,25 @@ const isProfessional = mode === 'professional';
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Confirm Payment Initiation
+                {getLocalizedText('Confirm Payment Initiation', 'भुक्तानी सुरुवात पुष्टि गर्नुहोस्')}
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                You are about to record a payment of {CurrencyFormatter.format(amount)} via {selectedMethod}.
+                {getLocalizedText(
+                  `You are about to record a payment of ${CurrencyFormatter.format(amount)} via ${selectedMethod}.`,
+                  `तपाईं ${CurrencyFormatter.format(amount)} को भुक्तानी ${selectedMethod} मार्फत रेकर्ड गर्दै हुनुहुन्छ।`
+                )}
               </p>
             </div>
 
             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-2">
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                Professional Responsibility:
+                {getLocalizedText('Professional Responsibility:', 'व्यवसायी जिम्मेवारी:')}
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
-                <li>You confirm receiving this amount from the customer</li>
-                <li>This is a legally binding digital entry</li>
-                <li>False entries may lead to account suspension</li>
-                <li>This action will be recorded in the system</li>
+                <li>{getLocalizedText('You confirm receiving this amount from the customer', 'तपाईंले ग्राहकबाट यो रकम प्राप्त गरेको पुष्टि गर्नुहुन्छ')}</li>
+                <li>{getLocalizedText('This is a legally binding digital entry', 'यो कानूनी रूपमा बाध्यकारी डिजिटल प्रविष्टि हो')}</li>
+                <li>{getLocalizedText('False entries may lead to account suspension', 'गलत प्रविष्टिहरूले खाता निलम्बन हुन सक्छ')}</li>
+                <li>{getLocalizedText('This action will be recorded in the system', 'यो कार्य प्रणालीमा रेकर्ड गरिनेछ')}</li>
               </ul>
             </div>
 
@@ -311,7 +327,7 @@ const isProfessional = mode === 'professional';
                 onClick={() => setShowConfirmation(false)}
                 className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                Back
+                {getLocalizedText('Back', 'पछाडि')}
               </button>
               <button
                 onClick={handleSubmit(onSubmit)}
@@ -324,10 +340,10 @@ const isProfessional = mode === 'professional';
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Processing...
+                    {getLocalizedText('Processing...', 'प्रक्रिया हुँदै...')}
                   </span>
                 ) : (
-                  'I Understand, Confirm'
+                  getLocalizedText('I Understand, Confirm', 'म बुझेँ, पुष्टि गर्नुहोस्')
                 )}
               </button>
             </div>
@@ -342,7 +358,7 @@ const isProfessional = mode === 'professional';
               onClick={handleCancel}
               className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
             >
-              Cancel
+              {getLocalizedText('Cancel', 'रद्द गर्नुहोस्')}
             </button>
            <button
   type="button"
@@ -356,10 +372,10 @@ const isProfessional = mode === 'professional';
         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
       </svg>
-      Saving...
+      {getLocalizedText('Saving...', 'सुरक्षित हुँदै...')}
     </span>
   ) : (
-    'Save Payment'
+    getLocalizedText('Save Payment', 'भुक्तानी सुरक्षित गर्नुहोस्')
   )}
 </button>
           </div>

@@ -6,6 +6,7 @@ import type { User } from '@/lib/data/user';
 
 interface ProfileLocationBarProps {
   user: User;
+    isReadOnly?:boolean;
 }
 
 export function ProfileLocationBar({ user }: ProfileLocationBarProps) {

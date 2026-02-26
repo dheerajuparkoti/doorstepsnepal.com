@@ -30,10 +30,10 @@ export async function FeaturedServicesSectionSSR() {
       maxPerPage: 30
     });
     
-    console.log(`🎠 Featured section will show ${services.length} services out of ${total} total`);
+
 
     if (services.length === 0) {
-      console.log('🚫 No priced services found, hiding section');
+
       return null;
     }
 
@@ -45,7 +45,7 @@ export async function FeaturedServicesSectionSSR() {
     );
     
   } catch (error) {
-    console.error("❌ Error in FeaturedServicesSectionSSR:", error);
+    console.error(" Error in FeaturedServicesSectionSSR:", error);
     return null;
   }
 }

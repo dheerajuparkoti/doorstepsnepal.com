@@ -1,4 +1,4 @@
-// components/address-dialog.tsx (updated version)
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -47,8 +47,11 @@ const addressFormSchema = z.object({
   district: z.string().min(1, 'District is required'),
   municipality: z.string().min(1, 'Municipality is required'),
   ward_no: z.string().min(1, 'Ward number is required'),
-  street_address: z.string().min(1, 'Street address is required'),
-  // Optional fields for better UX
+  street_address: z.string().min(1, 'Street address is required') .regex(
+      /^[a-zA-Z0-9\s\.,#\-/]+$/, 
+      'Street address can only contain English letters, numbers, spaces, and symbols: . , # - /'
+    ),
+
   label: z.string().optional(),
   is_default: z.boolean().optional(),
 });
@@ -370,13 +373,20 @@ export function AddressDialog({
                     <div className="relative">
                       <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
-                        placeholder={locale === 'ne' 
-                          ? 'सडकको नाम, घर नम्बर, आदि' 
-                          : 'Street name, house number, etc.'
-                        }
-                        className="pl-10"
-                        {...field}
-                      />
+            placeholder={locale === 'ne' 
+              ? 'सडकको नाम, घर नम्बर, आदि' 
+              : 'Street name, house number, etc.'
+            }
+            className="pl-10"
+            {...field}
+            onChange={(e) => {
+              
+              const value = e.target.value;
+             
+              const sanitizedValue = value.replace(/[^a-zA-Z0-9\s\.,#\-/]/g, '');
+              field.onChange(sanitizedValue);
+            }}
+          />
                     </div>
                   </FormControl>
                   <FormDescription>

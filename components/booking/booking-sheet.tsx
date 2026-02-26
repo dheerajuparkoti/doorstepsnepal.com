@@ -1,6 +1,3 @@
-
-
-
 'use client';
 
 import { useState } from 'react';
@@ -52,6 +49,8 @@ import { DatePicker } from 'hamro-nepali-patro';
 import 'hamro-nepali-patro/dist/styles.css';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { useAddressStore } from '@/stores/address-store';
+import { ProperCaseFormatter } from '@/lib/utils/formatters';
+import { getProfileSchema, ProfileSchemaType } from '@/lib/schemas/profile-schema';
 
 // Types
 export interface PriceItem {
@@ -158,10 +157,16 @@ export function BookingSheet({
   const [isAddressSaving, setIsAddressSaving] = useState(false);
   const [step, setStep] = useState<'details' | 'address' | 'confirm'>('details');
   const isLoadingAddresses = useAddressStore((state) => state.isLoading);
-
+const [notesError, setNotesError] = useState('');
   const getLocalizedText = (en: string, np: string) => {
     return language === 'ne' ? np : en;
   };
+
+  // Initialize schema with your localized text function
+const profileSchema = getProfileSchema(getLocalizedText);
+
+// Extract only ordernotes schema
+const orderNotesSchema = profileSchema.shape.ordernotes;
 
   const formatAddressDisplay = (address: AddressData): string => {
     if (language === 'ne') {
@@ -481,23 +486,32 @@ export function BookingSheet({
   </Label>
   <div className="relative">
     <Textarea
-      placeholder={getLocalizedText(
-        'Add any special instructions...',
-        'कुनै विशेष निर्देशन थप्नुहोस्...'
-      )}
-      value={bookingDetails.notes}
-      onChange={(e) => {
-        const text = e.target.value;
-        if (text.length <= 200) {
-          setBookingDetails(prev => ({ 
-            ...prev, 
-            notes: text 
-          }));
-        }
-      }}
-      className="min-h-[70px] resize-y text-sm pr-16"
-      maxLength={200}
+     placeholder={getLocalizedText(
+    'Add any special instructions...',
+    'कुनै विशेष निर्देशन थप्नुहोस्...'
+  )}
+  value={bookingDetails.notes}
+  onChange={(e) => {
+    const text = ProperCaseFormatter.format(e.target.value);
+
+    // Validate with Zod
+    const result = orderNotesSchema.safeParse(text);
+
+    if (result.success) {
+      setBookingDetails(prev => ({ ...prev, notes: text }));
+      setNotesError(''); // optional state for showing errors
+    } else {
+      // Show first error message
+      setNotesError(result.error.errors[0].message);
+    }
+  }}
+  className="min-h-[70px] resize-y text-sm pr-16"
+  maxLength={200}
     />
+
+{notesError && (
+  <p className="text-[10px] text-red-600 mt-1">{notesError}</p>
+)}
     <div className="absolute bottom-2 right-2 text-xs text-muted-foreground bg-background/80 px-1 rounded">
       {bookingDetails.notes.length}/200
     </div>

@@ -41,3 +41,59 @@ export const isValidProfessionalSlug = (slug: string): boolean => {
   const pattern = /^[a-z0-9]+(?:-[a-z0-9]+)*-\d+$/;
   return pattern.test(slug);
 };
+
+
+
+
+/**
+ * Creates a URL-friendly slug from a service name and ID
+ * Format: "plumbing-repair-456"
+ */
+export const createServiceSlug = (serviceName: string, id: number): string => {
+  // Convert name to lowercase and replace spaces with hyphens
+  const namePart = serviceName
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')           // Replace spaces with hyphens
+    .replace(/[^a-z0-9-]/g, '')      // Remove any special characters
+    .replace(/-+/g, '-')             // Replace multiple hyphens with single hyphen
+    .replace(/^-|-$/g, '');          // Remove leading/trailing hyphens
+  
+  // Return name-id format
+  return `${namePart}-${id}`;
+};
+
+/**
+ * Extracts the service ID from a service slug
+ * Format: "plumbing-repair-456" -> 456
+ */
+export const extractIdFromServiceSlug = (slug: string): number | null => {
+  // Split by hyphen and get the last part
+  const parts = slug.split('-');
+  const lastPart = parts[parts.length - 1];
+  
+  // Try to parse the last part as a number
+  const id = parseInt(lastPart, 10);
+  
+  // Return ID if valid, otherwise null
+  return isNaN(id) ? null : id;
+};
+
+/**
+ * Extracts the name part from a service slug
+ * Format: "plumbing-repair-456" -> "plumbing-repair"
+ */
+export const extractNameFromServiceSlug = (slug: string): string => {
+  const parts = slug.split('-');
+  parts.pop(); // Remove the last part (ID)
+  return parts.join('-');
+};
+
+/**
+ * Validates if a string is a valid service slug
+ */
+export const isValidServiceSlug = (slug: string): boolean => {
+  // Check format: name-with-hyphens-123
+  const pattern = /^[a-z0-9]+(?:-[a-z0-9]+)*-\d+$/;
+  return pattern.test(slug);
+};

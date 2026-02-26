@@ -69,10 +69,10 @@ export function ProfessionalBottomButtons({
           : 'Profile added to favorites'
       );
     } catch (error) {
-      toast.error(
+       toast.info(
         language === 'ne' 
-          ? 'मनपर्नेमा थप्न सकिएन' 
-          : 'Failed to add to favorites'
+          ? 'यो प्रोफाइल पहिले नै मनपर्नेमा थपिएको छ'
+          : 'This profile has already been added'
       );
     } finally {
       setIsFavoriteLoading(false);

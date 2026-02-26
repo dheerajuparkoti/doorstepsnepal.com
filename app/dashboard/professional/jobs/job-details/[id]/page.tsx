@@ -1138,12 +1138,16 @@ export default function OrderDetailsPage() {
                 <Mail className="w-4 h-4 mr-2" />
                 {getLocalizedText('Send Message', 'सन्देश पठाउनुहोस्')}
               </Button> */}
-              {status === OrderStatus.ACCEPTED && (
-                <Button variant="outline" className="w-full justify-start">
-                  <User className="w-4 h-4 mr-2" />
-                  {getLocalizedText('View Customer Profile', 'ग्राहक प्रोफाइल हेर्नुहोस्')}
-                </Button>
-              )}
+             {status === OrderStatus.ACCEPTED && (
+  <Button 
+    variant="outline" 
+    className="w-full justify-start"
+    onClick={() => router.push(`/dashboard/profile/customer/${currentOrder.customer_id}`)}
+  >
+    <User className="w-4 h-4 mr-2" />
+    {getLocalizedText('View Customer Profile', 'ग्राहक प्रोफाइल हेर्नुहोस्')}
+  </Button>
+)}
               {status === OrderStatus.PENDING && (
                 <Button variant="outline"
                   onClick={() => handleStatusUpdate(currentOrder,OrderStatus.ACCEPTED)}

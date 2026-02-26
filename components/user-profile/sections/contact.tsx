@@ -11,6 +11,7 @@ import { AGE_GROUPS, GENDERS } from '@/lib/data/user';
 
 interface ProfileContactInfoProps {
   user: User;
+    isReadOnly?:boolean;
 }
 
 export function ProfileContactInfo({ user }: ProfileContactInfoProps) {
@@ -35,15 +36,7 @@ export function ProfileContactInfo({ user }: ProfileContactInfoProps) {
             <UserIcon className="h-5 w-5 text-primary" />
             {language === 'ne' ? 'सम्पर्क जानकारी' : 'Contact Information'}
           </CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push('/accountInfo')}
-            className="gap-2"
-          >
-            <Pencil className="h-4 w-4" />
-            {language === 'ne' ? 'सम्पादन' : 'Edit'}
-          </Button>
+      
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

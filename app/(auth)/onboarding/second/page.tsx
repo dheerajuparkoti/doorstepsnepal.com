@@ -436,7 +436,12 @@ export default function ProfessionalVerificationPage({
                   <Textarea
                     id="description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^[a-zA-Z0-9 ]*$/.test(val) && val.length <= 50) {
+                          setDescription(val);
+                        }
+                      }}
                     placeholder={
                       locale === 'ne' 
                         ? 'उदाहरण: शैक्षिक प्रमाणपत्र, लाइसेन्स, प्रमाणपत्र, आदि' 

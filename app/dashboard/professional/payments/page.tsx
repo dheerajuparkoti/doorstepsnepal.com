@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from '@/components/ui/use-toast';
+import { BANKS_NEPAL } from '@/lib/constants/banks/nepal';
 import {
   Edit,
   Save,
@@ -52,167 +53,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useAuth } from '@/lib/context/auth-context';
+import { getPaymentSchema, PaymentFormValues } from '@/lib/schemas/payment-schema';
 
 
 
-// Bank data for Nepal
-const BANKS_NEPAL = [
-  'Nepal Rastra Bank',
-  'Nepal Bank Limited',
-  'Rastriya Banijya Bank',
-  'Agricultural Development Bank',
-  'Nabil Bank',
-  'NIC Asia Bank',
-  'Global IME Bank',
-  'Prabhu Bank',
-  'Everest Bank',
-  'Himalayan Bank',
-  'Kumari Bank',
-  'Laxmi Bank',
-  'Siddhartha Bank',
-  'Sunrise Bank',
-  'Prime Commercial Bank',
-  'NMB Bank',
-  'Machhapuchchhre Bank',
-  'Sanima Bank',
-  'Citizens Bank',
-  'Standard Chartered Bank Nepal',
-];
-
-// Form validation schema
-const paymentFormSchema = z.object({
-  payment_method: z.enum(['cash', 'esewa', 'khalti', 'imepay', 'bank_transfer']),
-  phone_number: z.string().optional(),
-  bank_account_number: z.string().optional(),
-  bank_branch_name: z.string().optional(),
-  bank_name: z.string().optional(),
-  bank_account_holder_name: z.string().optional(),
-  ec_name: z.string()
-    .min(2)
-    .max(50)
-    .regex(/^[a-zA-Z\s]+$/),
-  
-  ec_relationship: z.string()
-    .min(2)
-    .max(30)
-    .regex(/^[a-zA-Z\s]+$/),
-  
-  ec_phone: z.string()
-    .min(10)
-    .max(10)
-    .regex(/^[0-9]+$/)
-    .regex(/^(98|97)/),
-}).superRefine((data, ctx) => {
-  // Only validate bank transfer fields if payment method is bank_transfer
-  if (data.payment_method === 'bank_transfer') {
-    // Validate bank_account_holder_name (allows letters, spaces only)
-    if (!data.bank_account_holder_name || data.bank_account_holder_name.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['bank_account_holder_name'],
-      });
-    } else {
-      // Check for valid characters (letters, spaces only)
-      if (!/^[a-zA-Z\s]+$/.test(data.bank_account_holder_name)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_account_holder_name'],
-        });
-      }
-      // Check max length
-      else if (data.bank_account_holder_name.length > 50) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_account_holder_name'],
-        });
-      }
-      // Check min length
-      else if (data.bank_account_holder_name.length < 5) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_account_holder_name'],
-        });
-      }
-    }
-
-    // Validate bank_account_number (allows numbers and spaces only)
-    if (!data.bank_account_number || data.bank_account_number.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['bank_account_number'],
-      });
-    } else {
-      // Check for valid characters (numbers and spaces only)
-      if (!/^[0-9\s]+$/.test(data.bank_account_number)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_account_number'],
-        });
-      } else {
-        // Remove spaces for length validation
-        const cleanAccountNumber = data.bank_account_number.replace(/\s/g, '');
-        
-        if (cleanAccountNumber.length < 8) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['bank_account_number'],
-          });
-        } else if (cleanAccountNumber.length >300) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['bank_account_number'],
-          });
-        }
-      }
-    }
-
-    // Validate bank_name (allows letters, spaces only)
-    if (!data.bank_name || data.bank_name.trim() === '') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['bank_name'],
-      });
-    } else {
-      if (!/^[a-zA-Z\s]+$/.test(data.bank_name)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_name'],
-        });
-      } else if (data.bank_name.length < 2) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_name'],
-        });
-      } else if (data.bank_name.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_name'],
-        });
-      }
-    }
-
-    // Validate bank_branch_name (allows letters, spaces only)
-    if (data.bank_branch_name && data.bank_branch_name.trim() !== '') {
-      if (!/^[a-zA-Z\s]+$/.test(data.bank_branch_name)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_branch_name'],
-        });
-      } else if (data.bank_branch_name.length > 100) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ['bank_branch_name'],
-        });
-      }
-    }
-  }
-});
-
-type PaymentFormValues = z.infer<typeof paymentFormSchema>;
 
 export default function ProfessionalPaymentsPage() {
-  const { locale } = useI18n();
+  const { locale,language } = useI18n();
      const { user} = useAuth();
+    const getLocalizedText = (en: string, ne: string) => {
+    return language=== 'ne' ? ne : en;
+  };
+
   const {
     profile,
     isLoading,
@@ -230,8 +82,8 @@ export default function ProfessionalPaymentsPage() {
  const currentProfessionalIdFromAuth = user?.professional_id;
   const currentProfessionalId =currentProfessionalIdFromAuth||0;
   // Initialize form
-  const form = useForm<PaymentFormValues>({
-    resolver: zodResolver(paymentFormSchema),
+    const form = useForm<PaymentFormValues>({
+    resolver: zodResolver(getPaymentSchema(getLocalizedText)),
     defaultValues: {
       payment_method: 'cash',
       phone_number: '',

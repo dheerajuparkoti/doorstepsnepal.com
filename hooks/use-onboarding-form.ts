@@ -41,17 +41,23 @@ export function useOnboardingForm() {
   const [formData, setFormData] = useState<OnboardingFormData>(initialFormData);
 
   const updateFormData = useCallback((
-    step: keyof OnboardingFormData,
-    data: Partial<OnboardingFormData[keyof OnboardingFormData]>
-  ) => {
-    setFormData(prev => ({
+  step: keyof OnboardingFormData,
+  data: Partial<OnboardingFormData[keyof OnboardingFormData]>
+) => {
+  setFormData(prev => {
+    const newData = {
       ...prev,
       [step]: {
         ...prev[step],
         ...data,
       },
-    }));
-  }, []);
+    };
+    
+    return newData;
+  });
+}, []);
+
+
 
   const getStepData = useCallback((step: number) => {
     switch (step) {
