@@ -1,39 +1,4 @@
-// // components/professional/ssr/professional-screen-ssr.tsx
-// import { ProfessionalScreen } from '../professional-screen';
-// import { fetchProfessionalProfile } from '@/lib/api/professional-profiles';
-// import { notFound } from 'next/navigation';
 
-// interface ProfessionalScreenSSRProps {
-//   professionalId: number;
-//   showAppBar?: boolean;
-//   isOwnProfile?: boolean;
-// }
-
-// export async function ProfessionalScreenSSR({ 
-//   professionalId, 
-//   showAppBar = false,
-//   isOwnProfile = false 
-// }: ProfessionalScreenSSRProps) {
-  
-//   // Fetch initial profile for SEO and metadata
-//   const profile = await fetchProfessionalProfile(professionalId);
-
-//   if (!profile) {
-//     notFound();
-//   }
-
-//   return (
-//     <ProfessionalScreen
-//       professionalId={professionalId}
-//       showAppBar={showAppBar}
-//       isOwnProfile={isOwnProfile}
-//       initialProfile={profile}
-//     />
-//   );
-// }
-
-
-// components/professional/ssr/professional-screen-ssr.tsx
 import { Suspense } from 'react';
 import { ProfessionalScreen } from '../professional-screen';
 import { ProfessionalHeaderCarouselSSR } from './professional-header-carousel-ssr';

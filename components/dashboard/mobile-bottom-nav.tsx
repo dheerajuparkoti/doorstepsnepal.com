@@ -39,6 +39,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAppStateStore } from "@/stores/app-state-store";
 
 interface MenuItem {
   label: string;
@@ -54,7 +55,8 @@ export function MobileBottomNav() {
   const { mode } = useAuth();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openSections, setOpenSections] = useState<string[]>([]);
-
+ 
+const professionalId = useAppStateStore((state) => state.professionalId);
   // Close sheet when route changes
   useEffect(() => {
     setOpenMenu(null);
@@ -123,7 +125,9 @@ export function MobileBottomNav() {
       href: "/dashboard/profile", 
       icon: User,
       children: [
-        { label: t.professional.sidebar.viewProfile, href: "/dashboard/profile/professional", icon: View },
+        
+       { label: t.professional.sidebar.viewProfile,  href: `/dashboard/profile/professional/${professionalId}`,
+                 icon: View},
         { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/professional/verify-documents", icon: FileCheck },
         { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/professional/payments", icon: CreditCard },
         { label: t.professional.sidebar.workGallery, href: "/dashboard/professional/gallery", icon: ImageIcon },

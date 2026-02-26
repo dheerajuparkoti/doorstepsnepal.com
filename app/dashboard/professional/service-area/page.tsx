@@ -156,7 +156,7 @@ export default function ProfessionalServiceAreasPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   
  const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId =currentProfessionalIdFromAuth||24;
+  const currentProfessionalId =currentProfessionalIdFromAuth||0;
   // Initialize form
   const form = useForm<ServiceAreaFormValues>({
     resolver: zodResolver(serviceAreaFormSchema),

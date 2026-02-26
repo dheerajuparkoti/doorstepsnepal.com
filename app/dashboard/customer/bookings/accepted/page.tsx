@@ -390,7 +390,9 @@ export default function AcceptedBookingsPage() {
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-blue-50">
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200
+             dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700"
+>
                 <CheckCircle className="w-3 h-3 mr-1" />
                 {acceptedOrders.length} {locale === 'ne' ? 'स्वीकृत' : 'Accepted'}
               </Badge>

@@ -367,7 +367,9 @@ export default function CancelledBookingsPage() {
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-red-50">
+              <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200
+             dark:bg-red-900/30 dark:text-red-300 dark:border-red-700"
+>
                 <XCircle className="w-3 h-3 mr-1" />
                 {cancelledOrders.length} {locale === 'ne' ? 'रद्द' : 'Cancelled'}
               </Badge>

@@ -54,7 +54,7 @@ export default function CancelledJobsPage() {
   const [sortBy, setSortBy] = useState('date_desc');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId =currentProfessionalIdFromAuth||24;
+  const currentProfessionalId =currentProfessionalIdFromAuth||0;
 
   useEffect(() => {
     loadJobs();
@@ -366,7 +366,9 @@ export default function CancelledJobsPage() {
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-red-50">
+              <Badge variant="outline"   className="bg-red-50 text-red-700 border-red-200
+             dark:bg-red-900/30 dark:text-red-300 dark:border-red-700"
+>
                 <XCircle className="w-3 h-3 mr-1" />
                 {cancelledJobs.length} {locale === 'ne' ? 'रद्द' : 'Cancelled'}
               </Badge>

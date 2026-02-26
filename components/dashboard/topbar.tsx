@@ -37,6 +37,7 @@ import { Home, Bell, Sun, Moon, Globe, User, Settings, LogOut, ChevronDown, Load
 
 // Import notification store
 import { useNotificationStore, useUnreadCount, useIsLoading } from "@/stores/notification-store";
+import { useAppStateStore } from "@/stores/app-state-store";
 
 // Helper function to check if professional onboarding is complete
 const isProfessionalOnboardingComplete = (user: any): boolean => {
@@ -78,7 +79,7 @@ export function DashboardTopbar() {
   const unreadCount = useUnreadCount();
   const isLoading = useIsLoading();
   const { loadNotifications, notifications } = useNotificationStore();
-
+const professionalId = useAppStateStore((state) => state.professionalId);
   useEffect(() => {
     if (user?.id) {
       
@@ -119,10 +120,12 @@ export function DashboardTopbar() {
       .slice(0, 2);
   };
   
-  const profileRoute =
-    mode === "professional"
-      ? "/dashboard/profile/professional"
-      : "/dashboard/profile/customer";
+const profileRoute =
+  mode === "professional"
+    ? professionalId
+      ? `/dashboard/profile/professional/${professionalId}`
+      : "#"
+    : "/dashboard/profile/customer";
 
   // Handle mode switch with onboarding check
   // const handleModeSwitch = (newMode: "customer" | "professional") => {
@@ -372,7 +375,7 @@ export function DashboardTopbar() {
             <AlertDialogAction
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive  hover:bg-destructive/90"
             >
               {isLoggingOut ? (
                 <>

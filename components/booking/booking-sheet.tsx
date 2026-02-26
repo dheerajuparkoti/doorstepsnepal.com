@@ -445,7 +445,7 @@ export function BookingSheet({
                             showYearDropdown
                             isClearable={false}
                             className="w-full border rounded-md !h-9 [&>input]:!h-9 [&>input]:!min-h-0 [&>input]:!py-0 [&>input]:!px-2 [&>input]:pl-8 text-sm"
-                            inputClassName="!h-9 !min-h-0 !py-0 !px-2 !pl-8 text-sm"
+                            inputClassName="h-9 pl-8 pr-2 text-sm text-foreground"
                             placeholder={getLocalizedText('Select date', 'मिति चयन गर्नुहोस्')}
                           />
                         </div>

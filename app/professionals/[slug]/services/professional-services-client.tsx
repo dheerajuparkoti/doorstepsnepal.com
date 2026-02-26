@@ -14,7 +14,10 @@ import {
   DollarSign,
   SlidersHorizontal,
   Star,
-  Calendar
+  Calendar,
+  Banknote,
+  Heart,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -46,6 +49,10 @@ import { useOrderStore } from '@/stores/order-store';
 import { useAddressStore, useTemporaryAddress, useAddresses } from '@/stores/address-store';
 import { Address } from '@/lib/data/address';
 import { AddressData } from '@/components/booking/booking-sheet';
+import { cn } from '@/lib/utils';
+import { useGuestStore } from '@/stores/guest-store';
+import { addFavorite } from '@/lib/api/favorites';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 interface ProfessionalServicesClientProps {
   professionalId: number;
   professionalName: string;
@@ -78,7 +85,7 @@ export function ProfessionalServicesClient({
   const { language } = useI18n();
   const { createOrder } = useOrderStore(); 
     const { confirm, ConfirmationDialog } = useConfirmationDialog();
-  
+     const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   // State management
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -536,6 +543,77 @@ toast.error(
     setShowFilters(false);
   };
 
+
+const handleProfessionalFavorite = async (proId: number) => {
+  const { isGuest } = useGuestStore.getState();
+  
+  if (isGuest) {
+      toast.warning(
+      language === 'ne'
+        ? 'कृपया लाग-इन गर्नुहोस्'
+        : 'Please log in to favorite'
+    );
+    return;
+  }
+
+  setIsFavoriteLoading(true);
+  try {
+    await addFavorite({
+      professional_id: proId, 
+    });
+    
+    toast.success(
+     language === 'ne' 
+        ? 'व्यवसायी मनपर्नेमा थपियो' 
+        : 'Professional added to favorites'
+    );
+  } catch (error) {
+     toast.info(
+    language === 'ne' 
+        ? 'यो व्यवसायी पहिले नै मनपर्नेमा थपिएको छ'
+        : 'This professional has already been added'
+    );
+  
+  } finally {
+    setIsFavoriteLoading(false);
+  }
+};
+
+
+const handleServiceFavorite = async (serId: number) => {
+  const { isGuest } = useGuestStore.getState();
+  
+  if (isGuest) {
+    toast.warning(
+      language === 'ne'
+        ? 'कृपया लाग-इन गर्नुहोस्'
+        : 'Please log in to favorite'
+    );
+    return;
+  }
+
+  setIsFavoriteLoading(true);
+  try {
+    await addFavorite({
+      professional_service_id: serId, 
+    });
+    
+    toast.success(
+      language === 'ne' 
+        ? 'सेवा मनपर्नेमा थपियो' 
+        : 'Service added to favorites'
+    );
+  } catch (error) {
+     toast.info(
+    language === 'ne' 
+      ? 'यो सेवा पहिले नै मनपर्नेमा थपिएको छ'
+      : 'This service has already been added'
+  );
+  } finally {
+    setIsFavoriteLoading(false);
+  }
+};
+
   return (
     <>
       <div className="min-h-screen bg-background">
@@ -769,16 +847,84 @@ toast.error(
                             <Wrench className="h-12 w-12 text-muted-foreground/30" />
                           </div>
                         )}
+
+  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+               <TooltipProvider>
+  <div className="absolute top-3 right-3 z-10 flex gap-2">
+
+    {/* Favorite Professional */}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-9 w-9 rounded-full backdrop-blur-md shadow-md transition-all duration-300",
+            "bg-white/80 dark:bg-black/60",
+            "hover:scale-110 hover:shadow-lg",
+            service.is_professional_favorited
+              ? "text-green-500"
+              : "text-muted-foreground hover:text-green-500"
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleProfessionalFavorite(service.professional_id);
+          }}
+        >
+          <User
+            className={cn(
+              "h-4 w-4 transition-all duration-300",
+              service.is_professional_favorited && "scale-110"
+            )}
+          />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {service.is_professional_favorited
+          ? "Remove Professional from Favorites"
+          : "Add Professional to Favorites"}
+      </TooltipContent>
+    </Tooltip>
+
+    {/* Favorite Service */}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-9 w-9 rounded-full backdrop-blur-md shadow-md transition-all duration-300",
+            "bg-white/80 dark:bg-black/60",
+            "hover:scale-110 hover:shadow-lg",
+            service.is_service_favorited
+              ? "text-red-500"
+              : "text-muted-foreground hover:text-red-500"
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleServiceFavorite(service.id);
+          }}
+        >
+          <Heart
+            className={cn(
+              "h-4 w-4 transition-all duration-300",
+              service.is_service_favorited && "fill-current scale-110"
+            )}
+          />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {service.is_service_favorited
+          ? "Remove Service from Favorites"
+          : "Add Service to Favorites"}
+      </TooltipContent>
+    </Tooltip>
+
+  </div>
+</TooltipProvider>
                         
-                        {/* Price Badge */}
-                        {pricedItems.length > 0 && (
-                          <div className="absolute top-3 right-3">
-                            <div className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
-                              <DollarSign className="inline h-3 w-3" />
-                              {Math.min(...pricedItems.map((p: any) => p.price))}+
-                            </div>
-                          </div>
-                        )}
+                        
+               
                       </div>
 
                       {/* Content */}
@@ -797,7 +943,7 @@ toast.error(
                         {pricedItems.length > 0 && (
                           <div className="space-y-3">
                             <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                              <DollarSign className="h-4 w-4" />
+                              <Banknote className="h-4 w-4" />
                               <span>{getLocalizedText('Pricing', 'मूल्य निर्धारण')}</span>
                             </div>
                             

@@ -136,7 +136,7 @@ export function ProfessionalReviewsTab({
   return (
     <div className="p-4 space-y-4">
       {/* Toggle View Button */}
-      <div className="flex justify-center">
+      {/* <div className="flex justify-center">
         <Button
           variant="outline"
           size="sm"
@@ -155,7 +155,7 @@ export function ProfessionalReviewsTab({
             </>
           )}
         </Button>
-      </div>
+      </div> */}
 
       {/* Reviews Grid */}
       {viewMode === 'chronological' ? (

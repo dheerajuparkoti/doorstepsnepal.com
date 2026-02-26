@@ -330,7 +330,9 @@ export default function PendingBookingsPage() {
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-yellow-50">
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200
+             dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-700"
+>
                 <Clock className="w-3 h-3 mr-1" />
                 {filteredOrders.length} {locale === 'ne' ? 'बाँकी' : 'Pending'}
               </Badge>

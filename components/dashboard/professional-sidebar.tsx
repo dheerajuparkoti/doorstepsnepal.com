@@ -47,7 +47,7 @@ export function ProfessionalSidebar() {
   const { t } = useI18n();
   const pathname = usePathname();
   // const [openSections, setOpenSections] = useState<string[]>(["profile", "services", "jobs", "settings"]);
-  const [openSections, setOpenSections] = useState<string[]>([]);// make labels collapsible
+  const [openSections, setOpenSections] = useState<string[]>([]);
 const professionalId = useAppStateStore((state) => state.professionalId);
 
   const navItems: NavItem[] = [

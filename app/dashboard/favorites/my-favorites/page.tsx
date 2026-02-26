@@ -7,6 +7,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/context';
 import { createProfessionalSlug } from '@/lib/utils/slug';
+import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
+import { toast } from 'sonner';
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<FavoritesResponse>([]);
@@ -14,6 +16,7 @@ export default function FavoritesPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { locale } = useI18n();
+  const { confirm, ConfirmationDialog } = useConfirmationDialog();
 
   useEffect(() => {
     loadFavorites();
@@ -43,21 +46,38 @@ export default function FavoritesPage() {
     }
   }
 
+
   async function handleRemoveFavorite(favoriteId: number) {
-    const confirmMessage = locale === 'ne'
-      ? 'के तपाईं यो मनपराएको सूचीबाट हटाउन चाहनुहुन्छ?'
-      : 'Are you sure you want to remove this from favorites?';
-    
-    if (!confirm(confirmMessage)) return;
-    
+   
+    const confirmed = await confirm({
+      title: locale === 'ne' 
+        ? 'मनपराएको हटाउने?'
+        : 'Remove from Favorites?',
+      description: locale === 'ne'
+        ? 'के तपाईं यो वस्तु मनपराएको सूचीबाट हटाउन निश्चित हुनुहुन्छ?'
+        : 'Are you sure you want to remove this item from your favorites?',
+      confirmText: locale === 'ne' 
+        ? 'हो, हटाउनुहोस्'
+        : 'Yes, Remove',
+      cancelText: locale === 'ne'
+        ? 'रद्द गर्नुहोस्'
+        : 'Cancel',
+      variant: 'destructive', 
+    });
+
+    if (!confirmed) return;
+
+  
     try {
       await removeFavorite(favoriteId);
       setFavorites(prev => prev.filter(fav => fav.id !== favoriteId));
+      
+    
+      toast.success(locale === 'ne' ? 'हटाइयो' : 'Removed');
     } catch (err) {
       console.error('Error removing favorite:', err);
-      alert(locale === 'ne'
-        ? 'मनपराएको हटाउन असफल'
-        : 'Failed to remove favorite');
+  
+       toast.error(locale === 'ne' ? 'हटाउन असफल' : 'Failed to remove');
     }
   }
 
@@ -74,7 +94,7 @@ export default function FavoritesPage() {
       fav => fav.professional?.id === professionalId
     )?.professional;
     
-    // Get the professional's name (fallback to empty string)
+   
     const professionalName = professional?.full_name || '';
     
     // Create slug with both ID and name
@@ -268,6 +288,7 @@ export default function FavoritesPage() {
           </div>
         </div>
       )}
+       <ConfirmationDialog />
     </div>
   );
 }
@@ -330,7 +351,7 @@ function ServiceFavoriteCard({
         </div>
         
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600">
+          <h3 className="font-semibold text-blue-900 truncate group-hover:text-blue-600">
             {localizedName || (locale === 'ne' ? 'सेवा' : 'Service')}
           </h3>
           <div className="flex items-center gap-2 mt-1">
@@ -413,7 +434,7 @@ function ProfessionalFavoriteCard({
         </div>
         
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate group-hover:text-green-600">
+          <h3 className="font-semibold text-green-900 truncate group-hover:text-green-600">
             {professional?.full_name || (locale === 'ne' ? 'पेशेवर' : 'Professional')}
           </h3>
           <div className="flex items-center gap-2 mt-1">
@@ -424,17 +445,7 @@ function ProfessionalFavoriteCard({
               {locale === 'ne' ? 'सत्यापित' : 'Verified'}
             </span>
           </div>
-          <div className="flex items-center gap-2 mt-3">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-              4.8
-            </span>
-            <span className="text-xs text-gray-500">
-              • 50+ {locale === 'ne' ? 'समीक्षाहरू' : 'reviews'}
-            </span>
-          </div>
+       
         </div>
         
         <button 
@@ -452,8 +463,11 @@ function ProfessionalFavoriteCard({
             <TrashIcon className="w-5 h-5" />
           )}
         </button>
+        
       </div>
+       
     </div>
+    
   );
 }
 

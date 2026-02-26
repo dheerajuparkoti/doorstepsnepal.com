@@ -368,7 +368,9 @@ export default function CompletedBookingsPage() {
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-green-50">
+              <Badge variant="outline"className="bg-green-50 text-blue-700 border-green-200
+             dark:bg-green-900/30 dark:text-green-300 dark:border-green-700"
+>
                 <CheckCircle className="w-3 h-3 mr-1" />
                 {completedOrders.length} {locale === 'ne' ? 'सम्पन्न' : 'Completed'}
               </Badge>

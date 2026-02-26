@@ -174,8 +174,8 @@ export default function ProfessionalServiceAvailabilityPage() {
   const [timeError, setTimeError] = useState<string | null>(null);
 
   
- const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId =currentProfessionalIdFromAuth||24;
+  const currentProfessionalIdFromAuth = user?.professional_id;
+  const currentProfessionalId =currentProfessionalIdFromAuth||0;
   // Initialize form
   const form = useForm<AvailabilityFormValues>({
     resolver: zodResolver(availabilityFormSchema),

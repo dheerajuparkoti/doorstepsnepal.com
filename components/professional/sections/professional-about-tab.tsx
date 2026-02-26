@@ -67,7 +67,7 @@ export function ProfessionalAboutTab({
             {serviceAreaNames.map((area, index) => (
               <span
                 key={index}
-                className="px-4 py-1.5 bg-secondary/10 text-secondary rounded-full text-sm"
+                className="px-4 py-1.5 bg-primary/10 text-primary rounded-full text-sm"
               >
                 {area}
               </span>

@@ -54,7 +54,7 @@ export default function InspectedJobsPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
  const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId =currentProfessionalIdFromAuth||24;
+  const currentProfessionalId =currentProfessionalIdFromAuth||0;
 
   useEffect(() => {
     loadJobs();
@@ -360,10 +360,15 @@ export default function InspectedJobsPage() {
               }
             </p>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="bg-purple-50">
+              <Badge variant="outline"   className="bg-purple-50 text-blue-700 border-purple-200
+             dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700"
+>
                 <Eye className="w-3 h-3 mr-1" />
                 {inspectedJobs.length} {locale === 'ne' ? 'निरीक्षण गरियो' : 'Inspected'}
               </Badge>
+
+
+
             </div>
           </div>
 

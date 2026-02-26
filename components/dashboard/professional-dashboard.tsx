@@ -216,13 +216,7 @@ const getMonthlyEarnings = () => {
       change: wallet?.total_earned ? `+${((totalEarnings / wallet.total_earned) * 100).toFixed(0)}%` : "0%",
       changeType: "positive" as const,
     },
-    {
-      label: t.professional.stats.rating,
-      value: "4.9",
-      icon: Star,
-      change: `${completedJobs.length} reviews`,
-      changeType: "neutral" as const,
-    },
+   
   ];
 
 const getTimeUntilNextJob = (scheduledTime: Date | string | undefined) => {
@@ -389,7 +383,7 @@ const getTimeProgress = (scheduledTime: Date | string | undefined) => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (

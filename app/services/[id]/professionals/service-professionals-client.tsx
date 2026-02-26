@@ -17,7 +17,8 @@ import {
   Award,
   Clock,
   CheckCircle,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Heart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -55,6 +56,11 @@ import { useConfirmationDialog } from '@/hooks/use-confirmation-dialog';
 import { useAddresses, useAddressStore, useTemporaryAddress } from '@/stores/address-store';
 import { Address } from '@/lib/data/address';
 import { notificationApi } from '@/lib/api/notification'; //for notification
+import { addFavorite } from '@/lib/api/favorites';
+import { useGuestStore } from '@/stores/guest-store';
+import { cn } from '@/lib/utils';
+import { id } from 'date-fns/locale';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 interface ServiceProfessionalsClientProps {
   professionalsData: any[];
   serviceName: string;
@@ -96,6 +102,7 @@ export function ServiceProfessionalsClient({
 
   const { createOrder } = useOrderStore(); 
     const { confirm, ConfirmationDialog } = useConfirmationDialog();
+      const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   
   // State management
   const [filters, setFilters] = useState<FilterState>({
@@ -677,6 +684,76 @@ toast.error(
     );
   };
 
+
+const handleProfessionalFavorite = async (proId: number) => {
+  const { isGuest } = useGuestStore.getState();
+  
+  if (isGuest) {
+      toast.warning(
+      language === 'ne'
+        ? 'कृपया लाग-इन गर्नुहोस्'
+        : 'Please log in to favorite'
+    );
+    return;
+  }
+
+  setIsFavoriteLoading(true);
+  try {
+    await addFavorite({
+      professional_id: proId, 
+    });
+    
+    toast.success(
+     language === 'ne' 
+        ? 'व्यवसायी मनपर्नेमा थपियो' 
+        : 'Professional added to favorites'
+    );
+  } catch (error) {
+     toast.info(
+    language === 'ne' 
+        ? 'यो व्यवसायी पहिले नै मनपर्नेमा थपिएको छ'
+        : 'This professional has already been added'
+    );
+  
+  } finally {
+    setIsFavoriteLoading(false);
+  }
+};
+
+
+const handleServiceFavorite = async (serId: number) => {
+  const { isGuest } = useGuestStore.getState();
+  
+  if (isGuest) {
+    toast.warning(
+      language === 'ne'
+        ? 'कृपया लाग-इन गर्नुहोस्'
+        : 'Please log in to favorite'
+    );
+    return;
+  }
+
+  setIsFavoriteLoading(true);
+  try {
+    await addFavorite({
+      professional_service_id: serId, 
+    });
+    
+    toast.success(
+      language === 'ne' 
+        ? 'सेवा मनपर्नेमा थपियो' 
+        : 'Service added to favorites'
+    );
+  } catch (error) {
+     toast.info(
+    language === 'ne' 
+      ? 'यो सेवा पहिले नै मनपर्नेमा थपिएको छ'
+      : 'This service has already been added'
+  );
+  } finally {
+    setIsFavoriteLoading(false);
+  }
+};
   // Render professional card
   const renderProfessionalCard = (professional: any) => {
     return (
@@ -700,7 +777,80 @@ toast.error(
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            
+<TooltipProvider>
+  <div className="absolute top-3 right-3 z-10 flex gap-2">
+
+    {/* Favorite Professional */}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-9 w-9 rounded-full backdrop-blur-md shadow-md transition-all duration-300",
+            "bg-white/80 dark:bg-black/60",
+            "hover:scale-110 hover:shadow-lg",
+            professional.is_professional_favorited
+              ? "text-green-500"
+              : "text-muted-foreground hover:text-green-500"
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleProfessionalFavorite(professional.professional_id);
+          }}
+        >
+          <User
+            className={cn(
+              "h-4 w-4 transition-all duration-300",
+              professional.is_professional_favorited && "scale-110"
+            )}
+          />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {professional.is_professional_favorited
+          ? "Remove Professional from Favorites"
+          : "Add Professional to Favorites"}
+      </TooltipContent>
+    </Tooltip>
+
+    {/* Favorite Service */}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className={cn(
+            "h-9 w-9 rounded-full backdrop-blur-md shadow-md transition-all duration-300",
+            "bg-white/80 dark:bg-black/60",
+            "hover:scale-110 hover:shadow-lg",
+            professional.is_service_favorited
+              ? "text-red-500"
+              : "text-muted-foreground hover:text-red-500"
+          )}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleServiceFavorite(professional.id);
+          }}
+        >
+          <Heart
+            className={cn(
+              "h-4 w-4 transition-all duration-300",
+              professional.is_service_favorited && "fill-current scale-110"
+            )}
+          />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        {professional.is_service_favorited
+          ? "Remove Service from Favorites"
+          : "Add Service to Favorites"}
+      </TooltipContent>
+    </Tooltip>
+
+  </div>
+</TooltipProvider>
+          
             {/* Professional Info Overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <div className="flex items-start justify-between">
@@ -821,10 +971,6 @@ toast.error(
    setSelectedProfessional(professional);
                   setShowBookingSheet(true);
     }
-
-
-
-               
                 }}
               >
                 {getLocalizedText('Book Now', 'बुक गर्नुहोस्')}
@@ -835,6 +981,8 @@ toast.error(
       </Card>
     );
   };
+
+
 
  const activeFilterCount = [
   filters.selectedTag,

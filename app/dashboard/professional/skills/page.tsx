@@ -282,7 +282,7 @@ export default function ProfessionalSkillsPage() {
   const [skillSearchQuery, setSkillSearchQuery] = useState('');
   const [filteredSkills, setFilteredSkills] = useState<string[]>(ALL_SKILLS);
  const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId =currentProfessionalIdFromAuth||24;
+  const currentProfessionalId =currentProfessionalIdFromAuth||0;
   // Initialize form
   const form = useForm<SkillsFormValues>({
     resolver: zodResolver(skillsFormSchema),

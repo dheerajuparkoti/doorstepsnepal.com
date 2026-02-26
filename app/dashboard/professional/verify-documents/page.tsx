@@ -68,7 +68,7 @@ export default function ProfessionalVerificationPage() {
   
 
     const currentProfessionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId =currentProfessionalIdFromAuth||24;
+  const currentProfessionalId =currentProfessionalIdFromAuth||0;
 
   useEffect(() => {
     loadDocuments();
@@ -373,12 +373,20 @@ export default function ProfessionalVerificationPage() {
                   <Textarea
                     id="description"
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                 
+
+                                        onChange={(e) => {
+                        const val = e.target.value;
+                        if (/^[a-zA-Z0-9 ]*$/.test(val) && val.length <= 50) {
+                          setDescription(val);
+                        }
+                      }}
                     placeholder={
                       locale === 'ne' 
                         ? 'उदाहरण: शैक्षिक प्रमाणपत्र, लाइसेन्स, प्रमाणपत्र, आदि' 
                         : 'Example: Educational certificate, license, certificate, etc.'
                     }
+                    maxLength={50}
                     className="mt-2 min-h-[120px]"
                     required
                   />

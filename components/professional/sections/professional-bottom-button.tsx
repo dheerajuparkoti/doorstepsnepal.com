@@ -79,29 +79,31 @@ export function ProfessionalBottomButtons({
     }
   };
 
-  return (
-    <div className="flex gap-2 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <Button
-        className="flex-1 gap-2"
-        onClick={handleCall}
-      >
-        <Phone className="h-4 w-4" />
-        <span className="truncate">
-          {language === 'ne' 
-            ? `${firstName} सँग सम्पर्क गर्नुहोस्`
-            : `Schedule with ${firstName}`}
-        </span>
-      </Button>
-      
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-10 w-10"
-        onClick={handleFavorite}
-        disabled={isFavoriteLoading}
-      >
-        <Heart className={`h-4 w-4 ${isFavoriteLoading ? 'animate-pulse' : ''}`} />
-      </Button>
-    </div>
-  );
+ return (
+  <div className="flex gap-2 p-4 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    
+
+    <Button
+      className="flex-[2] gap-2"
+      onClick={handleCall}
+    >
+      <Phone className="h-4 w-4" />
+      <span className="truncate">
+        {language === 'ne' 
+          ? `${firstName} सँग सम्पर्क गर्नुहोस्`
+          : `Schedule with ${firstName}`}
+      </span>
+    </Button>
+
+    <Button
+      variant="outline"
+      size="icon"
+      className="flex-[1] h-10 w-full"
+      onClick={handleFavorite}
+      disabled={isFavoriteLoading}
+    >
+      <Heart className={`h-4 w-4 ${isFavoriteLoading ? 'animate-pulse' : ''}`} />
+    </Button>
+  </div>
+);
 }

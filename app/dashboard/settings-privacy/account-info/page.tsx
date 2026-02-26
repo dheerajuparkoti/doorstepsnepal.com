@@ -1025,7 +1025,7 @@ export default function AccountInfoPage() {
                     <Badge 
                       className={`mt-2 ${
                         getUserTypeDisplay() === getLocalizedText('Professional', 'व्यवसायी')
-                          ? 'bg-secondary/20 text-secondary hover:bg-secondary/30 border-secondary/30'
+                          ? 'bg-secondary/20 text-primary hover:bg-primary/30 border-primary/30'
                           : 'bg-primary/20 text-primary hover:bg-primary/30 border-primary/30'
                       }`}
                       variant="outline"
