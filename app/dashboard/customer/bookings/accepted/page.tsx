@@ -181,7 +181,7 @@ export default function AcceptedBookingsPage() {
           </h1>
           <p className="text-muted-foreground">
             {locale === 'ne' 
-              ? 'पेशेवरहरूद्वारा स्वीकृत बुकिंगहरू'
+              ? 'प्रोफेशनलहरूद्वारा स्वीकृत बुकिंगहरू'
               : 'Bookings accepted by professionals'
             }
           </p>
@@ -233,7 +233,7 @@ export default function AcceptedBookingsPage() {
             </h1>
             <p className="text-muted-foreground">
               {locale === 'ne' 
-                ? 'पेशेवरहरूद्वारा स्वीकृत बुकिंगहरू'
+                ? 'प्रोफेशनलहरूद्वारा स्वीकृत बुकिंगहरू'
                 : 'Bookings accepted by professionals'
               }
             </p>
@@ -261,7 +261,7 @@ export default function AcceptedBookingsPage() {
               <Input
                 placeholder={
                   locale === 'ne' 
-                    ? 'सेवा, पेशेवर, स्थान, आईडी, वा मूल्य द्वारा खोज्नुहोस्...'
+                    ? 'सेवा, प्रोफेशनल, स्थान, आईडी, वा मूल्य द्वारा खोज्नुहोस्...'
                     : 'Search by service, professional, location, ID, or price...'
                 }
                 className="pl-10 pr-10"

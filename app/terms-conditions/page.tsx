@@ -3,14 +3,35 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Mail, Lock, Eye, Globe, RefreshCw, Users, FileText, AlertCircle, BookOpen, DollarSign, UserCheck, Scale, MessageSquare } from "lucide-react";
+import { Shield, Mail, Lock, Eye, Globe, RefreshCw, Users, FileText, AlertCircle, BookOpen, DollarSign, UserCheck, Scale, MessageSquare, Contact2Icon } from "lucide-react";
 import Link from "next/link";
 import { useI18n } from '@/lib/i18n/context';
 import { Footer } from "@/components/layout/footer";
 
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+
 export default function TermsAndConditionsPage() {
   const { locale } = useI18n();
-  
+      const pathname = usePathname();
+      const router = useRouter();
+
+
+
+      
+  // Function to handle scroll to section
+  const scrollToSection = (sectionId: string) => {
+    // If we're already on the about page
+    if (pathname === "/about") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Navigate to about page with hash
+      router.push(`/about#${sectionId}`);
+    }
+  };
 
 
   // Bilingual content - with consistent point structure
@@ -415,11 +436,11 @@ export default function TermsAndConditionsPage() {
           points: [
             {
               title: "प्लेटफर्म सेवाहरू",
-              desc: "सेवाहरूले प्लेटफर्म प्रदान गर्दछ जसले तपाईंलाई स्वतन्त्र तेस्रो पक्ष सेवा प्रदायकहरू, जसलाई 'सेवा पेशेवरहरू' भनिन्छ, संग घर-आधारित सेवाहरूको शृंखला समन्वय र समय तालिका बनाउन सक्षम बनाउँछ। Doorsteps Nepal ले सेवा पेशेवरहरूलाई तिनीहरूले तपाईंलाई प्रदान गर्ने सेवाहरूको लागि भुक्तानी स्थानान्तरण गर्न, साथै तिनीहरूको तर्फबाट भुक्तानी संकलन गर्न सहज बनाउँछ।"
+              desc: "सेवाहरूले प्लेटफर्म प्रदान गर्दछ जसले तपाईंलाई स्वतन्त्र तेस्रो पक्ष सेवा प्रदायकहरू, जसलाई 'सेवा प्रोफेशनलहरू' भनिन्छ, संग घर-आधारित सेवाहरूको शृंखला समन्वय र समय तालिका बनाउन सक्षम बनाउँछ। Doorsteps Nepal ले सेवा प्रोफेशनलहरूलाई तिनीहरूले तपाईंलाई प्रदान गर्ने सेवाहरूको लागि भुक्तानी स्थानान्तरण गर्न, साथै तिनीहरूको तर्फबाट भुक्तानी संकलन गर्न सहज बनाउँछ।"
             },
             {
               title: "प्रो सेवाहरू",
-              desc: "'प्रो सेवाहरू' शब्दले सेवा पेशेवरहरूले प्रदान गर्ने सेवाहरूलाई जनाउँछ। Doorsteps Nepal ले प्रो सेवाहरू प्रदान गर्दैन र तिनीहरूको वितरणको लागि जिम्मेवार हुँदैन। सेवा पेशेवरहरू प्लेटफर्म मार्फत तिनीहरूले प्रदान गर्ने प्रो सेवाहरूको लागि विशेष रूपमा जिम्मेवार हुन्छन्।"
+              desc: "'प्रो सेवाहरू' शब्दले सेवा प्रोफेशनलहरूले प्रदान गर्ने सेवाहरूलाई जनाउँछ। Doorsteps Nepal ले प्रो सेवाहरू प्रदान गर्दैन र तिनीहरूको वितरणको लागि जिम्मेवार हुँदैन। सेवा प्रोफेशनलहरू प्लेटफर्म मार्फत तिनीहरूले प्रदान गर्ने प्रो सेवाहरूको लागि विशेष रूपमा जिम्मेवार हुन्छन्।"
             },
             {
               title: "व्यक्तिगत प्रयोग",
@@ -445,7 +466,7 @@ export default function TermsAndConditionsPage() {
             },
             {
               title: "समीक्षाहरू",
-              desc: "हामीले तपाईंबाट सेवा पेशेवरहरू सम्बन्धी समीक्षाहरू अनुरोध गर्न सक्छौं। सबै समीक्षाहरू ईमानदार हुनुपर्छ र जानीजानी झूटा, गलत, वा भ्रमित गर्ने हुनु हुँदैन। समीक्षाहरू गुणस्तर नियन्त्रणको लागि प्रयोग गरिन्छ।"
+              desc: "हामीले तपाईंबाट सेवा प्रोफेशनलहरू सम्बन्धी समीक्षाहरू अनुरोध गर्न सक्छौं। सबै समीक्षाहरू ईमानदार हुनुपर्छ र जानीजानी झूटा, गलत, वा भ्रमित गर्ने हुनु हुँदैन। समीक्षाहरू गुणस्तर नियन्त्रणको लागि प्रयोग गरिन्छ।"
             },
             {
               title: "लाइसेन्स अनुदान",
@@ -503,7 +524,7 @@ export default function TermsAndConditionsPage() {
           points: [
             {
               title: "बुकिङ राख्ने",
-              desc: "प्लेटफर्मले तपाईंलाई उपलब्ध स्लटहरूको आधारमा विभिन्न प्रो सेवाहरू अनुरोध गर्न अनुमति दिन्छ। हामीले तपाईंको छनौट गरिएको समयको लागि सेवा पेशेवर भेट्टाउन पूरा प्रयास गर्नेछौं।"
+              desc: "प्लेटफर्मले तपाईंलाई उपलब्ध स्लटहरूको आधारमा विभिन्न प्रो सेवाहरू अनुरोध गर्न अनुमति दिन्छ। हामीले तपाईंको छनौट गरिएको समयको लागि सेवा प्रोफेशनल भेट्टाउन पूरा प्रयास गर्नेछौं।"
             },
             {
               title: "पुष्टिकरण",
@@ -515,7 +536,7 @@ export default function TermsAndConditionsPage() {
             },
             {
               title: "प्रतिस्थापन",
-              desc: "यदि चयन गरिएको सेवा पेशेवर उपलब्ध हुँदैन भने, हामीले तपाईंको बुकिङ पूरा गर्न हाम्रा दर्ता गरिएका सेवा पेशेवरहरूमध्येबाट प्रतिस्थापन प्रदान गर्नेछौं।"
+              desc: "यदि चयन गरिएको सेवा प्रोफेशनल उपलब्ध हुँदैन भने, हामीले तपाईंको बुकिङ पूरा गर्न हाम्रा दर्ता गरिएका सेवा प्रोफेशनलहरूमध्येबाट प्रतिस्थापन प्रदान गर्नेछौं।"
             }
           ]
         },
@@ -529,11 +550,11 @@ export default function TermsAndConditionsPage() {
             },
             {
               title: "प्रो सेवा शुल्क",
-              desc: "प्रो सेवाहरू प्राप्त गर्दा, तपाईंले सेवा पेशेवरहरूलाई निर्दिष्ट रकम, साथै कुनै पनि थप सेवाहरू, खर्चहरू, र सामान खर्चहरू तिर्नुपर्छ।"
+              desc: "प्रो सेवाहरू प्राप्त गर्दा, तपाईंले सेवा प्रोफेशनलहरूलाई निर्दिष्ट रकम, साथै कुनै पनि थप सेवाहरू, खर्चहरू, र सामान खर्चहरू तिर्नुपर्छ।"
             },
             {
               title: "सुविधा शुल्क",
-              desc: "Doorsteps Nepal ले बुकिङहरू सहज बनाउन र सेवा पेशेवरहरूलाई भुक्तानी स्थानान्तरण गर्न सुविधा शुल्क लगाउन सक्छ।"
+              desc: "Doorsteps Nepal ले बुकिङहरू सहज बनाउन र सेवा प्रोफेशनलहरूलाई भुक्तानी स्थानान्तरण गर्न सुविधा शुल्क लगाउन सक्छ।"
             },
             {
               title: "भुक्तानी विधिहरू",
@@ -555,11 +576,11 @@ export default function TermsAndConditionsPage() {
           points: [
             {
               title: "गैर-भेदभाव",
-              desc: "Doorsteps Nepal ले संरक्षित विशेषताहरूको आधारमा सेवा पेशेवरहरू प्रति भेदभावको विरुद्ध कडा नीति कायम राख्छ।"
+              desc: "Doorsteps Nepal ले संरक्षित विशेषताहरूको आधारमा सेवा प्रोफेशनलहरू प्रति भेदभावको विरुद्ध कडा नीति कायम राख्छ।"
             },
             {
               title: "आदरपूर्ण व्यवहार",
-              desc: "ग्राहकहरूले सबै सेवा पेशेवरहरूसँग आदर र शिष्टताको साथ व्यवहार गर्नुपर्छ, सुरक्षित र उपयुक्त वातावरण प्रदान गर्नुपर्छ।"
+              desc: "ग्राहकहरूले सबै सेवा प्रोफेशनलहरूसँग आदर र शिष्टताको साथ व्यवहार गर्नुपर्छ, सुरक्षित र उपयुक्त वातावरण प्रदान गर्नुपर्छ।"
             },
             {
               title: "जवाफदेही",
@@ -567,7 +588,7 @@ export default function TermsAndConditionsPage() {
             },
             {
               title: "रिपोर्टिङ",
-              desc: "सेवा पेशेवरहरूद्वारा अनुचित व्यवहार doorstepsnepal@gmail.com मा ४८ घण्टा भित्र रिपोर्ट गर्नुहोस्।"
+              desc: "सेवा प्रोफेशनलहरूद्वारा अनुचित व्यवहार doorstepsnepal@gmail.com मा ४८ घण्टा भित्र रिपोर्ट गर्नुहोस्।"
             }
           ]
         },
@@ -917,13 +938,20 @@ export default function TermsAndConditionsPage() {
                     <h3 className="font-bold text-lg mb-1">{current.footer.title}</h3>
                     <p className="text-sm text-muted-foreground">{current.footer.subtitle}</p>
                   </div>
-                  <a 
+                  {/* <a 
                     href={`mailto:legal@doorstepsnepal.com`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     <Mail className="h-4 w-4" />
                     {current.footer.button}
-                  </a>
+                  </a> */}
+                      <button
+                  onClick={() => scrollToSection("contact")}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                    <Contact2Icon className="h-4 w-4" />
+                  {current.footer.button}
+                </button>
                 </div>
               </div>
 

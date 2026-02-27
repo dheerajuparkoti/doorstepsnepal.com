@@ -239,7 +239,7 @@ export default function CompletedBookingsPage() {
               <Input
                 placeholder={
                   locale === 'ne' 
-                    ? 'सेवा, पेशेवर, स्थान, आईडी, मूल्य, वा नोटहरू द्वारा खोज्नुहोस्...'
+                    ? 'सेवा, प्रोफेशनल, स्थान, आईडी, मूल्य, वा नोटहरू द्वारा खोज्नुहोस्...'
                     : 'Search by service, professional, location, ID, price, or notes...'
                 }
                 className="pl-10 pr-10"
@@ -477,7 +477,7 @@ export default function CompletedBookingsPage() {
                   <p className="text-2xl font-bold text-blue-600">
                     {new Set(completedOrders.map(o => o.professional_name)).size}
                   </p>
-                  <p className="text-muted-foreground">{locale === 'ne' ? 'पेशेवरहरू' : 'Professionals'}</p>
+                  <p className="text-muted-foreground">{locale === 'ne' ? 'प्रोफेशनलहरू' : 'Professionals'}</p>
                 </div>
                 <div className="text-center p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <p className="text-2xl font-bold text-purple-600">

@@ -80,7 +80,7 @@ export function ProfileHeader({ user, isReadOnly = false }: ProfileHeaderProps) 
             `}
           >
             {language === 'ne' 
-              ? (user.type === 'professional' ? 'पेशेवर' : 'ग्राहक')
+              ? (user.type === 'professional' ? 'प्रोफेशनल' : 'ग्राहक')
               : userType
             }
           </Badge>

@@ -180,7 +180,7 @@ const isProfessional = mode === 'professional';
                   </svg>
                   <div>
                     <p className="text-sm font-medium text-orange-800 dark:text-orange-300">
-                      {getLocalizedText('Professional Action Required', 'व्यवसायी कार्य आवश्यक')}
+                      {getLocalizedText('Professional Action Required', 'प्रोफेशनल कार्य आवश्यक')}
                     </p>
                     <p className="text-sm text-orange-700 dark:text-orange-400">
                       {getLocalizedText(
@@ -312,7 +312,7 @@ const isProfessional = mode === 'professional';
 
             <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl space-y-2">
               <p className="text-sm font-medium text-gray-900 dark:text-white">
-                {getLocalizedText('Professional Responsibility:', 'व्यवसायी जिम्मेवारी:')}
+                {getLocalizedText('Professional Responsibility:', 'प्रोफेशनल जिम्मेवारी:')}
               </p>
               <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
                 <li>{getLocalizedText('You confirm receiving this amount from the customer', 'तपाईंले ग्राहकबाट यो रकम प्राप्त गरेको पुष्टि गर्नुहुन्छ')}</li>

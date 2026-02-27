@@ -3,11 +3,14 @@
 import { Navbar } from "@/components/layout/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Mail, Lock, Eye, Globe, RefreshCw, Users, Cookie, AlertCircle, FileText, Languages, } from "lucide-react";
+import { Shield, Mail, Lock, Eye, Globe, RefreshCw, Users, Cookie, AlertCircle, FileText, Languages, Contact2Icon, } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { useI18n } from '@/lib/i18n/context';
 import { Footer } from "@/components/layout/footer";
+import { usePathname } from "next/navigation";
+
+import { useRouter } from "next/navigation";
 
 // export const metadata: Metadata = {
 //   title: "Privacy Policy | Door Steps Nepal",
@@ -16,7 +19,22 @@ import { Footer } from "@/components/layout/footer";
 
 export default function PrivacyPolicyPage() {
   const { locale } = useI18n();
-  
+    const pathname = usePathname();
+    const router = useRouter();
+   // Function to handle scroll to section
+  const scrollToSection = (sectionId: string) => {
+    // If we're already on the about page
+    if (pathname === "/about") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Navigate to about page with hash
+      router.push(`/about#${sectionId}`);
+    }
+  };
+
  
   // Bilingual content
   const content = {
@@ -197,7 +215,7 @@ export default function PrivacyPolicyPage() {
       },
       introduction: {
         title: "Door Steps Nepal को गोपनीयता नीतिमा स्वागत छ",
-        description: `Door Steps Nepal र यसका सहायक कम्पनीहरू ("Door Steps Nepal," "हामी," वा "हाम्रो") वेब-आधारित समाधानहरू मार्फत ग्राहकहरूलाई सेवा पेशेवरहरूसँग जोड्न समर्पित छौं। यो नीतिले हामीले तपाईंको व्यक्तिगत डाटा कसरी सङ्कलन गर्छौं, प्रयोग गर्छौं, भण्डारण गर्छौं, र खुलाउँछौं भन्ने कुरा रेखाङ्कन गर्दछ जब तपाईंले हाम्रो वेबसाइट वा मोबाइल अनुप्रयोग (सामूहिक रूपमा, "प्लेटफर्म") पहुँच गर्नुहुन्छ वा प्रयोग गर्नुहुन्छ, र जब तपाईंले हाम्रो उत्पादनहरू र सेवाहरू (सामूहिक रूपमा, "सेवाहरू") प्रयोग गर्नुहुन्छ। प्लेटफर्म मार्फत सेवा पेशेवरहरूले प्रदान गर्ने सेवाहरूलाई "पेशेवर सेवाहरू" भनिन्छ।`,
+        description: `Door Steps Nepal र यसका सहायक कम्पनीहरू ("Door Steps Nepal," "हामी," वा "हाम्रो") वेब-आधारित समाधानहरू मार्फत ग्राहकहरूलाई सेवा प्रोफेशनलहरूसँग जोड्न समर्पित छौं। यो नीतिले हामीले तपाईंको व्यक्तिगत डाटा कसरी सङ्कलन गर्छौं, प्रयोग गर्छौं, भण्डारण गर्छौं, र खुलाउँछौं भन्ने कुरा रेखाङ्कन गर्दछ जब तपाईंले हाम्रो वेबसाइट वा मोबाइल अनुप्रयोग (सामूहिक रूपमा, "प्लेटफर्म") पहुँच गर्नुहुन्छ वा प्रयोग गर्नुहुन्छ, र जब तपाईंले हाम्रो उत्पादनहरू र सेवाहरू (सामूहिक रूपमा, "सेवाहरू") प्रयोग गर्नुहुन्छ। प्लेटफर्म मार्फत सेवा प्रोफेशनलहरूले प्रदान गर्ने सेवाहरूलाई "प्रोफेशनल सेवाहरू" भनिन्छ।`,
         note: "नोट: हाम्रो प्लेटफर्म प्रयोग गरेर, तपाईं यस गोपनीयता नीति अनुसार जानकारी सङ्कलन र प्रयोग गर्न सहमत हुनुहुन्छ।"
       },
       sections: {
@@ -219,7 +237,7 @@ export default function PrivacyPolicyPage() {
           methods: [
             { title: "प्रत्यक्ष अन्तरक्रिया", icon: Users, desc: "जब तपाईंले खाता सिर्जना गर्नुहुन्छ, सेवा अनुरोध गर्नुहुन्छ, हाम्रो समर्थनसँग सम्पर्क गर्नुहुन्छ, वा हाम्रो न्यूजलेटर सदस्यता लिनुहुन्छ" },
             { title: "स्वचालित प्रविधिहरू", icon: Eye, desc: "कुकीहरू, वेब बीकनहरू, र समान प्रविधिहरू जसले प्रयोग प्रवृत्तिहरू ट्र्याक गर्दछ र तपाईंको अनुभव सुधार्दछ" },
-            { title: "तेस्रो पक्ष", icon: Globe, desc: "विश्लेषण प्रदायकहरू, सेवा पेशेवरहरू, विज्ञापन नेटवर्कहरू, र सार्वजनिक रूपमा उपलब्ध स्रोतहरू" }
+            { title: "तेस्रो पक्ष", icon: Globe, desc: "विश्लेषण प्रदायकहरू, सेवा प्रोफेशनलहरू, विज्ञापन नेटवर्कहरू, र सार्वजनिक रूपमा उपलब्ध स्रोतहरू" }
           ]
         },
         "3": {
@@ -227,7 +245,7 @@ export default function PrivacyPolicyPage() {
           description: "हामी तपाईंको व्यक्तिगत डाटा निम्न उद्देश्यहरूका लागि प्रयोग गर्छौं:",
           purposes: [
             "तपाईंको सेवा अनुरोधहरू पूरा र व्यवस्थापन गर्न",
-            "पेशेवर सेवाहरू प्रदान र सुधार गर्न",
+            "प्रोफेशनल सेवाहरू प्रदान र सुधार गर्न",
             "हाम्रो प्लेटफर्ममा तपाईंको अनुभव व्यक्तिगत बनाउन",
             "विपणन सामग्री र अद्यावधिकहरू पठाउन",
             "महत्वपूर्ण सेवा जानकारी सञ्चार गर्न",
@@ -240,7 +258,7 @@ export default function PrivacyPolicyPage() {
           title: "तपाईंको व्यक्तिगत डाटा साझेदारी",
           description: "तपाईंको व्यक्तिगत डाटा यी संग साझा हुन सक्छ:",
           shares: [
-            { title: "सेवा पेशेवरहरू", desc: "तपाईंले हाम्रो प्लेटफर्म मार्फत अनुरोध गर्नुभएका पेशेवर सेवाहरू वितरण गर्न" },
+            { title: "सेवा प्रोफेशनलहरू", desc: "तपाईंले हाम्रो प्लेटफर्म मार्फत अनुरोध गर्नुभएका प्रोफेशनल सेवाहरू वितरण गर्न" },
             { title: "आन्तरिक र बाह्य तेस्रो पक्षहरू", desc: "होस्टिंग प्रदायकहरू, विपणन साझेदारहरू, विश्लेषण सेवाहरू, र भुक्तानी प्रक्रियाकर्ताहरू समावेश" },
             { title: "कानूनी प्राधिकरणहरू", desc: "कानून, नियमन, वा कानूनी प्रक्रिया अनुसार आवश्यक हुँदा हाम्रो अधिकारहरू संरक्षण गर्न र दायित्वहरू पालना गर्न" }
           ]
@@ -869,13 +887,22 @@ export default function PrivacyPolicyPage() {
                     <h3 className="font-bold text-lg mb-1">{current.footer.title}</h3>
                     <p className="text-sm text-muted-foreground">{current.footer.subtitle}</p>
                   </div>
-                  <a 
+                  {/* <a 
                     href={`mailto:${current.sections["13"].contact.email}`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
                   >
                     <Mail className="h-4 w-4" />
                     {current.footer.button}
-                  </a>
+                  </a> */}
+              
+                <button
+                  onClick={() => scrollToSection("contact")}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                    <Contact2Icon className="h-4 w-4" />
+                  {current.footer.button}
+                </button>
+      
                 </div>
               </div>
 

@@ -273,7 +273,7 @@ export default function NotificationsPage() {
                       <span className="font-semibold">
                         {mode === 'professional' 
                           ? getLocalizedText('customer', 'ग्राहक')
-                          : getLocalizedText('professional', 'व्यवसायी')}
+                          : getLocalizedText('professional', 'प्रोफेशनल')}
                       </span>{' '}
                       {getLocalizedText('mode', 'मोडमा')}
                     </p>
@@ -394,7 +394,7 @@ export default function NotificationsPage() {
               <AlertDialogTitle className="text-xl">
                 {getLocalizedText(
                   `Switch to ${pendingMode} mode?`,
-                  `${pendingMode === 'customer' ? 'ग्राहक' : 'व्यवसायी'} मोडमा स्विच गर्ने?`
+                  `${pendingMode === 'customer' ? 'ग्राहक' : 'प्रोफेशनल'} मोडमा स्विच गर्ने?`
                 )}
               </AlertDialogTitle>
               <AlertDialogDescription className="text-base">
@@ -405,7 +405,7 @@ export default function NotificationsPage() {
                 <span className="font-semibold text-foreground">
                   {pendingMode === 'customer' 
                     ? getLocalizedText('customer', 'ग्राहक')
-                    : getLocalizedText('professional', 'व्यवसायी')}
+                    : getLocalizedText('professional', 'प्रोफेशनल')}
                 </span>.
                 {getLocalizedText(
                   ' You can switch back anytime from the top bar.',
@@ -429,7 +429,7 @@ export default function NotificationsPage() {
               >
                 {getLocalizedText(
                   `Switch to ${pendingMode}`,
-                  `${pendingMode === 'customer' ? 'ग्राहक' : 'व्यवसायी'}मा स्विच गर्नुहोस्`
+                  `${pendingMode === 'customer' ? 'ग्राहक' : 'प्रोफेशनल'}मा स्विच गर्नुहोस्`
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>

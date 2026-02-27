@@ -936,7 +936,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
   const getUserTypeDisplay = useCallback(() => {
     if (!user) return getLocalizedText('Customer', 'ग्राहक');
     return mode === 'professional' 
-      ? getLocalizedText('Professional', 'व्यवसायी') 
+      ? getLocalizedText('Professional', 'प्रोफेशनल') 
       : getLocalizedText('Customer', 'ग्राहक');
   }, [user, mode, getLocalizedText]);
   const memberYears = user?.member_since === 0 ? 1 : user?.member_since;
@@ -1030,7 +1030,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                     <h2 className="text-xl font-bold text-foreground">{user.full_name}</h2>
                     <Badge 
                       className={`mt-2 ${
-                        getUserTypeDisplay() === getLocalizedText('Professional', 'व्यवसायी')
+                        getUserTypeDisplay() === getLocalizedText('Professional', 'प्रोफेशनल')
                           ? 'bg-secondary/20 text-primary hover:bg-primary/30 border-primary/30'
                           : 'bg-primary/20 text-primary hover:bg-primary/30 border-primary/30'
                       }`}
@@ -1227,18 +1227,18 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                   <AddressSection />
 
                   {/* Professional Section - Always show for professional users */}
-                  {getUserTypeDisplay() === getLocalizedText('Professional', 'व्यवसायी') && user.professional_id && (
+                  {getUserTypeDisplay() === getLocalizedText('Professional', 'प्रोफेशनल') && user.professional_id && (
                     <>
                       <Card>
                         <CardHeader>
                           <CardTitle className="flex items-center text-foreground">
                             <Briefcase className="h-5 w-5 mr-2 text-secondary" />
-                            {getLocalizedText('Professional Information', 'व्यवसायी जानकारी')}
+                            {getLocalizedText('Professional Information', 'प्रोफेशनल जानकारी')}
                           </CardTitle>
                           <CardDescription>
                             {getLocalizedText(
                               'Your professional account details and status',
-                              'तपाईंको व्यवसायी खाता विवरण र स्थिति'
+                              'तपाईंको प्रोफेशनल खाता विवरण र स्थिति'
                             )}
                           </CardDescription>
                         </CardHeader>
@@ -1246,7 +1246,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                           <div className="grid gap-4 md:grid-cols-2">
                             <DetailItem
                               icon={Briefcase}
-                              title={getLocalizedText('Professional ID', 'व्यवसायी आईडी')}
+                              title={getLocalizedText('Professional ID', 'प्रोफेशनल आईडी')}
                               value={`#${user.professional_id}`}
                               isEditable={false}
                             />
@@ -1278,12 +1278,12 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                         <CardHeader>
                           <CardTitle className="flex items-center text-foreground">
                             <Award className="h-5 w-5 mr-2 text-secondary" />
-                            {getLocalizedText('Professional Details', 'व्यवसायी विवरण')}
+                            {getLocalizedText('Professional Details', 'प्रोफेशनल विवरण')}
                           </CardTitle>
                           <CardDescription>
                             {getLocalizedText(
                               'Manage your professional profile information',
-                              'तपाईंको व्यवसायी प्रोफाइल जानकारी व्यवस्थापन गर्नुहोस्'
+                              'तपाईंको प्रोफेशनल प्रोफाइल जानकारी व्यवस्थापन गर्नुहोस्'
                             )}
                           </CardDescription>
                         </CardHeader>

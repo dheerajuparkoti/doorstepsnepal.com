@@ -364,13 +364,13 @@ export function SingleProfessionalServiceClient({
       
       toast.success(
         language === 'ne' 
-          ? 'व्यवसायी मनपर्नेमा थपियो' 
+          ? 'प्रोफेशनल मनपर्नेमा थपियो' 
           : 'Professional added to favorites'
       );
     } catch (error) {
       toast.info(
         language === 'ne' 
-          ? 'यो व्यवसायी पहिले नै मनपर्नेमा थपिएको छ'
+          ? 'यो प्रोफेशनल पहिले नै मनपर्नेमा थपिएको छ'
           : 'This professional has already been added'
       );
     } finally {

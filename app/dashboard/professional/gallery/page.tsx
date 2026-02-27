@@ -294,7 +294,7 @@ export default function ProfessionalShowcasePage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          {locale === 'ne' ? 'पेशेवर शोकेस' : 'Professional Showcase'}
+          {locale === 'ne' ? 'प्रोफेशनल शोकेस' : 'Professional Showcase'}
         </h1>
         <p className="text-muted-foreground">
           {locale === 'ne' 

@@ -357,7 +357,7 @@ const handleCancelOrder = async () => {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-muted-foreground" />
-                    <span className="font-medium">{getLocalizedText('Professional', 'व्यवसायी')}</span>
+                    <span className="font-medium">{getLocalizedText('Professional', 'प्रोफेशनल')}</span>
                   </div>
                   <p>{currentOrder.professional_name}</p>
                 </div>
@@ -581,7 +581,7 @@ const handleCancelOrder = async () => {
               >
                 <User className="w-4 h-4 mr-2" />
                 
-                {getLocalizedText('View Professional Profile', 'व्यवसायीको प्रोफाइल हेर्नुहोस्')}
+                {getLocalizedText('View Professional Profile', 'प्रोफेशनलको प्रोफाइल हेर्नुहोस्')}
               </Button>
 
 {status === OrderStatus.PENDING &&  !hasPendingPayments &&(

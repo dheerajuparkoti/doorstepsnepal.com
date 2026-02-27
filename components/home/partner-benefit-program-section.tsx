@@ -296,7 +296,7 @@ export function PartnerBenefitProgramSection({
                 href="/login" 
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-medium rounded-lg hover:bg-primary/90 transition-colors"
               >
-                {language === "ne" ? "पेशेवर बन्नुहोस्" : "Become a Professional"}
+                {language === "ne" ? "प्रोफेशनल बन्नुहोस्" : "Become a Professional"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link 

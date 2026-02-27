@@ -182,7 +182,7 @@ export default function PendingBookingsPage() {
             </h1>
             <p className="text-muted-foreground">
               {locale === 'ne' 
-                ? 'पेशेवर स्वीकृतिको लागि पर्खिरहेका बुकिंगहरू'
+                ? 'प्रोफेशनल स्वीकृतिको लागि पर्खिरहेका बुकिंगहरू'
                 : 'Bookings waiting for professional acceptance'
               }
             </p>
@@ -207,7 +207,7 @@ export default function PendingBookingsPage() {
               <Input
                 placeholder={
                   locale === 'ne' 
-                    ? 'सेवा, पेशेवर, स्थान, वा आईडी द्वारा खोज्नुहोस्...'
+                    ? 'सेवा, प्रोफेशनल, स्थान, वा आईडी द्वारा खोज्नुहोस्...'
                     : 'Search by service, professional, location, or ID...'
                 }
                 className="pl-10 pr-10"

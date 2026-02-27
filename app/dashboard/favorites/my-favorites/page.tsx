@@ -193,7 +193,7 @@ export default function FavoritesPage() {
         </h1>
         <p className="text-gray-600">
           {locale === 'ne' 
-            ? 'तपाईंले बचत गर्नुभएका सेवा र पेशेवरहरू'
+            ? 'तपाईंले बचत गर्नुभएका सेवा र प्रोफेशनलहरू'
             : 'Your saved services and professionals'}
         </p>
       </div>
@@ -239,7 +239,7 @@ export default function FavoritesPage() {
         <section className="mb-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">
-              {locale === 'ne' ? 'पेशेवरहरू' : 'Professionals'} ({professionalFavorites.length})
+              {locale === 'ne' ? 'प्रोफेशनलहरू' : 'Professionals'} ({professionalFavorites.length})
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -269,7 +269,7 @@ export default function FavoritesPage() {
           </h3>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
             {locale === 'ne'
-              ? 'आफ्ना मनपराएका सूचीमा सेवा र पेशेवरहरू थप्न सुरु गर्नुहोस्'
+              ? 'आफ्ना मनपराएका सूचीमा सेवा र प्रोफेशनलहरू थप्न सुरु गर्नुहोस्'
               : 'Start exploring and add services and professionals to your favorites list'}
           </p>
           <div className="space-x-4">
@@ -283,7 +283,7 @@ export default function FavoritesPage() {
               href="/professionals"
               className="inline-block border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 font-medium"
             >
-              {locale === 'ne' ? 'पेशेवरहरू खोज्नुहोस्' : 'Find Professionals'}
+              {locale === 'ne' ? 'प्रोफेशनलहरू खोज्नुहोस्' : 'Find Professionals'}
             </Link>
           </div>
         </div>
@@ -360,7 +360,7 @@ function ServiceFavoriteCard({
             </span>
             <span className="text-gray-400">•</span>
             <span className="text-sm text-gray-500 truncate">
-              {service?.full_name || (locale === 'ne' ? 'पेशेवर' : 'Professional')}
+              {service?.full_name || (locale === 'ne' ? 'प्रोफेशनल' : 'Professional')}
             </span>
           </div>
         </div>
@@ -435,7 +435,7 @@ function ProfessionalFavoriteCard({
         
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-green-900 truncate group-hover:text-green-600">
-            {professional?.full_name || (locale === 'ne' ? 'पेशेवर' : 'Professional')}
+            {professional?.full_name || (locale === 'ne' ? 'प्रोफेशनल' : 'Professional')}
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <span className="inline-flex items-center gap-1 text-sm font-medium text-green-600">

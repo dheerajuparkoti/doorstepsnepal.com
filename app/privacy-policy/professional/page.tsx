@@ -25,13 +25,35 @@ import {
   Handshake,
   FileCheck,
   Ban,
+  Contact2Icon,
 } from "lucide-react";
 import { useI18n } from '@/lib/i18n/context';
 import { Footer } from "@/components/layout/footer";
+import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
+
+
 
 export default function ProfessionalsPrivacyPolicyPage() {
   const { locale } = useI18n();
-  
+        const pathname = usePathname();
+        const router = useRouter();
+
+
+          // Function to handle scroll to section
+  const scrollToSection = (sectionId: string) => {
+    // If we're already on the about page
+    if (pathname === "/about") {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      // Navigate to about page with hash
+      router.push(`/about#${sectionId}`);
+    }
+  };
+
   // Bilingual content for professionals
   const content = {
     en: {
@@ -246,20 +268,20 @@ export default function ProfessionalsPrivacyPolicyPage() {
     },
     ne: {
       hero: {
-        title: "पेशेवर गोपनीयता नीति",
-        subtitle: "Door Steps Nepal का सेवा पेशेवरहरूको लागि सर्तहरू, नियमहरू, र आचार संहिता",
+        title: "प्रोफेशनल गोपनीयता नीति",
+        subtitle: "Door Steps Nepal का सेवा प्रोफेशनलहरूको लागि सर्तहरू, नियमहरू, र आचार संहिता",
         lastUpdated: "अन्तिम अद्यावधिक: डिसेम्बर २०२३",
         version: "संस्करण १.०"
       },
       introduction: {
-        title: "Door Steps Nepal को पेशेवर दिशानिर्देशहरूमा स्वागत छ",
-        description: `यो कागजातले सबै सेवा पेशेवरहरू ("पेशेवरहरू," "तपाईं," वा "तपाईंको") ले Door Steps Nepal प्लेटफर्म मार्फत दर्ता र सेवा प्रदान गर्दा पालना गर्नुपर्ने सर्तहरू, नियमहरू, र आचार संहिता रेखांकित गर्दछ। यी सर्तहरू स्वीकार गरेर, तपाईं यहाँ उल्लिखित सबै नियमहरू र विनियमहरू पालना गर्न सहमत हुनुहुन्छ।`,
-        note: "नोट: हाम्रो प्लेटफर्ममा पेशेवरको रूपमा दर्ता गरेर, तपाईंले यो नीतिमा उल्लिखित सबै सर्तहरू पढ्नुभएको, बुझ्नुभएको, र ती अनुसार बाध्य हुन सहमत हुनुहुन्छ भनी स्वीकार गर्नुहुन्छ।"
+        title: "Door Steps Nepal को प्रोफेशनल दिशानिर्देशहरूमा स्वागत छ",
+        description: `यो कागजातले सबै सेवा प्रोफेशनलहरू ("प्रोफेशनलहरू," "तपाईं," वा "तपाईंको") ले Door Steps Nepal प्लेटफर्म मार्फत दर्ता र सेवा प्रदान गर्दा पालना गर्नुपर्ने सर्तहरू, नियमहरू, र आचार संहिता रेखांकित गर्दछ। यी सर्तहरू स्वीकार गरेर, तपाईं यहाँ उल्लिखित सबै नियमहरू र विनियमहरू पालना गर्न सहमत हुनुहुन्छ।`,
+        note: "नोट: हाम्रो प्लेटफर्ममा प्रोफेशनलको रूपमा दर्ता गरेर, तपाईंले यो नीतिमा उल्लिखित सबै सर्तहरू पढ्नुभएको, बुझ्नुभएको, र ती अनुसार बाध्य हुन सहमत हुनुहुन्छ भनी स्वीकार गर्नुहुन्छ।"
       },
       sections: {
         "1": {
           title: "कागजात र प्रमाणीकरण",
-          description: "सबै पेशेवरहरूले वैध र सक्कली कागजातहरू राख्नुपर्छ:",
+          description: "सबै प्रोफेशनलहरूले वैध र सक्कली कागजातहरू राख्नुपर्छ:",
           points: [
             { 
               title: "कागजात प्रामाणिकता", 
@@ -337,7 +359,7 @@ export default function ProfessionalsPrivacyPolicyPage() {
         },
         "4": {
           title: "उपकरण र सामग्री",
-          description: "पेशेवर उपकरण आवश्यकताहरू र जिम्मेवारीहरू:",
+          description: "प्रोफेशनल उपकरण आवश्यकताहरू र जिम्मेवारीहरू:",
           points: [
             { 
               title: "व्यक्तिगत उपकरण", 
@@ -348,7 +370,7 @@ export default function ProfessionalsPrivacyPolicyPage() {
         },
         "5": {
           title: "ग्राहक अन्तरक्रिया",
-          description: "पेशेवर ग्राहक संचारको लागि दिशानिर्देशहरू:",
+          description: "प्रोफेशनल ग्राहक संचारको लागि दिशानिर्देशहरू:",
           points: [
             { 
               title: "बुकिंग रद्द", 
@@ -369,7 +391,7 @@ export default function ProfessionalsPrivacyPolicyPage() {
         },
         "6": {
           title: "गोपनीयता र आचरण",
-          description: "पेशेवर आचरण र जानकारी व्यवस्थापन:",
+          description: "प्रोफेशनल आचरण र जानकारी व्यवस्थापन:",
           points: [
             { 
               title: "गोपनीयता", 
@@ -377,7 +399,7 @@ export default function ProfessionalsPrivacyPolicyPage() {
               neDesc: "ग्राहकको सम्पूर्ण जानकारी गोप्य राख्नुपर्नेछ र कुनै पनि अनधिकृत व्यक्ति वा पक्षलाई खुलाउन पाइने छैन।"
             },
             { 
-              title: "पेशेवर आचरण", 
+              title: "प्रोफेशनल आचरण", 
               desc: "आफ्नो कर्तव्य निर्वाह गर्दा कुनै पनि प्रकारको दुर्व्यवहार, दुरुपयोग वा भेदभावपूर्ण व्यवहार गर्न पाइने छैन।",
               neDesc: "आफ्नो कर्तव्य निर्वाह गर्दा कुनै पनि प्रकारको दुर्व्यवहार, दुरुपयोग वा भेदभावपूर्ण व्यवहार गर्न पाइने छैन।"
             }
@@ -437,15 +459,15 @@ export default function ProfessionalsPrivacyPolicyPage() {
         { num: "8", title: "नीति अनुपालन र अद्यावधिक", icon: RefreshCw }
       ],
       footer: {
-        title: "पेशेवर दिशानिर्देशहरू बारे प्रश्नहरू?",
-        subtitle: "यस नीतिको कुनै पनि पक्षको स्पष्टीकरणको लागि हाम्रो पेशेवर समर्थन टीमलाई सम्पर्क गर्नुहोस्",
+        title: "प्रोफेशनल दिशानिर्देशहरू बारे प्रश्नहरू?",
+        subtitle: "यस नीतिको कुनै पनि पक्षको स्पष्टीकरणको लागि हाम्रो प्रोफेशनल समर्थन टीमलाई सम्पर्क गर्नुहोस्",
         button: "समर्थन टीमलाई सम्पर्क गर्नुहोस्"
       },
       backToTop: "माथि जानुहोस्",
       grievance: {
         title: "शिकायत र समर्थन सम्पर्क",
         email: "professionals@doorstepsnepal.com",
-        response: "हामी सबै पेशेवर अनुरोधहरू २४ घण्टा भित्र जवाफ दिने लक्ष्य राख्छौं",
+        response: "हामी सबै प्रोफेशनल अनुरोधहरू २४ घण्टा भित्र जवाफ दिने लक्ष्य राख्छौं",
         support: [
           { title: "प्राविधिक समर्थन", email: "tech.support@doorstepsnepal.com" },
           { title: "भुक्तानी समस्याहरू", email: "payments@doorstepsnepal.com" },
@@ -607,7 +629,7 @@ export default function ProfessionalsPrivacyPolicyPage() {
                           <p className="text-muted-foreground mb-4">
                             {locale === "en" 
                               ? "For any questions or concerns regarding these professional guidelines, please contact our support team:" 
-                              : "यी पेशेवर दिशानिर्देशहरूको बारेमा कुनै प्रश्न वा चिन्ताको लागि, कृपया हाम्रो समर्थन टीमलाई सम्पर्क गर्नुहोस्:"}
+                              : "यी प्रोफेशनल दिशानिर्देशहरूको बारेमा कुनै प्रश्न वा चिन्ताको लागि, कृपया हाम्रो समर्थन टीमलाई सम्पर्क गर्नुहोस्:"}
                           </p>
                           <div className="space-y-3">
                             <div className="p-4 bg-primary/5 rounded-lg">
@@ -651,13 +673,20 @@ export default function ProfessionalsPrivacyPolicyPage() {
                     <h3 className="font-bold text-lg mb-1">{current.footer.title}</h3>
                     <p className="text-sm text-muted-foreground">{current.footer.subtitle}</p>
                   </div>
-                  <a 
+                  {/* <a 
                     href={`mailto:${current.grievance.email}`}
                     className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
                   >
                     <Mail className="h-4 w-4" />
                     {current.footer.button}
-                  </a>
+                  </a> */}
+                        <button
+                  onClick={() => scrollToSection("contact")}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                >
+                    <Contact2Icon className="h-4 w-4" />
+                  {current.footer.button}
+                </button>
                 </div>
               </div>
 

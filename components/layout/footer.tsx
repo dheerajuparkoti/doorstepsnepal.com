@@ -3,7 +3,8 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
-import { Home, Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { Home, Facebook, Instagram, Twitter,  Youtube, Mail, Phone, MapPin } from "lucide-react";
+import { SiTiktok } from "react-icons/si";
 
 export function Footer() {
   const { t } = useI18n();
@@ -24,12 +25,33 @@ export function Footer() {
     }
   };
 
+
+
+  const scrollTofaqSection = (sectionId: string) => {
+  const currentPath = pathname;
+  const element = document.getElementById(sectionId);
+
+  if (element) {
+    // If the section exists on the current page
+    element.scrollIntoView({ behavior: "smooth" });
+  } else {
+    // Navigate to downloads page with hash
+    router.push(`/downloads-app#${sectionId}`);
+  }
+};
+
+
   // Function to handle contact info click
   const handleContactClick = (e: React.MouseEvent, sectionId: string = "contact") => {
     e.preventDefault();
     scrollToSection(sectionId);
   };
 
+    // Function to handle contact info click
+  const handleLocationClick = (e: React.MouseEvent, sectionId: string = "ourLocation") => {
+    e.preventDefault();
+    scrollToSection(sectionId);
+  };
   return (
     <footer className="border-t border-border bg-muted/50">
       <div className="container mx-auto px-4 py-12">
@@ -46,19 +68,31 @@ export function Footer() {
               {t.footer.aboutText}
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary">
+            <a 
+  href="https://www.facebook.com/people/Doorsteps-Nepal-official/61577089614271/" 
+  target="_blank" 
+  rel="noopener noreferrer"
+  className="text-muted-foreground transition-colors hover:text-primary"
+>
+
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>
               </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary">
+              <a href="https://www.instagram.com/doorstepsnepal?igsh=dnBnM2NmYWx6eGYx"    target="_blank" 
+  rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-primary">
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary">
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a href="#" className="text-muted-foreground transition-colors hover:text-primary">
+            <a 
+  href="https://www.tiktok.com/@doorsteps.nepal" 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  className="text-muted-foreground transition-colors hover:text-primary"
+>
+  <SiTiktok className="h-5 w-5" />
+  <span className="sr-only">TikTok</span>
+</a>
+              <a href="https://www.youtube.com/@DoorstepsNepal" target="_blank"   rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-primary">
                 <Youtube className="h-5 w-5" />
                 <span className="sr-only">YouTube</span>
               </a>
@@ -71,10 +105,10 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <button
-                  onClick={() => scrollToSection("hero")}
+                  onClick={() => scrollToSection("ourLocation")}
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
-                  {t.footer.aboutUs}
+                  {t.footer.location}
                 </button>
               </li>
               <li>
@@ -102,14 +136,14 @@ export function Footer() {
                   {t.footer.termsConditions}
                 </a>
               </li>
-              <li>
-                <a
-                  href="/faqs"
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                >
-                  {t.footer.faqs}
-                </a>
-              </li>
+<li>
+  <button
+    onClick={() => scrollTofaqSection("faq")}
+    className="text-sm text-muted-foreground transition-colors hover:text-primary"
+  >
+    {t.footer.faqs}
+  </button>
+</li>
             </ul>
           </div>
 
@@ -141,6 +175,15 @@ export function Footer() {
                   {t.nav.becomeProfessional}
                 </a>
               </li>
+
+                  <li>
+                <a
+                  href="/privacy-policy/professional"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.footer.privacyPolicyProfessional}
+                </a>
+              </li>
             </ul>
             <h3 className="font-semibold">{t.footer.download}</h3>
               <ul className="space-y-2">
@@ -155,7 +198,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Contact Info - Updated with scroll functionality */}
+          {/* Contact Info -  scroll functionality */}
           <div className="space-y-4">
             <h3 className="font-semibold">{t.footer.contactUs}</h3>
             <ul className="space-y-3">

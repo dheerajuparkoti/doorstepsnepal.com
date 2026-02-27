@@ -1513,9 +1513,9 @@ export function ProfessionalsClient({
   const searchParams = useSearchParams();
   
   // State for professionals data and pagination
-// With:
+
 const [allProfessionals, setAllProfessionals] = useState<any[]>(() => {
-  // Deduplicate initial data
+
   const unique = initialProfessionalsData.reduce((acc, current) => {
     const exists = acc.find((item: { id: any; }) => item.id === current.id);
     if (!exists) {
@@ -2189,7 +2189,7 @@ const [displayProfessionals, setDisplayProfessionals] = useState<any[]>(() => {
     filterSheetFilters.hasDiscount || filterSheetFilters.hasMinimumPrice || 
     filterSheetFilters.location || filterSheetFilters.selectedTag;
 
-  // Handle card options (like Flutter's _showCardOptions)
+ 
   const handleCardOptions = (professional: any, action: 'services' | 'profile' | 'favorite') => {
     switch (action) {
       case 'services':

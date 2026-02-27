@@ -23,10 +23,10 @@
 //       <section className="py-16 md:py-24">
 //         <div className="container mx-auto px-4 text-center">
 //           <h2 className="text-3xl font-bold mb-4">
-//             {language === "ne" ? "शीर्ष पेशेवरहरू" : "Top Professionals"}
+//             {language === "ne" ? "शीर्ष प्रोफेशनलहरू" : "Top Professionals"}
 //           </h2>
 //           <p className="text-muted-foreground">
-//             {language === "ne" ? "कुनै पेशेवर उपलब्ध छैन" : "No professionals available"}
+//             {language === "ne" ? "कुनै प्रोफेशनल उपलब्ध छैन" : "No professionals available"}
 //           </p>
 //         </div>
 //       </section>
@@ -40,11 +40,11 @@
 //         <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
 //           <div>
 //             <h2 className="text-3xl font-bold md:text-4xl">
-//               {language === "ne" ? "शीर्ष पेशेवरहरू" : "Top Professionals"}
+//               {language === "ne" ? "शीर्ष प्रोफेशनलहरू" : "Top Professionals"}
 //             </h2>
 //             <p className="mt-2 text-muted-foreground">
 //               {language === "ne"
-//                 ? `कुल ${total} पेशेवरहरू`
+//                 ? `कुल ${total} प्रोफेशनलहरू`
 //                 : `Total ${total} professionals`}
 //             </p>
 //           </div>
@@ -109,7 +109,7 @@
 //             <Button variant="ghost" className="gap-2" asChild>
 //               <Link href="/professionals">
 //                 {language === "ne"
-//                   ? `थप ${total - professionalServices.length} पेशेवरहरू हेर्नुहोस्`
+//                   ? `थप ${total - professionalServices.length} प्रोफेशनलहरू हेर्नुहोस्`
 //                   : `View ${total - professionalServices.length} more professionals`}
 //                 <ArrowRight className="h-4 w-4" />
 //               </Link>
@@ -146,10 +146,10 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">
-            {language === "ne" ? "शीर्ष पेशेवरहरू" : "Top Professionals"}
+            {language === "ne" ? "शीर्ष प्रोफेशनलहरू" : "Top Professionals"}
           </h2>
           <p className="text-muted-foreground">
-            {language === "ne" ? "कुनै पेशेवर उपलब्ध छैन" : "No professionals available"}
+            {language === "ne" ? "कुनै प्रोफेशनल उपलब्ध छैन" : "No professionals available"}
           </p>
         </div>
       </section>
@@ -163,11 +163,11 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
         <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h2 className="text-3xl font-bold md:text-4xl">
-              {language === "ne" ? "शीर्ष पेशेवरहरू" : "Top Professionals"}
+              {language === "ne" ? "शीर्ष प्रोफेशनलहरू" : "Top Professionals"}
             </h2>
             <p className="mt-2 text-muted-foreground">
               {language === "ne"
-                ? `कुल ${total} पेशेवरहरू`
+                ? `कुल ${total} प्रोफेशनलहरू`
                 : `Total ${total} professionals`}
             </p>
           </div>
@@ -233,7 +233,7 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
             <Button variant="ghost" className="gap-2" asChild>
               <Link href="/professionals">
                 {language === "ne"
-                  ? `थप ${total - professionalServices.length} पेशेवरहरू हेर्नुहोस्`
+                  ? `थप ${total - professionalServices.length} प्रोफेशनलहरू हेर्नुहोस्`
                   : `View ${total - professionalServices.length} more professionals`}
                 <ArrowRight className="h-4 w-4" />
               </Link>

@@ -98,7 +98,7 @@ export default function BecomeProfessionalPage() {
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
               {locale === "ne"
-                ? "Doorsteps Nepal मा पेशेवर बन्नुहोस्"
+                ? "Doorsteps Nepal मा प्रोफेशनल बन्नुहोस्"
                 : "Become a Professional on Doorsteps Nepal"}
             </h1>
             <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">

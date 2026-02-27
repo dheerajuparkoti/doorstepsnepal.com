@@ -8,11 +8,12 @@ import ContactSection from '@/components/about/contact-section';
 import { WhyChooseSection } from '@/components/home/why-choose-section';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
+import LocationSection from '@/components/about/location-section';
 
-// export const metadata: Metadata = {
-//   title: 'About Us - Doorstep Services',
-//   description: 'Learn about our mission, vision, and why thousands trust us for their home service needs.',
-// };
+export const metadata: Metadata = {
+  title: 'About Us - Doorstep Services',
+  description: 'Learn about our mission, vision, and why thousands trust us for their home service needs.',
+};
 
 
 export default function AboutPage() {
@@ -22,9 +23,10 @@ export default function AboutPage() {
       <HeroSection id="hero" />
       <WhyChooseSection id="why-choose" /> 
       <MissionVisionSection id="mission" /> 
-      <TeamSection id="team" /> 
+      {/* <TeamSection id="team" />  */}
       <StatsSection id="stats" />
       <ContactSection id="contact" /> 
+        <LocationSection id="ourLocation" /> 
       <Footer />
     </main>
   );

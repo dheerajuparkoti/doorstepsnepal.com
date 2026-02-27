@@ -288,11 +288,11 @@ export default function ProfessionalVerificationPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">
-          {locale === 'ne' ? 'पेशेवर सत्यापन' : 'Professional Verification'}
+          {locale === 'ne' ? 'प्रोफेशनल सत्यापन' : 'Professional Verification'}
         </h1>
         <p className="text-muted-foreground">
           {locale === 'ne' 
-            ? 'अपने पेशेवर प्रमाणपत्र और दस्तावेज़ अपलोड करें' 
+            ? 'अपने प्रोफेशनल प्रमाणपत्र और दस्तावेज़ अपलोड करें' 
             : 'Upload your professional certificates and documents'}
         </p>
       </div>

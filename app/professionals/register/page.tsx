@@ -113,7 +113,7 @@ export default function ProfessionalRegistrationPage() {
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
         description: locale === 'ne'
-          ? 'पेशेवर दर्ता सफल भयो'
+          ? 'प्रोफेशनल दर्ता सफल भयो'
           : 'Professional registration successful',
       });
       
@@ -135,11 +135,11 @@ export default function ProfessionalRegistrationPage() {
       <Card>
         <CardHeader>
           <CardTitle>
-            {locale === 'ne' ? 'पेशेवर दर्ता' : 'Professional Registration'}
+            {locale === 'ne' ? 'प्रोफेशनल दर्ता' : 'Professional Registration'}
           </CardTitle>
           <CardDescription>
             {locale === 'ne'
-              ? 'Doorstep मा पेशेवरको रूपमा दर्ता गर्नुहोस्'
+              ? 'Doorstep मा प्रोफेशनलको रूपमा दर्ता गर्नुहोस्'
               : 'Register as a professional on Doorstep'}
           </CardDescription>
         </CardHeader>

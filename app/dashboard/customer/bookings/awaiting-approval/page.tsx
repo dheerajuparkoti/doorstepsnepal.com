@@ -252,7 +252,7 @@ export default function InspectedBookingsPage() {
               <Input
                 placeholder={
                   locale === 'ne' 
-                    ? 'सेवा, पेशेवर, स्थान, आईडी, मूल्य, वा निरीक्षण नोट द्वारा खोज्नुहोस्...'
+                    ? 'सेवा, प्रोफेशनल, स्थान, आईडी, मूल्य, वा निरीक्षण नोट द्वारा खोज्नुहोस्...'
                     : 'Search by service, professional, location, ID, price, or inspection notes...'
                 }
                 className="pl-10 pr-10"

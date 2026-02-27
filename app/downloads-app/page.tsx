@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,91 @@ import {
 import { useI18n } from "@/lib/i18n/context";
 import Image from "next/image";
 import { Footer } from "@/components/layout/footer";
+import { QRCodeSVG } from "qrcode.react";
+import { DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
+
+
+
+
+// Custom hook for counting animation
+const useCountAnimation = (endValue: string, duration: number = 2000) => {
+  const [count, setCount] = useState("0");
+  const countRef = useRef<HTMLDivElement>(null);
+  const animationStarted = useRef(false);
+
+  useEffect(() => {
+    // Parse the end value (handles numbers with K+ and %)
+    const parseValue = (val: string): number => {
+      if (val.includes('K+')) {
+        return parseFloat(val) * 1000;
+      } else if (val.includes('%')) {
+        return parseFloat(val);
+      } else {
+        return parseFloat(val);
+      }
+    };
+
+    const formatValue = (num: number, originalFormat: string): string => {
+      if (originalFormat.includes('K+')) {
+        return Math.floor(num / 1000) + 'K+';
+      } else if (originalFormat.includes('%')) {
+        return Math.floor(num) + '%';
+      } else {
+        return num.toFixed(1);
+      }
+    };
+
+    const targetNumber = parseValue(endValue);
+    const startNumber = 0;
+    const increment = targetNumber / (duration / 16); // 60fps
+    let currentNumber = startNumber;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !animationStarted.current) {
+            animationStarted.current = true;
+            
+            const timer = setInterval(() => {
+              currentNumber += increment;
+              if (currentNumber >= targetNumber) {
+                setCount(formatValue(targetNumber, endValue));
+                clearInterval(timer);
+              } else {
+                setCount(formatValue(currentNumber, endValue));
+              }
+            }, 16);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    if (countRef.current) {
+      observer.observe(countRef.current);
+    }
+
+    return () => {
+      if (countRef.current) {
+        observer.unobserve(countRef.current);
+      }
+    };
+  }, [endValue, duration]);
+
+  return { count, countRef };
+};
+
+// Animated Stats Component
+const AnimatedStat = ({ value, label }: { value: string; label: string }) => {
+  const { count, countRef } = useCountAnimation(value);
+
+  return (
+    <div className="text-center" ref={countRef}>
+      <div className="text-2xl font-bold text-primary">{count}</div>
+      <div className="text-sm text-muted-foreground">{label}</div>
+    </div>
+  );
+};
 
 export default function DownloadPage() {
   const { locale } = useI18n();
@@ -81,7 +166,7 @@ export default function DownloadPage() {
       },
       {
         icon: Users,
-        title: "प्रमाणित पेशेवर",
+        title: "प्रमाणित प्रोफेशनल",
         description: "पृष्ठभूमि जाँच गरिएका सेवा प्रदायक"
       },
       {
@@ -103,43 +188,48 @@ export default function DownloadPage() {
   };
 
   // App screenshots with descriptions
-  const screenshots = [
-    {
-      id: 1,
-      title: locale === "ne" ? "होमस्क्रिन" : "Home Screen",
-      description: locale === "ne" ? "सबै सेवाहरू एकै ठाउँमा" : "All services in one place"
-    },
-    {
-      id: 2,
-      title: locale === "ne" ? "सेवा बुकिङ" : "Service Booking",
-      description: locale === "ne" ? "सजिलो र छिटो बुकिङ" : "Easy and quick booking"
-    },
-    {
-      id: 3,
-      title: locale === "ne" ? "भुक्तानी" : "Payment",
-      description: locale === "ne" ? "सुरक्षित भुक्तानी विकल्प" : "Secure payment options"
-    },
-    {
-      id: 4,
-      title: locale === "ne" ? "प्रोफाइल व्यवस्थापन" : "Profile Management",
-      description: locale === "ne" ? "आफ्नो प्रोफाइल व्यवस्थापन" : "Manage your profile"
-    },
-    {
-      id: 5,
-      title: locale === "ne" ? "सेवा इतिहास" : "Service History",
-      description: locale === "ne" ? "अघिल्ला सेवाहरूको विवरण" : "Details of previous services"
-    },
-    {
-      id: 6,
-      title: locale === "ne" ? "रियल टाइम ट्र्याकिङ" : "Real-time Tracking",
-      description: locale === "ne" ? "सेवा प्रगति ट्र्याक गर्नुहोस्" : "Track service progress"
-    }
-  ];
-
+const screenshots = [
+  {
+    id: 1,
+    src: "/download/screenshot/1.png",
+    title: locale === "ne" ? "होमस्क्रिन" : "Home Screen",
+    description: locale === "ne" ? "सबै सेवाहरू एकै ठाउँमा" : "All services in one place"
+  },
+  {
+    id: 2,
+    src: "/download/screenshot/2.png",
+    title: locale === "ne" ? "सेवा बुकिङ" : "Service Booking",
+    description: locale === "ne" ? "सजिलो र छिटो बुकिङ" : "Easy and quick booking"
+  },
+  {
+    id: 3,
+    src: "/download/screenshot/3.png",
+    title: locale === "ne" ? "भुक्तानी" : "Payment",
+    description: locale === "ne" ? "सुरक्षित भुक्तानी विकल्प" : "Secure payment options"
+  },
+  {
+    id: 4,
+    src: "/download/screenshot/4.png",
+    title: locale === "ne" ? "प्रोफाइल व्यवस्थापन" : "Profile Management",
+    description: locale === "ne" ? "आफ्नो प्रोफाइल व्यवस्थापन" : "Manage your profile"
+  },
+  {
+    id: 5,
+    src: "/download/screenshot/5.png",
+    title: locale === "ne" ? "सेवा इतिहास" : "Service History",
+    description: locale === "ne" ? "अघिल्ला सेवाहरूको विवरण" : "Details of previous services"
+  },
+  {
+    id: 6,
+    src: "/download/screenshot/6.png",
+    title: locale === "ne" ? "रियल टाइम ट्र्याकिङ" : "Real-time Tracking",
+    description: locale === "ne" ? "सेवा प्रगति ट्र्याक गर्नुहोस्" : "Track service progress"
+  }
+];
   // Download stats
   const stats = [
     {
-      value: "50K+",
+      value: "35K+",
       label: locale === "ne" ? "डाउनलोड" : "Downloads"
     },
     {
@@ -147,7 +237,7 @@ export default function DownloadPage() {
       label: locale === "ne" ? "तारा दर्जा" : "Star Rating"
     },
     {
-      value: "10K+",
+      value: "7K+",
       label: locale === "ne" ? "सक्रिय प्रयोगकर्ता" : "Active Users"
     },
     {
@@ -159,7 +249,7 @@ export default function DownloadPage() {
   // Download links
   const downloadLinks = {
     android: "https://play.google.com/store/apps/details?id=com.techreva.doorsteps",
-    ios: "https://apps.apple.com/np/app/doorsteps-nepal/id6479012345"
+    ios: "https://apps.apple.com/np/app/doorsteps-nepal/id6757838302"
   };
 
   // App details
@@ -173,6 +263,25 @@ export default function DownloadPage() {
   };
 
   const currentFeatures = locale === "ne" ? features.ne : features.en;
+
+
+  const phoneScreenshots = [
+  "/download/screenshot/c1.png",
+  "/download/screenshot/c2.png",
+  "/download/screenshot/c3.png",
+    "/download/screenshot/c4.png",
+  ];
+
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % phoneScreenshots.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   return (
     <>
@@ -218,7 +327,6 @@ export default function DownloadPage() {
                         <div className="text-xl font-bold">Google Play</div>
                       </div>
                     </a>
-
                     <a 
                       href={downloadLinks.ios}
                       target="_blank"
@@ -237,60 +345,66 @@ export default function DownloadPage() {
                     </a>
                   </div>
 
-                  {/* Stats */}
+                  {/* Stats with Live Counting Animation */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6">
                     {stats.map((stat, index) => (
-                      <div key={index} className="text-center">
-                        <div className="text-2xl font-bold text-primary">{stat.value}</div>
-                        <div className="text-sm text-muted-foreground">{stat.label}</div>
-                      </div>
+                      <AnimatedStat key={index} value={stat.value} label={stat.label} />
                     ))}
                   </div>
                 </div>
 
                 {/* Right - Phone Mockup */}
                 <div className="relative">
-                  <div className="relative mx-auto max-w-md">
-                    {/* Phone Frame */}
-                    <div className="relative bg-gradient-to-b from-gray-900 to-black rounded-[3rem] p-6 shadow-2xl">
-                      {/* Notch */}
-                      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10"></div>
-                      
-                      {/* Screen Content */}
-                      <div className="relative bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl overflow-hidden h-[500px]">
-                        {/* App screenshots carousel could go here */}
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-center p-8">
-                            <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
-                              <Phone className="h-8 w-8 text-primary" />
-                            </div>
-                            <h3 className="text-2xl font-bold mb-2">
-                              {locale === "ne" ? "Door Steps Nepal" : "Door Steps Nepal"}
-                            </h3>
-                            <p className="text-muted-foreground mb-6">
-                              {locale === "ne" 
-                                ? "घरको सबै आवश्यकता एकै ठाउँमा"
-                                : "All home needs in one place"}
-                            </p>
-                            <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full">
-                              <QrCode className="h-4 w-4" />
-                              <span className="text-sm">
-                                {locale === "ne" ? "QR स्क्यान गर्नुहोस्" : "Scan QR Code"}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Home Button */}
-                      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-24 h-1 bg-gray-800 rounded-full"></div>
-                    </div>
-                  </div>
+             <div className="relative mx-auto max-w-sm">
+  {/* Phone Frame */}
+  <div className="relative bg-gradient-to-b from-gray-900 via-gray-800 to-black rounded-[3rem] p-4 shadow-2xl">
+    
+    {/* Notch */}
+    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-28 h-6 bg-black rounded-b-2xl z-20"></div>
+
+    {/* Screen Content */}
+    <div className="relative rounded-3xl overflow-hidden h-[520px] flex items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
+      
+      {/* Image Wrapper */}
+    <div className="relative w-full h-full rounded-3xl overflow-hidden flex items-center justify-center">
+  <Image
+    src={phoneScreenshots[current]}
+    alt={`App Screenshot ${current + 1}`}
+    fill
+    className="object-contain transition-opacity duration-700"
+    sizes="(max-width: 768px) 100vw, 400px"
+  />
+
+        {/* Side Dark Gradients */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 h-full w-12 bg-gradient-to-r from-black/60 to-transparent rounded-l-3xl"></div>
+          <div className="absolute top-0 right-0 h-full w-12 bg-gradient-to-l from-black/60 to-transparent rounded-r-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-black/60 to-transparent rounded-b-3xl"></div>
+        </div>
+
+        {/* Optional Overlay */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 backdrop-blur-md rounded-full">
+            <DevicePhoneMobileIcon className="h-4 w-4 text-white" />
+            <span className="text-sm text-white">
+              {locale === "ne" ? "डोरस्टेप्स नेपाल" : "Doorsteps Nepal"}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+
+    {/* Home Button */}
+    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gray-700 rounded-full shadow-inner"></div>
+  </div>
+</div>
                 </div>
               </div>
             </div>
           </div>
         </section>
+
 
         {/* Features Section */}
         <section className="py-16">
@@ -324,54 +438,72 @@ export default function DownloadPage() {
           </div>
         </section>
 
-        {/* Screenshots Gallery */}
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold mb-4">
-                  {locale === "ne" ? "एप स्क्रिनसटहरू" : "App Screenshots"}
-                </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  {locale === "ne" 
-                    ? "हाम्रो एपको अद्वितीय डिजाइन र कार्यक्षमता हेर्नुहोस्"
-                    : "See our app's unique design and functionality"}
-                </p>
-              </div>
+    {/* Screenshots Gallery */}
+<section className="py-16 bg-muted/30">
+  <div className="container mx-auto px-4">
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4">
+          {locale === "ne" ? "एप स्क्रिनसटहरू" : "App Screenshots"}
+        </h2>
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          {locale === "ne"
+            ? "हाम्रो एपको अद्वितीय डिजाइन र कार्यक्षमता हेर्नुहोस्"
+            : "See our app's unique design and functionality"}
+        </p>
+      </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {screenshots.map((screenshot) => (
-                  <Card key={screenshot.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
-                    <div className="aspect-[9/16] bg-gradient-to-b from-primary/5 to-secondary/5 flex items-center justify-center p-8">
-                      {/* Mock phone for screenshot */}
-                      <div className="relative w-full h-full bg-gradient-to-b from-gray-900 to-black rounded-3xl p-4">
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-16 h-2 bg-gray-800 rounded-b-lg"></div>
-                        <div className="h-full bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center">
-                          <div className="text-center p-4">
-                            <div className="text-lg font-semibold mb-2">{screenshot.title}</div>
-                            <div className="text-sm text-muted-foreground">{screenshot.description}</div>
-                          </div>
-                        </div>
-                        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-800 rounded-full"></div>
-                      </div>
-                    </div>
-                    <CardHeader className="p-4">
-                      <CardTitle className="text-lg">{screenshot.title}</CardTitle>
-                      <CardDescription>{screenshot.description}</CardDescription>
-                    </CardHeader>
-                  </Card>
-                ))}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {screenshots.map((screenshot) => (
+          <Card
+            key={screenshot.id}
+            className="overflow-hidden group hover:shadow-xl transition-all duration-300"
+          >
+            {/* Phone Mock Frame */}
+            <div className="aspect-[9/16] flex items-center justify-center p-8 bg-gradient-to-b from-primary/5 to-secondary/5">
+              <div className="relative w-full h-full bg-gradient-to-b from-gray-900 to-black rounded-3xl p-4 shadow-lg">
+
+                {/* Notch */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-2 bg-gray-800 rounded-b-lg"></div>
+
+                {/* Screenshot Container */}
+                <div className="relative h-full rounded-2xl overflow-hidden">
+                  <Image
+                    src={screenshot.src}
+                    alt={screenshot.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
+
+                  {/* Side Dark Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/60 pointer-events-none"></div>
+                </div>
+
+                {/* Bottom Bar */}
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-12 h-1 bg-gray-800 rounded-full"></div>
               </div>
             </div>
-          </div>
-        </section>
+
+            <CardHeader className="p-4">
+              <CardTitle className="text-lg">
+                {screenshot.title}
+              </CardTitle>
+              <CardDescription>
+                {screenshot.description}
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* Download Instructions */}
         <section className="py-16">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
-
-
               {/* QR Code Section */}
               <div className="mt-16">
                 <div className="text-center mb-8">
@@ -391,15 +523,14 @@ export default function DownloadPage() {
                     <CardContent className="p-8">
                       <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 mb-6 flex items-center justify-center">
                         {/* Android QR Code Image */}
-                        <div className="relative w-48 h-48 bg-white p-4 rounded-lg shadow-sm">
-                          <Image
-                            src="/qr-codes/android-qr.png" // Path to your Android QR code image
-                            alt="Android QR Code"
-                            width={192}
-                            height={192}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
+                       <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 mb-6 flex items-center justify-center">
+  <div className="w-48 h-48 bg-white p-4 rounded-lg shadow-sm flex items-center justify-center">
+    <QRCodeSVG
+      value={downloadLinks.android}
+      size={160}
+    />
+  </div>
+</div>
                       </div>
                       <div className="flex items-center justify-center gap-3 mb-4">
                         <PhoneIcon className="h-6 w-6 text-green-600" />
@@ -427,18 +558,17 @@ export default function DownloadPage() {
                   {/* iOS QR Code */}
                   <Card>
                     <CardContent className="p-8">
-                      <div className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 mb-6 flex items-center justify-center">
-                        {/* iOS QR Code Image */}
-                        <div className="relative w-48 h-48 bg-white p-4 rounded-lg shadow-sm">
-                          <Image
-                            src="/qr-codes/ios-qr.png" // Path to your iOS QR code image
-                            alt="iOS QR Code"
-                            width={192}
-                            height={192}
-                            className="w-full h-full object-contain"
+                        <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 mb-6 flex items-center justify-center">
+                        {/* Android QR Code Image */}
+                      <div className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 mb-6 flex items-center justify-center">
+                        <div className="w-48 h-48 bg-white p-4 rounded-lg shadow-sm flex items-center justify-center">
+                          <QRCodeSVG
+                            value={downloadLinks.ios}
+                            size={160}
                           />
                         </div>
                       </div>
+                           </div>
                       <div className="flex items-center justify-center gap-3 mb-4">
                         <Apple className="h-6 w-6 text-blue-600" />
                         <h4 className="text-xl font-bold">
@@ -477,7 +607,7 @@ export default function DownloadPage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-16 bg-muted/30">
+        <section id="faq" className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
@@ -546,44 +676,6 @@ export default function DownloadPage() {
                     </p>
                   </CardContent>
                 </Card>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Final CTA */}
-        <section className="py-16">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="p-8 rounded-3xl bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10 border-2 border-primary/20">
-                <h2 className="text-3xl font-bold mb-4">
-                  {locale === "ne" ? "अहिले नै डाउनलोड गर्नुहोस्" : "Download Now"}
-                </h2>
-                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
-                  {locale === "ne" 
-                    ? "आफ्नो घरको सबै आवश्यकता एकै ठाउँमा पाउनुहोस्। Door Steps Nepal एप डाउनलोड गर्नुहोस् र अहिले नै सेवा बुक गर्नुहोस्।"
-                    : "Get all your home needs in one place. Download the Door Steps Nepal app and start booking services today."}
-                </p>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <a 
-                    href={downloadLinks.android}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 bg-gray-900 hover:bg-gray-800 text-white px-8 py-4 rounded-xl text-lg font-medium transition-all hover:scale-105"
-                  >
-                    <PhoneIcon className="h-6 w-6" />
-                    {locale === "ne" ? "Google Play" : "Google Play"}
-                  </a>
-                  <a 
-                    href={downloadLinks.ios}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-3 bg-black hover:bg-gray-900 text-white px-8 py-4 rounded-xl text-lg font-medium transition-all hover:scale-105"
-                  >
-                    <Apple className="h-6 w-6" />
-                    {locale === "ne" ? "App Store" : "App Store"}
-                  </a>
-                </div>
               </div>
             </div>
           </div>
