@@ -1,3 +1,9 @@
+
+
+/**
+ * Fetches professional services that have at least one price
+ * Continues fetching pages until it reaches the desired limit or runs out of pages
+ */
 import { fetchProfessionalServices } from '../professional-services';
 import type { ProfessionalService } from '@/lib/data/professional-services';
 
@@ -10,6 +16,7 @@ interface FetchFeaturedServicesOptions {
 /**
  * Fetches professional services that have at least one price
  * Continues fetching pages until it reaches the desired limit or runs out of pages
+ * Returns random services
  */
 export async function fetchFeaturedServices({
   limit = 8,
@@ -19,7 +26,7 @@ export async function fetchFeaturedServices({
   services: ProfessionalService[];
   total: number;
 }> {
-  const featuredServices: ProfessionalService[] = [];
+  const allPricedServices: ProfessionalService[] = [];
   const uniqueIds = new Set<number>();
   
   let currentPage = 1;
@@ -27,72 +34,55 @@ export async function fetchFeaturedServices({
   let totalAvailable = 0;
   
   const targetCount = minCount || limit;
-  
-
 
   try {
-    // Keep fetching until we have enough services or no more pages
-    while (featuredServices.length < targetCount && hasMore) {
-    
-      
+    while (hasMore) {
       const data = await fetchProfessionalServices({
-  page: currentPage,
-  per_page: maxPerPage,
-});
+        page: currentPage,
+        per_page: maxPerPage,
+      });
       
       const services = data.professional_services || [];
       
       if (services.length === 0) {
-
         hasMore = false;
         break;
       }
 
-      // Update total available from response
       if (data.total) {
         totalAvailable = data.total;
       }
 
-      // Filter services with at least one price
       const pricedServices = services.filter((ps) => 
         ps.prices && ps.prices.length > 0
       );
 
-      // Add ONLY UNIQUE services to our collection
       for (const service of pricedServices) {
         if (!uniqueIds.has(service.id)) {
           uniqueIds.add(service.id);
-          featuredServices.push(service);
-          
-          // Stop if we've reached target count
-          if (featuredServices.length >= targetCount) {
-            break;
-          }
-        } else {
-   
+          allPricedServices.push(service);
         }
       }
-      
 
-      // Check if there are more pages
       hasMore = data.total_pages > currentPage;
       currentPage++;
       
-      // Safety check to prevent infinite loops
       if (currentPage > 20) {
- 
         hasMore = false;
       }
     }
 
+    const shuffled = [...allPricedServices].sort(() => Math.random() - 0.5);
+
+    const randomServices = shuffled.slice(0, limit);
 
     return {
-      services: featuredServices.slice(0, limit),
+      services: randomServices,
       total: totalAvailable
     };
     
   } catch (error) {
-
+    console.error("Error fetching featured services:", error);
     return {
       services: [],
       total: 0
@@ -109,3 +99,4 @@ export async function getFeaturedServices(limit: number = 8): Promise<{
 }> {
   return fetchFeaturedServices({ limit, maxPerPage: 30 });
 }
+

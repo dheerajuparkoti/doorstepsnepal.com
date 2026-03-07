@@ -23,6 +23,7 @@ import { SearchSectionSSR } from "@/components/home/ssr/search-section-ssr";
 import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
+import { BecomeAPartnerSection } from "@/components/home/become-a-partner";
 
 
 
@@ -75,7 +76,7 @@ export default function HomePage() {
 
           {/* Partner Benefit Program Section*/}
           <Suspense fallback={<PartnerBenefitProgramSkeleton />}>
-            <PartnerBenefitProgramSSR />
+           <BecomeAPartnerSection />
           </Suspense>
           <WhyChooseSection />
 

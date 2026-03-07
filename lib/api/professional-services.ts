@@ -40,6 +40,7 @@ import {
 interface FetchProfessionalServicesParams {
   page?: number;
   per_page?: number;
+
   professional_id?: number;
   service_id?: number;
   category_id?: number;
@@ -52,7 +53,7 @@ interface FetchProfessionalServicesParams {
 export async function fetchProfessionalServices(
   params: FetchProfessionalServicesParams = {}
 ): Promise<ProfessionalServiceResponse> {
-  try {
+  try {    
     const {
       page = 1,
       per_page = 50,
@@ -86,11 +87,15 @@ export async function fetchProfessionalServices(
       professional_services: [],
       total: 0,
       page: 1,
+      total_unique_professionals: 0,
+      total_unique_services: 0,
       per_page:50,
       total_pages: 0,
     };
   }
 }
+
+
 
 export async function searchProfessionalServices(
   params: {
@@ -139,6 +144,8 @@ export async function searchProfessionalServices(
       professional_services: [],
       total: 0,
       page: 1,
+      total_unique_professionals: 0,
+      total_unique_services: 0,
       per_page:50,
       total_pages: 0,
     };

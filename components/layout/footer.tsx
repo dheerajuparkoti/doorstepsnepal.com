@@ -177,12 +177,7 @@ export function Footer() {
               </li>
 
                   <li>
-                <a
-                  href="/privacy-policy/professional"
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                >
-                  {t.footer.privacyPolicyProfessional}
-                </a>
+              
               </li>
             </ul>
             <h3 className="font-semibold">{t.footer.download}</h3>
@@ -228,14 +223,7 @@ export function Footer() {
 
 
               </li>
-               <li className="flex items-center gap-3 text-sm text-muted-foreground">
-        
-                 <Phone className="h-4 w-4 shrink-0" />
             
-                   <span>+977-9768943001</span>
-
-
-              </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 shrink-0" />
                 <span>info@doorstepsnepal.com</span>

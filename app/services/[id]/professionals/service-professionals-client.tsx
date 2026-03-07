@@ -18,7 +18,8 @@ import {
   Clock,
   CheckCircle,
   SlidersHorizontal,
-  Heart
+  Heart,
+  Info
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,6 +62,7 @@ import { useGuestStore } from '@/stores/guest-store';
 import { cn } from '@/lib/utils';
 import { id } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ServiceDialog } from '@/components/service-dialog/service-dialog';
 interface ServiceProfessionalsClientProps {
   professionalsData: any[];
   serviceName: string;
@@ -124,6 +126,8 @@ export function ServiceProfessionalsClient({
   const { user } = useAuth();
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
 
+const [dialogOpen, setDialogOpen] = useState(false);
+
       // Address store
     const addresses = useAddresses();
     const temporaryAddress = useTemporaryAddress();
@@ -131,8 +135,29 @@ export function ServiceProfessionalsClient({
     const createAddress = useAddressStore((state) => state.createAddress);
     const updateAddress = useAddressStore((state) => state.updateAddress);
     const isLoadingAddresses = useAddressStore((state) => state.isLoading);
-
-
+const handleServiceDetailsClick = (professional: any) => {
+  setSelectedProfessional(professional);
+  setDialogOpen(true);
+};
+const getPriceRange = (prices: any[] | undefined) => {
+ 
+  if (!prices || !Array.isArray(prices)) return null;
+  
+  const validPrices = prices.filter(p => p.price !== null);
+  if (validPrices.length === 0) return null;
+  
+  const priceValues = validPrices.map(p => p.price);
+  const minPrice = Math.min(...priceValues);
+  const maxPrice = Math.max(...priceValues);
+  const hasDiscount = validPrices.some(p => p.discount_percentage > 0);
+  
+  return {
+    min: minPrice,
+    max: maxPrice,
+    hasDiscount,
+    isRange: minPrice !== maxPrice
+  };
+};
 
       const temporaryAddresses = useMemo((): AddressData[] => {
         return addresses
@@ -848,6 +873,33 @@ const handleServiceFavorite = async (serId: number) => {
       </TooltipContent>
     </Tooltip>
 
+{/* Service Details */}
+<Tooltip>
+  <TooltipTrigger asChild>
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn(
+        "h-9 w-9 rounded-full backdrop-blur-md shadow-md transition-all duration-300",
+        "bg-white/80 dark:bg-black/60",
+        "hover:scale-110 hover:shadow-lg",
+        "text-muted-foreground hover:text-blue-500"
+      )}
+      onClick={(e) => {
+        e.stopPropagation();
+        handleServiceDetailsClick(professional);
+      }}
+    >
+      <Info className="h-4 w-4" />
+    </Button>
+  </TooltipTrigger>
+  <TooltipContent>
+    {language === "ne" ? "सेवा विवरण हेर्नुहोस्" : "View Service Details"}
+  </TooltipContent>
+</Tooltip>
+
+
+
   </div>
 </TooltipProvider>
           
@@ -1255,6 +1307,20 @@ const handleServiceFavorite = async (serId: number) => {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+
+        {/* Service Dialog */}
+    <ServiceDialog
+      open={dialogOpen}
+      onOpenChange={setDialogOpen}
+      service={selectedProfessional?.service || null}
+      priceRange={selectedProfessional ? getPriceRange(selectedProfessional.prices) : null}
+      prices={selectedProfessional?.prices || []} 
+      language={language}
+      currencySymbol={language === "ne" ? "रु" : "Rs."}
+      bookLink={selectedProfessional ? `/services/${selectedProfessional.service.id}/professionals` : undefined}
+      showBookButton={false} 
+    />
     </div>
   );
 }

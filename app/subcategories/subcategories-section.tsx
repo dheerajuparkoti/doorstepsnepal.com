@@ -364,7 +364,10 @@ const navigateToServices = (subCategory: SubCategory) => {
             {filteredSubCategories.map((sub) => (
               <Card
                 key={sub.id}
-                className="group cursor-pointer overflow-hidden transition-all hover:border-primary hover:shadow-md"
+                // className="group cursor-pointer overflow-hidden transition-all hover:border-primary hover:shadow-md"
+                 className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-md p-0 gap-0 cursor-pointer"
+                              
+
                 onClick={() => navigateToServices(sub)}
               >
                 {/* Image */}

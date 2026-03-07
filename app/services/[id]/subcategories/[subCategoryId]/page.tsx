@@ -64,7 +64,7 @@ export default async function SubCategoryServicesPage({ params }: PageProps) {
     // Fetch all data in parallel
     const [servicesResponse, professionalServicesResponse, category, subCategory] = await Promise.all([
       fetchServices(1, 10000, { sub_category_id: subCategoryIdNum }),
-      fetchProfessionalServices(1, 10000).catch(() => ({ professional_services: [] })),
+      fetchProfessionalServices().catch(() => ({ professional_services: [] })),
       fetchCategoryById(categoryId),
       fetchSubCategoryById(subCategoryIdNum)
     ]);

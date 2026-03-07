@@ -45,9 +45,9 @@ export function CategoriesClient({ categoriesData }: CategoriesClientProps) {
   }
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-2 md:py-4">
       <div className="container mx-auto px-4">
-        {/* Header - Updates INSTANTLY when language changes */}
+        {/* Header  */}
         <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h2 className="text-3xl font-bold text-foreground md:text-4xl">
@@ -77,7 +77,7 @@ export function CategoriesClient({ categoriesData }: CategoriesClientProps) {
             {/* // <Link href={`/subcategories/${category.id}`}> */}
 
 
-              <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
+                <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg p-0 gap-0 cursor-pointer">
                 {/* Image */}
                 <div className="relative h-40 w-full overflow-hidden bg-muted">
                   {category.image ? (

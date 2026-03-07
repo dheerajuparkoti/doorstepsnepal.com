@@ -63,7 +63,7 @@ export default function ContactSection({ id }: SectionProps) {
     {
       icon: Phone,
       title: t.about.contactPhone,
-      value: ['+977-9851407706','+977-9851407707','+977-9768943001'],
+      value: ['+977-9851407706','+977-9851407707'],
     },
     {
       icon: MapPin,

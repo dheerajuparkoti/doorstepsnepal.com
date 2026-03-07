@@ -1,6 +1,5 @@
 "use client";
 
-import { Navbar } from "@/components/layout/navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -483,7 +482,6 @@ export default function ProfessionalsPrivacyPolicyPage() {
 
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         
         {/* Hero Section */}
@@ -704,7 +702,7 @@ export default function ProfessionalsPrivacyPolicyPage() {
           </div>
         </section>
       </div>
-      <Footer />
+      
     </>
   );
 }

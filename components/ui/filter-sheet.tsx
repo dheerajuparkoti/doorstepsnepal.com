@@ -206,12 +206,12 @@ export function FilterSheet({
           {/* Footer Actions */}
           <div className="border-t p-6 bg-gradient-to-t from-background to-transparent">
             <div className="flex gap-3">
-              <Button 
+              {/* <Button 
                 className="flex-1 h-11 text-base font-medium shadow-lg shadow-primary/20 hover:shadow-xl transition-all"
                 onClick={() => onApplyFilters(activeFilters)}
               >
                 {getLocalizedText('Apply Filters', 'फिल्टर लागू गर्नुहोस्')}
-              </Button>
+              </Button> */}
               <Button 
                 variant="outline" 
                 className="flex-1 h-11 text-base font-medium border-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/30 transition-all"

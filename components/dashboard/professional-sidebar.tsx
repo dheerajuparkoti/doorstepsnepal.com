@@ -27,6 +27,9 @@ import {
   View,
   LucideHourglass,
   CheckCircle2,
+  Award,
+  AwardIcon,
+  BriefcaseBusiness
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -97,6 +100,7 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       icon: CreditCard,
       children: [
         { label: t.professional.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
+           { label: t.professional.sidebar.partnerBenefitProgram, href: "/dashboard/professional/partner-benefit-program", icon:  AwardIcon},
       ],
     },
     {
@@ -106,6 +110,9 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       children: [
    
         { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
+
+                { label: t.professional.sidebar.privacyPolicyProfessional, href: "/dashboard/settings-privacy/privacy-policy", icon: BriefcaseBusiness },
+
         // { label: t.professional.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
         // { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
       ],

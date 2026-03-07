@@ -47,7 +47,7 @@ export function ServicesClient({ servicesData }: ServicesClientProps) {
   }
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-2 md:py-4">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
@@ -75,7 +75,7 @@ export function ServicesClient({ servicesData }: ServicesClientProps) {
           {services.map((service, index) => (
             <Link key={service.id} href={`/services/${service.id}/professionals`}>
               
-              <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
+                <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg p-0 gap-0 cursor-pointer">
                 {/* Image */}
                 <div className="relative h-40 w-full overflow-hidden bg-muted">
                   {service.image ? (

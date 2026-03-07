@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
 import {
   Plus,
   X,
@@ -190,11 +190,15 @@ export default function ProfessionalServiceAreasPage() {
 
   useEffect(() => {
     if (error) {
-      toast({
-        title: locale === 'ne' ? 'त्रुटि' : 'Error',
-        description: error,
-        variant: 'destructive',
-      });
+      toast.error(
+        locale === 'ne' ? 'त्रुटि' : 'Error',
+        {
+    description: error,
+
+        }
+    
+       
+      );
       clearError();
     }
   }, [error]);
@@ -221,26 +225,33 @@ export default function ProfessionalServiceAreasPage() {
   const handleAddServiceArea = async (data: ServiceAreaFormValues) => {
     try {
       if (serviceAreas.length >= MAX_SERVICE_AREAS) {
-        toast({
-          title: locale === 'ne' ? 'सीमा पुग्यो' : 'Limit Reached',
-          description: locale === 'ne'
+        toast.warning(
+         locale === 'ne' ? 'सीमा पुग्यो' : 'Limit Reached',
+                 {
+       description: locale === 'ne'
             ? `तपाईं केवल ${MAX_SERVICE_AREAS} वटा सेवा क्षेत्रहरू मात्र थप्न सक्नुहुन्छ`
             : `You can only add up to ${MAX_SERVICE_AREAS} service areas`,
-          variant: 'destructive',
-        });
+
+        }
+   
+         
+        );
         return;
       }
 
       // Check if already exists
       const newAreaName = formatServiceAreaName(data.district, data.municipality, data.ward);
       if (serviceAreas.some(area => area.name === newAreaName)) {
-        toast({
-          title: locale === 'ne' ? 'चेतावनी' : 'Warning',
-          description: locale === 'ne'
+        toast.warning(
+      locale === 'ne' ? 'चेतावनी' : 'Warning',
+      {
+ description: locale === 'ne'
             ? 'यो सेवा क्षेत्र पहिले नै थपिएको छ'
             : 'This service area already exists',
-          variant: 'destructive',
-        });
+      }
+         
+
+        );
         return;
       }
 
@@ -251,12 +262,15 @@ export default function ProfessionalServiceAreasPage() {
         data.ward
       );
 
-      toast({
-        title: locale === 'ne' ? 'सफलता' : 'Success',
-        description: locale === 'ne'
+      toast.success(
+    locale === 'ne' ? 'सफलता' : 'Success',
+    {
+  description: locale === 'ne'
           ? 'सेवा क्षेत्र सफलतापूर्वक थपियो'
           : 'Service area added successfully',
-      });
+    }
+      
+      );
 
       form.reset();
       setDistrictSearch('');
@@ -272,12 +286,14 @@ export default function ProfessionalServiceAreasPage() {
     try {
       await removeServiceArea(currentProfessionalId, serviceAreaId);
       
-      toast({
-        title: locale === 'ne' ? 'सफलता' : 'Success',
-        description: locale === 'ne'
+      toast.success(
+     locale === 'ne' ? 'सफलता' : 'Success',{
+ description: locale === 'ne'
           ? 'सेवा क्षेत्र हटाइयो'
           : 'Service area removed successfully',
-      });
+     }
+       
+      );
     } catch (err) {
       // Error handled by store
     }
@@ -286,12 +302,14 @@ export default function ProfessionalServiceAreasPage() {
   const handleRefresh = async () => {
     try {
       await fetchServiceAreas(currentProfessionalId);
-      toast({
-        title: locale === 'ne' ? 'ताजा पारियो' : 'Refreshed',
-        description: locale === 'ne'
+      toast.success(
+       locale === 'ne' ? 'ताजा पारियो' : 'Refreshed',{
+      description: locale === 'ne'
           ? 'सेवा क्षेत्रहरू ताजा पारियो'
           : 'Service areas refreshed successfully',
-      });
+       }
+  
+      );
     } catch (err) {
       // Error handled by store
     }
@@ -498,7 +516,7 @@ export default function ProfessionalServiceAreasPage() {
                       return (
                         <div
                           key={area.id}
-                          className="group relative border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                          className="group relative border rounded-lg p-4 hover:bg-black-50 transition-colors"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
@@ -778,7 +796,7 @@ export default function ProfessionalServiceAreasPage() {
               )}
 
               {/* Tips */}
-              <div className="p-4 bg-gray-50 rounded-lg mt-4">
+              <div className="p-4 bg-black-50 rounded-lg mt-4">
                 <h4 className="font-medium mb-2">
                   {locale === 'ne' ? 'सुझावहरू' : 'Tips'}
                 </h4>
@@ -886,226 +904,216 @@ export default function ProfessionalServiceAreasPage() {
       </div>
 
       {/* Add Service Area Dialog */}
-      <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {locale === 'ne' ? 'सेवा क्षेत्र छान्नुहोस्' : 'Select Service Area'}
-            </DialogTitle>
-            <DialogDescription>
-              {locale === 'ne'
-                ? 'जिल्ला, नगरपालिका र वडा छान्नुहोस्'
-                : 'Select district, municipality, and ward'}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleAddServiceArea)} className="space-y-4">
-              {/* District Selection */}
-              <FormField
-                control={form.control}
-                name="district"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {locale === 'ne' ? 'जिल्ला' : 'District'} *
-                    </FormLabel>
-                    <div className="relative">
+ {/* Add Service Area Dialog */}
+<Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
+  <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>
+        {locale === 'ne' ? 'सेवा क्षेत्र छान्नुहोस्' : 'Select Service Area'}
+      </DialogTitle>
+      <DialogDescription>
+        {locale === 'ne'
+          ? 'जिल्ला, नगरपालिका र वडा छान्नुहोस्'
+          : 'Select district, municipality, and ward'}
+      </DialogDescription>
+    </DialogHeader>
+    
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleAddServiceArea)} className="space-y-4">
+        {/* District Selection */}
+        <FormField
+          control={form.control}
+          name="district"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {locale === 'ne' ? 'जिल्ला' : 'District'} *
+              </FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <div>
+                    <Input
+                      placeholder={locale === 'ne' ? 'जिल्ला खोज्नुहोस्...' : 'Search district...'}
+                      value={districtSearch}
+                      onChange={(e) => setDistrictSearch(e.target.value)}
+                      className="mb-2"
+                    />
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setDistrictSearch('');
+                        form.setValue('municipality', '');
+                        setMunicipalitySearch('');
+                        form.setValue('ward', undefined); // Reset ward selection
+                      }}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
-                        <div>
-                          <Input
-                            placeholder={locale === 'ne' ? 'जिल्ला खोज्नुहोस्...' : 'Search district...'}
-                            value={districtSearch}
-                            onChange={(e) => setDistrictSearch(e.target.value)}
-                            className="mb-2"
-                          />
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              setDistrictSearch('');
-                              form.setValue('municipality', '');
-                              setMunicipalitySearch('');
-                              setSelectedWards([]);
-                            }}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={locale === 'ne' ? 'जिल्ला छान्नुहोस्' : 'Select district'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {filteredDistricts.map((district) => (
-                                <SelectItem key={district} value={district}>
-                                  {district}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
+                        <SelectTrigger>
+                          <SelectValue placeholder={locale === 'ne' ? 'जिल्ला छान्नुहोस्' : 'Select district'} />
+                        </SelectTrigger>
                       </FormControl>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Municipality Selection */}
-              <FormField
-                control={form.control}
-                name="municipality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {locale === 'ne' ? 'नगरपालिका' : 'Municipality'} *
-                    </FormLabel>
-                    <div className="relative">
-                      <FormControl>
-                        <div>
-                          <Input
-                            placeholder={locale === 'ne' ? 'नगरपालिका खोज्नुहोस्...' : 'Search municipality...'}
-                            value={municipalitySearch}
-                            onChange={(e) => setMunicipalitySearch(e.target.value)}
-                            disabled={!selectedDistrict}
-                            className="mb-2"
-                          />
-                          <Select
-                            onValueChange={(value) => {
-                              field.onChange(value);
-                              setMunicipalitySearch('');
-                              setSelectedWards([]);
-                            }}
-                            defaultValue={field.value}
-                            disabled={!selectedDistrict}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder={locale === 'ne' ? 'नगरपालिका छान्नुहोस्' : 'Select municipality'} />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {filteredMunicipalities.map((municipality) => (
-                                <SelectItem key={municipality} value={municipality}>
-                                  {municipality}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </FormControl>
-                    </div>
-                    <FormDescription>
-                      {!selectedDistrict ? (
-                        locale === 'ne'
-                          ? 'जिल्ला छानेपछि मात्र नगरपालिका छान्न सकिन्छ'
-                          : 'Municipality can only be selected after choosing district'
-                      ) : (
-                        locale === 'ne'
-                          ? `${selectedDistrict} जिल्लाका नगरपालिकाहरू`
-                          : `Municipalities in ${selectedDistrict} district`
-                      )}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Ward Selection (Optional) */}
-              <FormField
-                control={form.control}
-                name="ward"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {locale === 'ne' ? 'वडा (वैकल्पिक)' : 'Ward (Optional)'}
-                    </FormLabel>
-                    <div className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-sm font-medium">
-                          {locale === 'ne' ? 'वडा छान्नुहोस्' : 'Select Ward'}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedWards([]);
-                            field.onChange(undefined);
-                          }}
-                        >
-                          {locale === 'ne' ? 'सबै हटाउनुहोस्' : 'Clear all'}
-                        </Button>
-                      </div>
-                      
-                      <div className="grid grid-cols-6 gap-2">
-                        {DISTRICT_DATA.wards.map((ward) => (
-                          <Button
-                            key={ward}
-                            type="button"
-                            variant={selectedWards.includes(ward) ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => {
-                              toggleWardSelection(ward);
-                              field.onChange(ward);
-                            }}
-                            className="h-8"
-                          >
-                            {ward}
-                            {selectedWards.includes(ward) && (
-                              <Check className="w-3 h-3 ml-1" />
-                            )}
-                          </Button>
+                      <SelectContent>
+                        {filteredDistricts.map((district) => (
+                          <SelectItem key={district} value={district}>
+                            {district}
+                          </SelectItem>
                         ))}
-                      </div>
-                      
-                      <FormDescription className="mt-3">
-                        {locale === 'ne'
-                          ? 'तपाईं एक वा बढी वडाहरू छान्न सक्नुहुन्छ (वैकल्पिक)'
-                          : 'You can select one or multiple wards (optional)'}
-                      </FormDescription>
-                    </div>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Action Buttons */}
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setShowAddDialog(false);
-                    form.reset();
-                    setDistrictSearch('');
-                    setMunicipalitySearch('');
-                    setSelectedWards([]);
-                  }}
-                  disabled={isUpdatingServiceAreas}
-                >
-                  {locale === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={isUpdatingServiceAreas || serviceAreas.length >= MAX_SERVICE_AREAS}
-                >
-                  {isUpdatingServiceAreas ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {locale === 'ne' ? 'थपिदै...' : 'Adding...'}
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-4 h-4 mr-2" />
-                      {locale === 'ne' ? 'सेवा क्षेत्र थप्नुहोस्' : 'Add Service Area'}
-                    </>
-                  )}
-                </Button>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </FormControl>
               </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Municipality Selection */}
+        <FormField
+          control={form.control}
+          name="municipality"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>
+                {locale === 'ne' ? 'नगरपालिका' : 'Municipality'} *
+              </FormLabel>
+              <div className="relative">
+                <FormControl>
+                  <div>
+                    <Input
+                      placeholder={locale === 'ne' ? 'नगरपालिका खोज्नुहोस्...' : 'Search municipality...'}
+                      value={municipalitySearch}
+                      onChange={(e) => setMunicipalitySearch(e.target.value)}
+                      disabled={!selectedDistrict}
+                      className="mb-2"
+                    />
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        setMunicipalitySearch('');
+                        form.setValue('ward', undefined); // Reset ward selection
+                      }}
+                      defaultValue={field.value}
+                      disabled={!selectedDistrict}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={locale === 'ne' ? 'नगरपालिका छान्नुहोस्' : 'Select municipality'} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {filteredMunicipalities.map((municipality) => (
+                          <SelectItem key={municipality} value={municipality}>
+                            {municipality}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </FormControl>
+              </div>
+              <FormDescription>
+                {!selectedDistrict ? (
+                  locale === 'ne'
+                    ? 'जिल्ला छानेपछि मात्र नगरपालिका छान्न सकिन्छ'
+                    : 'Municipality can only be selected after choosing district'
+                ) : (
+                  locale === 'ne'
+                    ? `${selectedDistrict} जिल्लाका नगरपालिकाहरू`
+                    : `Municipalities in ${selectedDistrict} district`
+                )}
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Ward Selection (Optional) - Single Selection */}
+ 
+<FormField
+  control={form.control}
+  name="ward"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>
+        {locale === 'ne' ? 'वडा (वैकल्पिक)' : 'Ward (Optional)'}
+      </FormLabel>
+      <div className="border rounded-lg p-4">
+        <div className="mb-3">
+          <span className="text-sm font-medium">
+            {locale === 'ne' ? 'वडा छान्नुहोस्' : 'Select Ward'}
+          </span>
+        </div>
+        
+        <Select
+          onValueChange={(value) => {
+            
+            field.onChange(parseInt(value, 10));
+          }}
+          value={field.value !== undefined ? field.value.toString() : undefined}
+        >
+          <FormControl>
+            <SelectTrigger>
+              <SelectValue placeholder={locale === 'ne' ? 'वडा छान्नुहोस्' : 'Select a ward'} />
+            </SelectTrigger>
+          </FormControl>
+          <SelectContent>
+            {DISTRICT_DATA.wards.map((ward) => (
+              <SelectItem key={ward} value={ward.toString()}>
+                {ward}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        <FormDescription className="mt-3">
+          {locale === 'ne'
+            ? 'तपाईं एउटा वडा मात्र छान्न सक्नुहुन्छ (वैकल्पिक)'
+            : 'You can select only one ward (optional)'}
+        </FormDescription>
+      </div>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
+        {/* Action Buttons */}
+        <div className="flex justify-end gap-3 pt-4 border-t">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setShowAddDialog(false);
+              form.reset();
+              setDistrictSearch('');
+              setMunicipalitySearch('');
+            }}
+            disabled={isUpdatingServiceAreas}
+          >
+            {locale === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
+          </Button>
+          <Button
+            type="submit"
+            disabled={isUpdatingServiceAreas || serviceAreas.length >= MAX_SERVICE_AREAS}
+          >
+            {isUpdatingServiceAreas ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                {locale === 'ne' ? 'थपिदै...' : 'Adding...'}
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                {locale === 'ne' ? 'सेवा क्षेत्र थप्नुहोस्' : 'Add Service Area'}
+              </>
+            )}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  </DialogContent>
+</Dialog>
     </div>
   );
 }

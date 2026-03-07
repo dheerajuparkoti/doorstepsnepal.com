@@ -24,6 +24,8 @@ import {
   MapPin,
   View,
   ChevronUp,
+  AwardIcon,
+  BriefcaseBusiness,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
@@ -101,6 +103,7 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       icon: CreditCard,
       children: [
         { label: t.customer.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
+
       ],
     },
     { 
@@ -162,6 +165,8 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       icon: CreditCard,
       children: [
         { label: t.professional.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
+                           { label: t.professional.sidebar.partnerBenefitProgram, href: "/dashboard/professional/partner-benefit-program", icon:  AwardIcon},
+
       ],
     },
     { 
@@ -169,7 +174,9 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       href: "/dashboard/settings-privacy", 
       icon: Settings,
       children: [
-        { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
+        { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },           { label: t.professional.sidebar.privacyPolicyProfessional, href: "/dashboard/settings-privacy/privacy-policy", icon: BriefcaseBusiness },
+           { label: t.professional.sidebar.privacyPolicyProfessional, href: "/dashboard/settings-privacy/privacy-policy", icon: BriefcaseBusiness },
+
       ],
     },
   ];

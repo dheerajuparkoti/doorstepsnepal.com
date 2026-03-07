@@ -37,7 +37,7 @@ export function HowItWorksSection() {
   ];
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-2 md:py-4">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="mb-12 text-center">
