@@ -257,7 +257,9 @@ const profileRoute =
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="gap-2 pl-2 pr-1">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.avatar || user?.profile_image || "/placeholder.svg"} alt={user?.name || user?.full_name} />
+                  <AvatarImage src={user?.avatar || user?.profile_image || "/placeholder.svg"} alt={user?.name || user?.full_name} 
+                      className="object-cover"
+                  />
                   <AvatarFallback className="bg-primary/10 text-primary">
                     {getUserInitials()}
                   </AvatarFallback>

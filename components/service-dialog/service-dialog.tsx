@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogTitle, DialogClose, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogOverlay } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tag, X } from "lucide-react";
+import { Tag } from "lucide-react";
 
 interface ServiceDialogProps {
   open: boolean;
@@ -60,6 +60,66 @@ export function ServiceDialog({
     ? service.description_np || service.description_en || "" 
     : service.description_en || service.description_np || "";
 
+  // Function to render description with proper formatting
+  const renderDescription = (description: string) => {
+    if (!description) return null;
+
+    // Check if the description contains HTML tags
+    const containsHTML = /<[a-z][\s\S]*>/i.test(description);
+
+    if (containsHTML) {
+      // If it contains HTML, render it with proper styling
+      return (
+        <div 
+          className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-medium [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
+      );
+    } else {
+      // If it's plain text, check for markdown-style formatting
+      const formattedText = description
+        // Bold: **text** or __text__
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.*?)__/g, '<strong>$1</strong>')
+        // Italic: *text* or _text_
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/_(.*?)_/g, '<em>$1</em>')
+        // Bullet points: lines starting with * or -
+        .split('\n')
+        .map(line => {
+          if (line.trim().match(/^[\*\-]\s/)) {
+            return `<li>${line.trim().substring(2)}</li>`;
+          } else if (line.trim().match(/^\d+\.\s/)) {
+            // Numbered lists
+            return `<li>${line.trim()}</li>`;
+          } else if (line.trim() === '') {
+            return '<br/>';
+          } else {
+            return `<p>${line}</p>`;
+          }
+        })
+        .join('');
+
+      // Wrap lists in appropriate tags
+      const withLists = formattedText
+        .replace(/(<li>.*<\/li>)+/g, (match) => {
+          if (match.includes('<li>')) {
+            // Check if it's a numbered list
+            const isNumbered = /<li>\d+\.\s/.test(match);
+            return isNumbered ? `<ol class="list-decimal pl-5 my-2">${match}</ol>` : `<ul class="list-disc pl-5 my-2">${match}</ul>`;
+          }
+          return match;
+        });
+
+      return (
+        <div 
+          className="text-gray-600 dark:text-gray-300 leading-relaxed [&_p]:mb-2 [&_br]:my-1"
+          dangerouslySetInnerHTML={{ __html: withLists }}
+        />
+      );
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* Custom overlay with lower opacity and blur effect */}
@@ -72,11 +132,10 @@ export function ServiceDialog({
           {serviceName}
         </DialogTitle>
 
-
         {/* Content with landscape proportions */}
         <div className="flex flex-col md:flex-row h-full animate-in slide-in-from-bottom-5 duration-500">
           {/* Image Section */}
-          <div className="relative h-[200px] md:h-auto md:w-[40%] bg-gray-100 dark:bg-gray-800">
+          {/* <div className="relative h-[200px] md:h-auto md:w-[40%] bg-gray-100 dark:bg-gray-800">
             <Image
               src={service.image || "/placeholder-image.jpg"}
               alt={serviceName}
@@ -95,18 +154,16 @@ export function ServiceDialog({
                 </div>
               </div>
             )}
-          </div>
+          </div> */}
 
           {/* Content Section - takes 60% width, scrollable */}
-          <div className="p-5 space-y-4 md:w-[60%] max-h-[300px] md:max-h-[400px] overflow-y-auto">
+          <div className="p-5 space-y-4 md:w-[100%] max-h-[300px] md:max-h-[400px] overflow-y-auto">
             {serviceDescription && (
               <div>
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1.5">
                   {isNepali ? "विवरण" : "Description"}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                  {serviceDescription}
-                </p>
+                {renderDescription(serviceDescription)}
               </div>
             )}
 

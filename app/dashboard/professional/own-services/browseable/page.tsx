@@ -759,15 +759,17 @@ import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useI18n } from '@/lib/i18n/context';
+import { useAuth } from '@/lib/context/auth-context';
 
 export default function BrowseableServicesPage() {
   const { t, language } = useI18n();
   const searchParams = useSearchParams();
   const router = useRouter();
   const { toast } = useToast();
-  
+    const {user} = useAuth();
   // const professionalId = Number(searchParams.get('professionalId'));
-  const professionalId = 24;
+ 
+    const professionalId = user?.professional_id ?? 0;
   const [services, setServices] = useState<BrowseableService[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -888,8 +890,10 @@ export default function BrowseableServicesPage() {
 
     setSubmitting(true);
     try {
+        console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",professionalId);
       // First, create the professional service
       const serviceResponse = await createProfessionalService({
+      
         professional_id: professionalId,
         service_id: selectedService.id,
       });

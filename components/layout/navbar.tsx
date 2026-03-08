@@ -134,7 +134,9 @@ export function Navbar() {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar || "/placeholder.svg"} />
+                      <AvatarImage src={user.avatar || "/placeholder.svg"} 
+                          className="object-cover"
+                      />
                       <AvatarFallback>{getUserInitials()}</AvatarFallback>
                     </Avatar>
                     <span className="hidden md:inline text-sm font-medium">

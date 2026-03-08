@@ -702,6 +702,7 @@ export default function ProfessionalServicesChoosePage() {
   const loadData = async () => {
     setLoading(true);
     try {
+
       const servicesData = await fetchServicesByProfessionalId(professionalId);
       setServices(servicesData);
     } catch (error) {

@@ -781,6 +781,9 @@ const handleServiceFavorite = async (serId: number) => {
 };
   // Render professional card
   const renderProfessionalCard = (professional: any) => {
+
+         // detail page URL
+  const detailUrl = `/services/service-detail/${professional.id}`;
     return (
       <Card 
         key={professional.id}
@@ -885,10 +888,15 @@ const handleServiceFavorite = async (serId: number) => {
         "hover:scale-110 hover:shadow-lg",
         "text-muted-foreground hover:text-blue-500"
       )}
-      onClick={(e) => {
-        e.stopPropagation();
-        handleServiceDetailsClick(professional);
-      }}
+      // onClick={(e) => {
+      //   e.stopPropagation();
+      //   handleServiceDetailsClick(professional);
+      // }}
+           onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          window.location.href = detailUrl;
+        }}
     >
       <Info className="h-4 w-4" />
     </Button>
@@ -1310,7 +1318,7 @@ const handleServiceFavorite = async (serId: number) => {
 
 
         {/* Service Dialog */}
-    <ServiceDialog
+    {/* <ServiceDialog
       open={dialogOpen}
       onOpenChange={setDialogOpen}
       service={selectedProfessional?.service || null}
@@ -1320,7 +1328,7 @@ const handleServiceFavorite = async (serId: number) => {
       currencySymbol={language === "ne" ? "रु" : "Rs."}
       bookLink={selectedProfessional ? `/services/${selectedProfessional.service.id}/professionals` : undefined}
       showBookButton={false} 
-    />
+    /> */}
     </div>
   );
 }

@@ -11,8 +11,6 @@ interface ServiceProfessionalsPageProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-
-
 export async function generateMetadata({ params }: ServiceProfessionalsPageProps) {
   try {
     const { id } = await params;
@@ -73,7 +71,7 @@ export default async function ServiceProfessionalsPage({
     let service = null;
     let serviceName = 'Services';
     
-    // Only fetch service if id is not 0
+  
     if (serviceId !== 0) {
       service = await fetchServiceById(serviceId);
       
@@ -85,7 +83,7 @@ export default async function ServiceProfessionalsPage({
     } else {
     
       const searchQuery = queryParams?.service as string || 
-                         queryParams?.search as string;
+      queryParams?.search as string;
       
       if (searchQuery) {
         serviceName = `Search: ${searchQuery}`;

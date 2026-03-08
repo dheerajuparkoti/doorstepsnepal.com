@@ -408,21 +408,24 @@ const navigateToServices = (subCategory: SubCategory) => {
                       : sub.description_en || 'No description available'}
                   </p>
 
-                  {/* View Info Button */}
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="link"
-                      className="h-auto p-0 text-primary"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // TODO: Open info modal/sheet
-                      }}
-                    >
-                      {language === 'ne' ? 'जानकारी हेर्नुहोस्' : 'View Info'}
-                    </Button>
-                    
-                    <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
-                  </div>
+             {/* View Info Button */}
+<div className="flex items-center justify-between">
+  <Button
+    variant="link"
+    className="h-auto p-0 text-primary"
+    onClick={(e) => {
+      e.stopPropagation();
+      // Navigate to subcategory detail page
+      router.push(`/subcategories/sub-category-detail/${sub.id}`);
+      // OR if you're not using router directly:
+      // window.location.href = `/subcategories/${subcategory.id}`;
+    }}
+  >
+    {language === 'ne' ? 'जानकारी हेर्नुहोस्' : 'View Info'}
+  </Button>
+  
+  <ChevronRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1" />
+</div>
                 </CardContent>
               </Card>
             ))}
