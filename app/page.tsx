@@ -24,7 +24,8 @@ import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
 import { BecomeAPartnerSection } from "@/components/home/become-a-partner";
-
+import { PromotionsCarouselSection } from "@/components/home/ssr/promotions-carousel-ssr";
+import { PromotionsCarouselSkeleton } from "@/components/home/skeleton/promotions-carousel-skeleton";
 
 
   
@@ -48,6 +49,12 @@ export default function HomePage() {
           {/* featured services Section with Suspense boundary */}
           <Suspense fallback={<FeaturedServicesCarouselSkeleton/>}>
             <FeaturedServicesCarouselSection />
+          </Suspense>
+
+
+          {/* PROMOTIONS CAROUSEL */}
+          <Suspense fallback={<PromotionsCarouselSkeleton />}>
+            <PromotionsCarouselSection />
           </Suspense>
 
           {/* featured services Section with Suspense boundary */}
