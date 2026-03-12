@@ -1,4 +1,193 @@
 
+// "use client";
+
+// import { useI18n } from "@/lib/i18n/context";
+// import Image from "next/image";
+// import Link from "next/link";
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Badge } from "@/components/ui/badge";
+// import { 
+//   ArrowLeft, 
+//   Tag, 
+//   Clock, 
+//   Layers,
+//   BookOpen
+// } from "lucide-react";
+
+
+
+
+// interface CategoryDetailClientProps {
+//   category: {
+//     id: number;
+//     name_en: string;
+//     name_np: string;
+//     description_en: string;
+//     description_np: string;
+//     image: string | null;
+//   };
+// }
+
+// export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
+//   const { language } = useI18n();
+  
+//   // Localized content
+//   const categoryName = language === "ne" ? category.name_np : category.name_en;
+//   const description = language === "ne" ? category.description_np : category.description_en;
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+//       {/* Hero Section with Image */}
+//       <div className="relative h-[300px] md:h-[400px] w-full bg-gray-900">
+//         {category.image ? (
+//           <Image
+//             src={category.image}
+//             alt={categoryName}
+//             fill
+//             className="object-cover opacity-60"
+//             priority
+//           />
+//         ) : (
+//           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10" />
+//         )}
+        
+//         {/* Overlay Content */}
+//         <div className="absolute inset-0 bg-black/50" />
+        
+//         <div className="absolute inset-0 flex items-center">
+//           <div className="container mx-auto px-4">
+//             <Link 
+//               href="/#" 
+//               className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
+//             >
+//               <ArrowLeft className="h-4 w-4 mr-2" />
+//       {language === "ne" ? "गृहपृष्ठमा फर्कनुहोस्" : "Back to Home"}
+//             </Link>
+            
+//             <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 max-w-3xl">
+//               {categoryName}
+//             </h1>
+            
+//             {description && (
+//               <p className="text-white/90 text-lg max-w-2xl line-clamp-2">
+//                 {description}
+//               </p>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Main Content */}
+//       <div className="container mx-auto px-4 py-8 md:py-12">
+//         <div className="grid lg:grid-cols-3 gap-8">
+//           {/* Left Column - Main Content */}
+//           <div className="lg:col-span-2 space-y-8">
+//             {/* Full Description */}
+//             {description && (
+//               <Card>
+//                 <CardContent className="p-6">
+//                   <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+//                     <BookOpen className="h-5 w-5 text-primary" />
+//                     {language === "ne" ? "विवरण" : "Description"}
+//                   </h2>
+//                   <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+//                     {description}
+//                   </p>
+//                 </CardContent>
+//               </Card>
+//             )}
+//           </div>
+
+//           {/* Right Column - Sidebar */}
+//           <div className="space-y-6">
+//             {/* Quick Info Card */}
+            
+//             {/* <Card>
+//               <CardContent className="p-6">
+//                 <h3 className="font-semibold mb-4 flex items-center gap-2">
+//                   <Tag className="h-5 w-5" />
+//                   {language === "ne" ? "द्रुत जानकारी" : "Quick Info"}
+//                 </h3>
+                
+//                 <div className="space-y-5"> */}
+//                   {/* Category ID */}
+//                   {/* <div className="flex items-start gap-3 pb-3 border-b">
+//                     <div className="bg-primary/10 p-2 rounded-lg">
+//                       <Layers className="h-5 w-5 text-primary" />
+//                     </div>
+//                     <div>
+//                       <p className="text-sm text-muted-foreground">
+//                         {language === "ne" ? "श्रेणी आईडी" : "Category ID"}
+//                       </p>
+//                       <p className="font-semibold text-lg">
+//                         #{category.id}
+//                       </p>
+//                     </div>
+//                   </div> */}
+
+//                   {/* Available Services Link */}
+//                   {/* <div className="flex items-start gap-3">
+//                     <div className="bg-primary/10 p-2 rounded-lg">
+//                       <Clock className="h-5 w-5 text-primary" />
+//                     </div>
+//                     <div>
+//                       <p className="text-sm text-muted-foreground mb-2">
+//                         {language === "ne" ? "सेवाहरू" : "Services"}
+//                       </p>
+//                       <Button variant="outline" size="sm" asChild className="w-full">
+//                         <Link href={`/subcategories/${category.id}`}>
+//                           {language === "ne" ? "सेवाहरू हेर्नुहोस्" : "View Services"}
+//                         </Link>
+//                       </Button>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card> */}
+
+//             {/* Navigation Card */}
+//             <Card className="sticky top-24">
+//               <CardContent className="p-6">
+//                 <h3 className="font-semibold mb-4 flex items-center gap-2">
+//                   <Layers className="h-5 w-5" />
+//                   {language === "ne" ? "सम्बन्धित लिङ्कहरू" : "Related Links"}
+//                 </h3>
+                
+//                 <div className="space-y-3">
+//                   <Button className="w-full" variant="default" asChild>
+//                     <Link href={`/subcategories/${category.id}`}>
+//                       {language === "ne" ? "उपश्रेणीहरू हेर्नुहोस्" : "View Subcategories"}
+//                     </Link>
+//                   </Button>
+                  
+//                   <Button variant="outline" className="w-full" asChild>
+//                     <Link href="/subcategories">
+//                       {language === "ne" ? "सबै श्रेणीहरू" : "All Categories"}
+//                     </Link>
+//                   </Button>
+//                 </div>
+                
+//                 <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+//                   <div className="flex items-center gap-1.5">
+//                     <Layers className="h-3 w-3" />
+//                     <span>{language === "ne" ? "श्रेणी" : "Category"}</span>
+//                   </div>
+//                   <div className="flex items-center gap-1.5">
+//                     <BookOpen className="h-3 w-3" />
+//                     <span>{language === "ne" ? "विवरण" : "Details"}</span>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
 "use client";
 
 import { useI18n } from "@/lib/i18n/context";
@@ -9,14 +198,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, 
-  Tag, 
-  Clock, 
+  BookOpen,
   Layers,
-  BookOpen
+  CheckCircle,
+  ListChecks,
+  Sparkles,
+  Shield,
+  Clock,
+  Star
 } from "lucide-react";
-
-
-
 
 interface CategoryDetailClientProps {
   category: {
@@ -35,6 +225,68 @@ export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
   // Localized content
   const categoryName = language === "ne" ? category.name_np : category.name_en;
   const description = language === "ne" ? category.description_np : category.description_en;
+
+  // Function to format description (same as service detail page)
+  const formatDescription = (text: string) => {
+    if (!text) return null;
+
+    // Split by sections (marked by ✅ or •)
+    const sections = text.split(/(?=✅|•|✔ )/g);
+    
+    return sections.map((section, index) => {
+      // Check if section is a bullet list
+      if (section.includes('•')) {
+        const items = section.split('•').filter(item => item.trim());
+        return (
+          <ul key={index} className="space-y-2 my-4">
+            {items.map((item, idx) => (
+              <li key={idx} className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <span className="text-muted-foreground">{item.trim()}</span>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      
+      // Check if section has a heading (starts with ✅)
+      if (section.includes('✅')) {
+        const lines = section.split('\n').filter(line => line.trim());
+        const heading = lines[0].replace('✅', '').trim();
+        const content = lines.slice(1).join('\n');
+        
+        return (
+          <div key={index} className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-primary">
+              <Sparkles className="h-5 w-5" />
+              {heading}
+            </h3>
+            {content.includes('•') ? (
+              <ul className="space-y-2">
+                {content.split('•').filter(item => item.trim()).map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{item.trim()}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                {content}
+              </p>
+            )}
+          </div>
+        );
+      }
+      
+      // Regular paragraph
+      return (
+        <p key={index} className="text-muted-foreground leading-relaxed mb-4">
+          {section}
+        </p>
+      );
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -62,7 +314,7 @@ export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
               className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-      {language === "ne" ? "गृहपृष्ठमा फर्कनुहोस्" : "Back to Home"}
+              {language === "ne" ? "गृहपृष्ठमा फर्कनुहोस्" : "Back to Home"}
             </Link>
             
             <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 max-w-3xl">
@@ -71,7 +323,7 @@ export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
             
             {description && (
               <p className="text-white/90 text-lg max-w-2xl line-clamp-2">
-                {description}
+                {description.split('\n')[0]}
               </p>
             )}
           </div>
@@ -83,17 +335,20 @@ export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Full Description */}
+            {/* Full Description with Rich Formatting */}
             {description && (
               <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <CardContent className="p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b">
                     <BookOpen className="h-5 w-5 text-primary" />
-                    {language === "ne" ? "विवरण" : "Description"}
-                  </h2>
-                  <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
-                    {description}
-                  </p>
+                    <h2 className="text-xl font-semibold">
+                      {language === "ne" ? "विवरण" : "Description"}
+                    </h2>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {formatDescription(description)}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -102,62 +357,20 @@ export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Quick Info Card */}
-            
-            {/* <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
-                  {language === "ne" ? "द्रुत जानकारी" : "Quick Info"}
-                </h3>
-                
-                <div className="space-y-5"> */}
-                  {/* Category ID */}
-                  {/* <div className="flex items-start gap-3 pb-3 border-b">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                      <Layers className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {language === "ne" ? "श्रेणी आईडी" : "Category ID"}
-                      </p>
-                      <p className="font-semibold text-lg">
-                        #{category.id}
-                      </p>
-                    </div>
-                  </div> */}
-
-                  {/* Available Services Link */}
-                  {/* <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                      <Clock className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {language === "ne" ? "सेवाहरू" : "Services"}
-                      </p>
-                      <Button variant="outline" size="sm" asChild className="w-full">
-                        <Link href={`/subcategories/${category.id}`}>
-                          {language === "ne" ? "सेवाहरू हेर्नुहोस्" : "View Services"}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
+        
 
             {/* Navigation Card */}
             <Card className="sticky top-24">
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Layers className="h-5 w-5" />
+                  <ListChecks className="h-5 w-5" />
                   {language === "ne" ? "सम्बन्धित लिङ्कहरू" : "Related Links"}
                 </h3>
                 
                 <div className="space-y-3">
                   <Button className="w-full" variant="default" asChild>
                     <Link href={`/subcategories/${category.id}`}>
-                      {language === "ne" ? "उपश्रेणीहरू हेर्नुहोस्" : "View Subcategories"}
+                      {language === "ne" ? "सेवाहरू हेर्नुहोस्" : "View Services"}
                     </Link>
                   </Button>
                   
@@ -170,12 +383,12 @@ export function CategoryDetailClient({ category }: CategoryDetailClientProps) {
                 
                 <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1.5">
-                    <Layers className="h-3 w-3" />
-                    <span>{language === "ne" ? "श्रेणी" : "Category"}</span>
+                    <Clock className="h-3 w-3" />
+                    <span>24/7 Support</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-3 w-3" />
-                    <span>{language === "ne" ? "विवरण" : "Details"}</span>
+                    <Star className="h-3 w-3" />
+                    <span>Best Price</span>
                   </div>
                 </div>
               </CardContent>

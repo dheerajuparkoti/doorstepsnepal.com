@@ -26,6 +26,8 @@ import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-
 import { BecomeAPartnerSection } from "@/components/home/become-a-partner";
 import { PromotionsCarouselSection } from "@/components/home/ssr/promotions-carousel-ssr";
 import { PromotionsCarouselSkeleton } from "@/components/home/skeleton/promotions-carousel-skeleton";
+import { PopularServicesSkeleton } from "@/components/home/skeleton/popular-services-skeleton";
+import { PopularServicesSectionSSR } from "@/components/home/ssr/popular-services-section-ssr";
 
 
   
@@ -62,15 +64,26 @@ export default function HomePage() {
             <FeaturedServicesSectionSSR />
           </Suspense>
 
+
+          
+            {/* featured services Section with Suspense boundary */}
+          <Suspense fallback={<PopularServicesSkeleton />}>
+            <PopularServicesSectionSSR />
+          </Suspense>
+
           {/* Categories Section with Suspense boundary */}
           <Suspense fallback={<CategoriesSkeleton />}>
             <CategoriesSection />
           </Suspense>
 
           {/* Services Section with Suspense boundary */}
-          <Suspense fallback={<ServicesSkeleton />}>
+          {/* <Suspense fallback={<ServicesSkeleton />}>
             <ServicesSection />
-          </Suspense>
+          </Suspense> */}
+
+
+
+          
 
           {/* professionals Section with Suspense boundary */}
           <Suspense fallback={<ProfessionalsSkeleton />}>

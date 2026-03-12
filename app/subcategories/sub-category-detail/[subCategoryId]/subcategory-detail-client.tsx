@@ -1,4 +1,280 @@
 
+// "use client";
+
+// import { useI18n } from "@/lib/i18n/context";
+// import Image from "next/image";
+// import Link from "next/link";
+// import { Button } from "@/components/ui/button";
+// import { Card, CardContent } from "@/components/ui/card";
+// import { Badge } from "@/components/ui/badge";
+// import { 
+//   ArrowLeft, 
+//   Tag, 
+//   Clock, 
+//   Layers,
+//   BookOpen,
+//   FolderTree,
+//   Info
+// } from "lucide-react";
+
+// interface SubCategoryDetailClientProps {
+//   subcategory: {
+//     id: number;
+//     name_en: string;
+//     name_np: string;
+//     description_en: string | null; 
+//     description_np: string | null;  
+//     image: string | null;
+//     category_id?: number;
+//   };
+// }
+
+// export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClientProps) {
+//   const { language } = useI18n();
+
+//   const subcategoryName = language === "ne" ? subcategory.name_np : subcategory.name_en;
+//   const description = language === "ne" 
+//     ? (subcategory.description_np || '') 
+//     : (subcategory.description_en || '');
+
+//   // Function to render description with proper formatting (copied from ServiceDialog)
+//   const renderDescription = (description: string) => {
+//     if (!description) return null;
+
+//     // Check if the description contains HTML tags
+//     const containsHTML = /<[a-z][\s\S]*>/i.test(description);
+
+//     if (containsHTML) {
+//       // If it contains HTML, render it with proper styling
+//       return (
+//         <div 
+//           className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-medium [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic"
+//           dangerouslySetInnerHTML={{ __html: description }}
+//         />
+//       );
+//     } else {
+//       // If it's plain text, check for markdown-style formatting
+//       const formattedText = description
+//         // Bold: **text** or __text__
+//         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+//         .replace(/__(.*?)__/g, '<strong>$1</strong>')
+//         // Italic: *text* or _text_
+//         .replace(/\*(.*?)\*/g, '<em>$1</em>')
+//         .replace(/_(.*?)_/g, '<em>$1</em>')
+//         // Bullet points: lines starting with * or -
+//         .split('\n')
+//         .map(line => {
+//           if (line.trim().match(/^[\*\-]\s/)) {
+//             return `<li>${line.trim().substring(2)}</li>`;
+//           } else if (line.trim().match(/^\d+\.\s/)) {
+//             // Numbered lists
+//             return `<li>${line.trim()}</li>`;
+//           } else if (line.trim() === '') {
+//             return '<br/>';
+//           } else {
+//             return `<p>${line}</p>`;
+//           }
+//         })
+//         .join('');
+
+//       // Wrap lists in appropriate tags
+//       const withLists = formattedText
+//         .replace(/(<li>.*<\/li>)+/g, (match) => {
+//           if (match.includes('<li>')) {
+//             // Check if it's a numbered list
+//             const isNumbered = /<li>\d+\.\s/.test(match);
+//             return isNumbered ? `<ol class="list-decimal pl-5 my-2">${match}</ol>` : `<ul class="list-disc pl-5 my-2">${match}</ul>`;
+//           }
+//           return match;
+//         });
+
+//       return (
+//         <div 
+//           className="text-gray-600 dark:text-gray-300 leading-relaxed [&_p]:mb-2 [&_br]:my-1"
+//           dangerouslySetInnerHTML={{ __html: withLists }}
+//         />
+//       );
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+//       {/* Hero Section with Image */}
+//       <div className="relative h-[300px] md:h-[400px] w-full bg-gray-900">
+//         {subcategory.image ? (
+//           <Image
+//             src={subcategory.image}
+//             alt={subcategoryName}
+//             fill
+//             className="object-cover opacity-60"
+//             priority
+//           />
+//         ) : (
+//           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10" />
+//         )}
+        
+//         {/* Overlay Content */}
+//         <div className="absolute inset-0 bg-black/50" />
+        
+//         <div className="absolute inset-0 flex items-center">
+//           <div className="container mx-auto px-4">
+//             <Link 
+//               href="/subcategories" 
+//               className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
+//             >
+//               <ArrowLeft className="h-4 w-4 mr-2" />
+//               {language === "ne" ? "उपश्रेणीहरूमा फर्कनुहोस्" : "Back to Subcategories"}
+//             </Link>
+            
+//             <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 max-w-3xl">
+//               {subcategoryName}
+//             </h1>
+            
+//             {description && (
+//               <p className="text-white/90 text-lg max-w-2xl line-clamp-2">
+//                 {description}
+//               </p>
+//             )}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Main Content */}
+//       <div className="container mx-auto px-4 py-8 md:py-12">
+//         <div className="grid lg:grid-cols-3 gap-8">
+//           {/* Left Column - Main Content */}
+//           <div className="lg:col-span-2 space-y-8">
+//             {/* Full Description Card with formatted description */}
+//             {description && (
+//               <Card>
+//                 <CardContent className="p-6">
+//                   <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+//                     <Info className="h-5 w-5 text-primary" />
+//                     {language === "ne" ? "विवरण" : "Description"}
+//                   </h2>
+//                   {renderDescription(description)}
+//                 </CardContent>
+//               </Card>
+//             )}
+//           </div>
+
+//           {/* Right Column - Sidebar */}
+//           <div className="space-y-6">
+//             {/* Quick Info Card */}
+//             {/* <Card>
+//               <CardContent className="p-6">
+//                 <h3 className="font-semibold mb-4 flex items-center gap-2">
+//                   <Tag className="h-5 w-5" />
+//                   {language === "ne" ? "द्रुत जानकारी" : "Quick Info"}
+//                 </h3>
+                
+//                 <div className="space-y-5"> */}
+//                   {/* Subcategory ID */}
+//                   {/* <div className="flex items-start gap-3 pb-3 border-b">
+//                     <div className="bg-primary/10 p-2 rounded-lg">
+//                       <Layers className="h-5 w-5 text-primary" />
+//                     </div>
+//                     <div>
+//                       <p className="text-sm text-muted-foreground">
+//                         {language === "ne" ? "उपश्रेणी आईडी" : "Subcategory ID"}
+//                       </p>
+//                       <p className="font-semibold text-lg">
+//                         #{subcategory.id}
+//                       </p>
+//                     </div>
+//                   </div> */}
+
+//                   {/* Parent Category Link (if available) */}
+//                   {/* {subcategory.category_id && (
+//                     <div className="flex items-start gap-3 pb-3 border-b">
+//                       <div className="bg-primary/10 p-2 rounded-lg">
+//                         <FolderTree className="h-5 w-5 text-primary" />
+//                       </div>
+//                       <div>
+//                         <p className="text-sm text-muted-foreground mb-2">
+//                           {language === "ne" ? "मुख्य श्रेणी" : "Parent Category"}
+//                         </p>
+//                         <Button variant="outline" size="sm" asChild className="w-full">
+//                           <Link href={`/categories/${subcategory.category_id}`}>
+//                             {language === "ne" ? "श्रेणी हेर्नुहोस्" : "View Category"}
+//                           </Link>
+//                         </Button>
+//                       </div>
+//                     </div>
+//                   )} */}
+
+//                   {/* Available Services Link */}
+//                   {/* <div className="flex items-start gap-3">
+//                     <div className="bg-primary/10 p-2 rounded-lg">
+//                       <Clock className="h-5 w-5 text-primary" />
+//                     </div>
+//                     <div>
+//                       <p className="text-sm text-muted-foreground mb-2">
+//                         {language === "ne" ? "सेवाहरू" : "Services"}
+//                       </p>
+//                       <Button variant="outline" size="sm" asChild className="w-full">
+//                         <Link href={`/services?subcategory=${subcategory.id}`}>
+//                           {language === "ne" ? "सेवाहरू हेर्नुहोस्" : "View Services"}
+//                         </Link>
+//                       </Button>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card> */}
+
+//             {/* Navigation Card */}
+//             <Card className="sticky top-24">
+//               <CardContent className="p-6">
+//                 <h3 className="font-semibold mb-4 flex items-center gap-2">
+//                   <Layers className="h-5 w-5" />
+//                   {language === "ne" ? "सम्बन्धित लिङ्कहरू" : "Related Links"}
+//                 </h3>
+                
+//                 <div className="space-y-3">
+//                   <Button className="w-full" variant="default" asChild>
+//                     <Link href={`/services?subcategory=${subcategory.id}`}>
+//                       {language === "ne" ? "सेवाहरू हेर्नुहोस्" : "View Services"}
+//                     </Link>
+//                   </Button>
+                  
+//                   <Button variant="outline" className="w-full" asChild>
+//                     <Link href="/subcategories">
+//                       {language === "ne" ? "सबै उपश्रेणीहरू" : "All Subcategories"}
+//                     </Link>
+//                   </Button>
+
+//                   {subcategory.category_id && (
+//                     <Button variant="outline" className="w-full" asChild>
+//                       <Link href={`/categories/${subcategory.category_id}`}>
+//                         {language === "ne" ? "मुख्य श्रेणी" : "Parent Category"}
+//                       </Link>
+//                     </Button>
+//                   )}
+//                 </div>
+                
+//                 <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
+//                   <div className="flex items-center gap-1.5">
+//                     <Layers className="h-3 w-3" />
+//                     <span>{language === "ne" ? "उपश्रेणी" : "Subcategory"}</span>
+//                   </div>
+//                   <div className="flex items-center gap-1.5">
+//                     <BookOpen className="h-3 w-3" />
+//                     <span>{language === "ne" ? "विवरण" : "Details"}</span>
+//                   </div>
+//                 </div>
+//               </CardContent>
+//             </Card>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
 "use client";
 
 import { useI18n } from "@/lib/i18n/context";
@@ -14,7 +290,12 @@ import {
   Layers,
   BookOpen,
   FolderTree,
-  Info
+  Info,
+  CheckCircle,
+  Sparkles,
+  ListChecks,
+  Star,
+  Shield
 } from "lucide-react";
 
 interface SubCategoryDetailClientProps {
@@ -26,6 +307,8 @@ interface SubCategoryDetailClientProps {
     description_np: string | null;  
     image: string | null;
     category_id?: number;
+    category_name_en?: string;
+    category_name_np?: string;
   };
 }
 
@@ -33,68 +316,71 @@ export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClient
   const { language } = useI18n();
 
   const subcategoryName = language === "ne" ? subcategory.name_np : subcategory.name_en;
+  const categoryName = language === "ne" ? subcategory.category_name_np : subcategory.category_name_en;
   const description = language === "ne" 
     ? (subcategory.description_np || '') 
     : (subcategory.description_en || '');
 
-  // Function to render description with proper formatting (copied from ServiceDialog)
-  const renderDescription = (description: string) => {
-    if (!description) return null;
+  // Function to format description (matching CategoryDetailClient style)
+  const formatDescription = (text: string) => {
+    if (!text) return null;
 
-    // Check if the description contains HTML tags
-    const containsHTML = /<[a-z][\s\S]*>/i.test(description);
-
-    if (containsHTML) {
-      // If it contains HTML, render it with proper styling
+    // Split by sections (marked by ✅ or •)
+    const sections = text.split(/(?=✅|•|✔ )/g);
+    
+    return sections.map((section, index) => {
+      // Check if section is a bullet list
+      if (section.includes('•')) {
+        const items = section.split('•').filter(item => item.trim());
+        return (
+          <ul key={index} className="space-y-2 my-4">
+            {items.map((item, idx) => (
+              <li key={idx} className="flex items-start gap-2">
+                <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <span className="text-muted-foreground">{item.trim()}</span>
+              </li>
+            ))}
+          </ul>
+        );
+      }
+      
+      // Check if section has a heading (starts with ✅)
+      if (section.includes('✅')) {
+        const lines = section.split('\n').filter(line => line.trim());
+        const heading = lines[0].replace('✅', '').trim();
+        const content = lines.slice(1).join('\n');
+        
+        return (
+          <div key={index} className="mb-6">
+            <h3 className="text-lg font-semibold mb-3 flex items-center gap-2 text-primary">
+              <Sparkles className="h-5 w-5" />
+              {heading}
+            </h3>
+            {content.includes('•') ? (
+              <ul className="space-y-2">
+                {content.split('•').filter(item => item.trim()).map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <CheckCircle className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span className="text-muted-foreground">{item.trim()}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
+                {content}
+              </p>
+            )}
+          </div>
+        );
+      }
+      
+      // Regular paragraph
       return (
-        <div 
-          className="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-gray-300 leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:mb-1 [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-semibold [&_h3]:text-base [&_h3]:font-medium [&_b]:font-bold [&_strong]:font-bold [&_i]:italic [&_em]:italic"
-          dangerouslySetInnerHTML={{ __html: description }}
-        />
+        <p key={index} className="text-muted-foreground leading-relaxed mb-4">
+          {section}
+        </p>
       );
-    } else {
-      // If it's plain text, check for markdown-style formatting
-      const formattedText = description
-        // Bold: **text** or __text__
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/__(.*?)__/g, '<strong>$1</strong>')
-        // Italic: *text* or _text_
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/_(.*?)_/g, '<em>$1</em>')
-        // Bullet points: lines starting with * or -
-        .split('\n')
-        .map(line => {
-          if (line.trim().match(/^[\*\-]\s/)) {
-            return `<li>${line.trim().substring(2)}</li>`;
-          } else if (line.trim().match(/^\d+\.\s/)) {
-            // Numbered lists
-            return `<li>${line.trim()}</li>`;
-          } else if (line.trim() === '') {
-            return '<br/>';
-          } else {
-            return `<p>${line}</p>`;
-          }
-        })
-        .join('');
-
-      // Wrap lists in appropriate tags
-      const withLists = formattedText
-        .replace(/(<li>.*<\/li>)+/g, (match) => {
-          if (match.includes('<li>')) {
-            // Check if it's a numbered list
-            const isNumbered = /<li>\d+\.\s/.test(match);
-            return isNumbered ? `<ol class="list-decimal pl-5 my-2">${match}</ol>` : `<ul class="list-disc pl-5 my-2">${match}</ul>`;
-          }
-          return match;
-        });
-
-      return (
-        <div 
-          className="text-gray-600 dark:text-gray-300 leading-relaxed [&_p]:mb-2 [&_br]:my-1"
-          dangerouslySetInnerHTML={{ __html: withLists }}
-        />
-      );
-    }
+    });
   };
 
   return (
@@ -132,7 +418,7 @@ export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClient
             
             {description && (
               <p className="text-white/90 text-lg max-w-2xl line-clamp-2">
-                {description}
+                {description.split('\n')[0]}
               </p>
             )}
           </div>
@@ -144,15 +430,20 @@ export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClient
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Full Description Card with formatted description */}
+            {/* Full Description Card with Rich Formatting */}
             {description && (
               <Card>
-                <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                    <Info className="h-5 w-5 text-primary" />
-                    {language === "ne" ? "विवरण" : "Description"}
-                  </h2>
-                  {renderDescription(description)}
+                <CardContent className="p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-6 pb-4 border-b">
+                    <BookOpen className="h-5 w-5 text-primary" />
+                    <h2 className="text-xl font-semibold">
+                      {language === "ne" ? "विवरण" : "Description"}
+                    </h2>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    {formatDescription(description)}
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -161,73 +452,13 @@ export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClient
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Quick Info Card */}
-            {/* <Card>
-              <CardContent className="p-6">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Tag className="h-5 w-5" />
-                  {language === "ne" ? "द्रुत जानकारी" : "Quick Info"}
-                </h3>
-                
-                <div className="space-y-5"> */}
-                  {/* Subcategory ID */}
-                  {/* <div className="flex items-start gap-3 pb-3 border-b">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                      <Layers className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {language === "ne" ? "उपश्रेणी आईडी" : "Subcategory ID"}
-                      </p>
-                      <p className="font-semibold text-lg">
-                        #{subcategory.id}
-                      </p>
-                    </div>
-                  </div> */}
-
-                  {/* Parent Category Link (if available) */}
-                  {/* {subcategory.category_id && (
-                    <div className="flex items-start gap-3 pb-3 border-b">
-                      <div className="bg-primary/10 p-2 rounded-lg">
-                        <FolderTree className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {language === "ne" ? "मुख्य श्रेणी" : "Parent Category"}
-                        </p>
-                        <Button variant="outline" size="sm" asChild className="w-full">
-                          <Link href={`/categories/${subcategory.category_id}`}>
-                            {language === "ne" ? "श्रेणी हेर्नुहोस्" : "View Category"}
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
-                  )} */}
-
-                  {/* Available Services Link */}
-                  {/* <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 p-2 rounded-lg">
-                      <Clock className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {language === "ne" ? "सेवाहरू" : "Services"}
-                      </p>
-                      <Button variant="outline" size="sm" asChild className="w-full">
-                        <Link href={`/services?subcategory=${subcategory.id}`}>
-                          {language === "ne" ? "सेवाहरू हेर्नुहोस्" : "View Services"}
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card> */}
+        
 
             {/* Navigation Card */}
             <Card className="sticky top-24">
               <CardContent className="p-6">
                 <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Layers className="h-5 w-5" />
+                  <ListChecks className="h-5 w-5" />
                   {language === "ne" ? "सम्बन्धित लिङ्कहरू" : "Related Links"}
                 </h3>
                 
@@ -247,7 +478,7 @@ export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClient
                   {subcategory.category_id && (
                     <Button variant="outline" className="w-full" asChild>
                       <Link href={`/categories/${subcategory.category_id}`}>
-                        {language === "ne" ? "मुख्य श्रेणी" : "Parent Category"}
+                        {language === "ne" ? "मुख्य श्रेणी हेर्नुहोस्" : "View Parent Category"}
                       </Link>
                     </Button>
                   )}
@@ -255,12 +486,12 @@ export function SubCategoryDetailClient({ subcategory }: SubCategoryDetailClient
                 
                 <div className="mt-6 flex items-center justify-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1.5">
-                    <Layers className="h-3 w-3" />
-                    <span>{language === "ne" ? "उपश्रेणी" : "Subcategory"}</span>
+                    <Shield className="h-3 w-3" />
+                    <span>Verified</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <BookOpen className="h-3 w-3" />
-                    <span>{language === "ne" ? "विवरण" : "Details"}</span>
+                    <Star className="h-3 w-3" />
+                    <span>Premium</span>
                   </div>
                 </div>
               </CardContent>
