@@ -79,7 +79,7 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       children: [
         { label: t.customer.sidebar.pending, href: "/dashboard/customer/bookings/pending", icon: Clock },
         { label: t.customer.sidebar.accepted, href: "/dashboard/customer/bookings/accepted", icon: CheckCircle },
-        { label: t.customer.sidebar.inspected, href: "/dashboard/customer/bookings/inspected", icon: Search },
+        { label: t.customer.sidebar.awaitingApproval, href: "/dashboard/customer/bookings/awaiting-approval", icon: Search },
         { label: t.customer.sidebar.completed, href: "/dashboard/customer/bookings/completed", icon: CheckCircle },
         { label: t.customer.sidebar.cancelled, href: "/dashboard/customer/bookings/cancelled", icon: XCircle },
       ],
@@ -154,7 +154,7 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       children: [
         { label: t.professional.sidebar.pending, href: "/dashboard/professional/jobs/pending", icon: Clock },
         { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle },
-        { label: t.professional.sidebar.inspected, href: "/dashboard/professional/jobs/inspected", icon: Search },
+        { label: t.professional.sidebar.awaitingApproval, href: "/dashboard/professional/jobs/awaiting-approval", icon: Search },
         { label: t.professional.sidebar.completed, href: "/dashboard/professional/jobs/completed", icon: CheckCircle },
         { label: t.professional.sidebar.cancelled, href: "/dashboard/professional/jobs/cancelled", icon: XCircle },
       ],
