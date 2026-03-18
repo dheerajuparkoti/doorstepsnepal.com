@@ -24,7 +24,7 @@ export async function fetchSubCategories(
     return await api.get<SubCategoriesResponse>('/sub_categories', {
       params,
       cache: 'force-cache',
-      next: { revalidate: 3600 }
+      // next: { revalidate: 3600 }
     });
   } catch (error) {
     console.error('API Error fetching subcategories:', error);

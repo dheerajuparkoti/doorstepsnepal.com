@@ -32,7 +32,7 @@ export async function fetchServices(
     // SSR with ISR caching
     return await apiRequest<ServicesResponse>(`/services?${params}`, {
       cache: 'force-cache',
-      next: { revalidate: 3600 }, // Revalidate every hour
+      next: { revalidate: 60 }, // Revalidate every hour
     });
   } catch (error) {
     console.error('API Error fetching services:', error);

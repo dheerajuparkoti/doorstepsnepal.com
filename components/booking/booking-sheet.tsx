@@ -333,6 +333,16 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                       <Tag className="h-3.5 w-3.5" />
                       {getLocalizedText('Select Service Type', 'सेवा प्रकार छान्नुहोस्')}
                     </Label>
+                   {/* Highlighted Price Hint */}
+  <div className="flex items-start gap-2 rounded-md bg-blue-50/50 p-2.5 text-blue-800 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-200 dark:border-blue-900/30">
+    <CreditCard className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+    <p className="text-[11px] leading-relaxed italic">
+      {getLocalizedText(
+        'Prices displayed are either fixed or starting from amounts. Final prices may vary based on service complexity or additional requirements.', 
+        'देखाइएका मूल्यहरू निर्धारित वा सुरुवाती दरहरू हुन्। सेवाको जटिलता वा थप आवश्यकताका आधारमा अन्तिम मूल्य फरक पर्न सक्छ।'
+      )}
+    </p>
+  </div>
                     <div className="grid gap-1.5">
                       {professional?.all_prices?.map((price: PriceItem) => {
                         const priceInfo = formatPrice(price);

@@ -7,8 +7,15 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  images: {
+   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'doorstep-images.s3.ap-south-1.amazonaws.com',
+        pathname: '/**',
+      },
+    ],
   },
 };
 

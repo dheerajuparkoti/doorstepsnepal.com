@@ -1,7 +1,232 @@
+// "use client";
+
+// import React ,{useState}from "react"
+
+// import Link from "next/link";
+// import { usePathname } from "next/navigation";
+// import { useI18n } from "@/lib/i18n/context";
+// import {
+//   LayoutDashboard,
+//   User,
+//   FileCheck,
+//   CreditCard,
+//   ImageIcon,
+//   Wrench,
+//   Briefcase,
+//   ListChecks,
+//   MapPin,
+//   Clock,
+//   CalendarDays,
+//   CheckCircle,
+//   Search,
+//   XCircle,
+//   Settings,
+//   Smartphone,
+//   Shield,
+//   ChevronDown,
+//   View,
+//   LucideHourglass,
+//   CheckCircle2,
+//   Award,
+//   AwardIcon,
+//   BriefcaseBusiness
+// } from "lucide-react";
+// import { cn } from "@/lib/utils";
+// import {
+//   Collapsible,
+//   CollapsibleContent,
+//   CollapsibleTrigger,
+// } from "@/components/ui/collapsible";
+
+// import { useAppStateStore } from '@/stores/app-state-store';
+// import { useAuth } from "@/lib/context/auth-context";
+// interface NavItem {
+//   label: string;
+//   href: string;
+//   icon: React.ComponentType<{ className?: string }>;
+//   children?: { label: string; href: string; icon: React.ComponentType<{ className?: string }> ;
+//   verifiedOnly?: boolean;
+// }[];
+// }
+
+// export function ProfessionalSidebar() {
+//   const { t } = useI18n();
+//   const pathname = usePathname();
+//   const { user } = useAuth();
+//   // const [openSections, setOpenSections] = useState<string[]>(["profile", "services", "jobs", "settings"]);
+//   const [openSections, setOpenSections] = useState<string[]>([]);
+//   const professionalId = useAppStateStore((state) => state.professionalId);
+
+
+//   const navItems: NavItem[] = [
+//     {
+//       label: t.professional.sidebar.dashboard,
+//       href: "/dashboard",
+//       icon: LayoutDashboard,
+//     },
+//     {
+//       label: t.professional.sidebar.profile,
+//       href: "/dashboard/profile",
+//       icon: User,
+//       children: [
+//         { label: t.professional.sidebar.viewProfile,  href: `/dashboard/profile/professional/${professionalId}`,
+//           icon: View},
+//         { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/professional/verify-documents", icon: FileCheck },
+//         { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/professional/payments", icon: CreditCard },
+//         { label: t.professional.sidebar.workGallery, href: "/dashboard/professional/gallery", icon: ImageIcon },
+//         { label: t.professional.sidebar.mySkills, href: "/dashboard/professional/skills", icon: Wrench },
+//       ],
+//     },
+//     {
+//       label: t.professional.sidebar.myServices,
+//       href: "/dashboard/services",
+//       icon: Briefcase,
+//       children: [
+//         { label: t.professional.sidebar.chooseServices, href: "/dashboard/professional/own-services", icon: ListChecks },
+//         { label: t.professional.sidebar.serviceArea, href: "/dashboard/professional/service-area", icon: MapPin },
+//         { label: t.professional.sidebar.serviceTime, href: "/dashboard/professional/service-availability", icon: Clock },
+//       ],
+//     },
+//     {
+//       label: t.professional.sidebar.myJobs,
+//       href: "/dashboard/jobs",
+//       icon: CalendarDays,
+//       children: [
+//         { label: t.professional.sidebar.pending, href: "/dashboard/professional/jobs/pending", icon: Clock },
+//         { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle2},
+//         { label: t.professional.sidebar.awaitingApproval, href: "/dashboard/professional/jobs/awaiting-approval", icon: LucideHourglass },
+//         { label: t.professional.sidebar.completed, href: "/dashboard/professional/jobs/completed", icon: CheckCircle },
+//         { label: t.professional.sidebar.cancelled, href: "/dashboard/professional/jobs/cancelled", icon: XCircle },
+//       ],
+//     },
+//     {
+//       label: t.professional.sidebar.payments,
+//       href: "/dashboard/payments",
+//       icon: CreditCard,
+//       children: [
+//         { label: t.professional.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
+
+
+//            { label: t.professional.sidebar.partnerBenefitProgram, href: "/dashboard/professional/partner-benefit-program", icon:  AwardIcon,verifiedOnly: true},
+//       ],
+//     },
+//     {
+//       label: t.professional.sidebar.settings,
+//       href: "/dashboard/settings-privacy",
+//       icon: Settings,
+//       children: [
+   
+//         { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
+
+//                 { label: t.professional.sidebar.privacyPolicyProfessional, href: "/dashboard/settings-privacy/privacy-policy", icon: BriefcaseBusiness },
+
+//         // { label: t.professional.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
+//         // { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
+//       ],
+//     },
+//   ];
+
+//   const toggleSection = (section: string) => {
+//     setOpenSections((prev) =>
+//       prev.includes(section)
+//         ? prev.filter((s) => s !== section)
+//         : [...prev, section]
+//     );
+//   };
+
+//   return (
+//     <nav className="flex h-full flex-col overflow-y-auto p-4">
+//       <div className="space-y-1">
+//         {navItems.map((item) => {
+//           const Icon = item.icon;
+//           const isActive = pathname === item.href;
+//           // const hasChildren = item.children && item.children.length > 0;
+//           const sectionKey = item.href.split("/").pop() || "";
+//           const isOpen = openSections.includes(sectionKey);
+//           const visibleChildren = item.children?.filter(child => 
+//             !child.verifiedOnly || user?.is_admin_approved
+//           );
+//           const hasVisibleChildren = visibleChildren && visibleChildren.length > 0;
+
+
+
+          
+//           if (hasVisibleChildren) {
+//             return (
+//               <Collapsible
+//                 key={item.href}
+//                 open={isOpen}
+//                 onOpenChange={() => toggleSection(sectionKey)}
+//               >
+//                 <CollapsibleTrigger
+//                   className={cn(
+//                     "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+//                     isActive
+//                       ? "bg-primary text-primary-foreground"
+//                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+//                   )}
+//                 >
+//                   <div className="flex items-center gap-3">
+//                     <Icon className="h-4 w-4" />
+//                     {item.label}
+//                   </div>
+//                   <ChevronDown
+//                     className={cn(
+//                       "h-4 w-4 transition-transform",
+//                       isOpen && "rotate-180"
+//                     )}
+//                   />
+//                 </CollapsibleTrigger>
+//                 <CollapsibleContent className="ml-4 mt-1 space-y-1 border-l border-border pl-4">
+//                   {item.children?.map((child) => {
+//                     const ChildIcon = child.icon;
+//                     const isChildActive = pathname === child.href;
+//                     return (
+//                       <Link
+//                         key={child.href}
+//                         href={child.href}
+//                         className={cn(
+//                           "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+//                           isChildActive
+//                             ? "bg-primary/10 text-primary font-medium"
+//                             : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+//                         )}
+//                       >
+//                         <ChildIcon className="h-4 w-4" />
+//                         {child.label}
+//                       </Link>
+//                     );
+//                   })}
+//                 </CollapsibleContent>
+//               </Collapsible>
+//             );
+//           }
+
+//           return (
+//             <Link
+//               key={item.href}
+//               href={item.href}
+//               className={cn(
+//                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+//                 isActive
+//                   ? "bg-primary text-primary-foreground"
+//                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+//               )}
+//             >
+//               <Icon className="h-4 w-4" />
+//               {item.label}
+//             </Link>
+//           );
+//         })}
+//       </div>
+//     </nav>
+//   );
+// }
+
+
 "use client";
 
-import React from "react"
-
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
@@ -18,16 +243,12 @@ import {
   Clock,
   CalendarDays,
   CheckCircle,
-  Search,
   XCircle,
   Settings,
-  Smartphone,
-  Shield,
   ChevronDown,
   View,
   LucideHourglass,
   CheckCircle2,
-  Award,
   AwardIcon,
   BriefcaseBusiness
 } from "lucide-react";
@@ -37,35 +258,41 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useState } from "react";
+
 import { useAppStateStore } from '@/stores/app-state-store';
+import { useAuth } from "@/lib/context/auth-context";
+
 interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  children?: { label: string; href: string; icon: React.ComponentType<{ className?: string }> }[];
+  verifiedOnly?: boolean; // Top-level filter support
+  children?: { 
+    label: string; 
+    href: string; 
+    icon: React.ComponentType<{ className?: string }>;
+    verifiedOnly?: boolean; 
+  }[];
 }
 
 export function ProfessionalSidebar() {
   const { t } = useI18n();
   const pathname = usePathname();
-  // const [openSections, setOpenSections] = useState<string[]>(["profile", "services", "jobs", "settings"]);
+  const { user } = useAuth();
   const [openSections, setOpenSections] = useState<string[]>([]);
-const professionalId = useAppStateStore((state) => state.professionalId);
+  const professionalId = useAppStateStore((state) => state.professionalId);
+
+  // Check if user is verified (Update 'is_admin_approved' to your exact DB field)
+  const isVerified = !!user?.is_admin_approved;
 
   const navItems: NavItem[] = [
-    {
-      label: t.professional.sidebar.dashboard,
-      href: "/dashboard",
-      icon: LayoutDashboard,
-    },
+    { label: t.professional.sidebar.dashboard, href: "/dashboard", icon: LayoutDashboard },
     {
       label: t.professional.sidebar.profile,
       href: "/dashboard/profile",
       icon: User,
       children: [
-        { label: t.professional.sidebar.viewProfile,  href: `/dashboard/profile/professional/${professionalId}`,
-          icon: View},
+        { label: t.professional.sidebar.viewProfile, href: `/dashboard/profile/professional/${professionalId}`, icon: View },
         { label: t.professional.sidebar.verifyDocuments, href: "/dashboard/professional/verify-documents", icon: FileCheck },
         { label: t.professional.sidebar.paymentsContacts, href: "/dashboard/professional/payments", icon: CreditCard },
         { label: t.professional.sidebar.workGallery, href: "/dashboard/professional/gallery", icon: ImageIcon },
@@ -88,7 +315,7 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       icon: CalendarDays,
       children: [
         { label: t.professional.sidebar.pending, href: "/dashboard/professional/jobs/pending", icon: Clock },
-        { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle2},
+        { label: t.professional.sidebar.accepted, href: "/dashboard/professional/jobs/accepted", icon: CheckCircle2 },
         { label: t.professional.sidebar.awaitingApproval, href: "/dashboard/professional/jobs/awaiting-approval", icon: LucideHourglass },
         { label: t.professional.sidebar.completed, href: "/dashboard/professional/jobs/completed", icon: CheckCircle },
         { label: t.professional.sidebar.cancelled, href: "/dashboard/professional/jobs/cancelled", icon: XCircle },
@@ -100,7 +327,12 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       icon: CreditCard,
       children: [
         { label: t.professional.sidebar.myPayments, href: "/dashboard/payments/my-payments", icon: CreditCard },
-           { label: t.professional.sidebar.partnerBenefitProgram, href: "/dashboard/professional/partner-benefit-program", icon:  AwardIcon},
+        { 
+          label: t.professional.sidebar.partnerBenefitProgram, 
+          href: "/dashboard/professional/partner-benefit-program", 
+          icon: AwardIcon,
+          verifiedOnly: true // Logic trigger
+        },
       ],
     },
     {
@@ -108,22 +340,15 @@ const professionalId = useAppStateStore((state) => state.professionalId);
       href: "/dashboard/settings-privacy",
       icon: Settings,
       children: [
-   
         { label: t.professional.sidebar.accountInfo, href: "/dashboard/settings-privacy/account-info", icon: User },
-
-                { label: t.professional.sidebar.privacyPolicyProfessional, href: "/dashboard/settings-privacy/privacy-policy", icon: BriefcaseBusiness },
-
-        // { label: t.professional.sidebar.appSettings, href: "/dashboard/settings-privacy/app", icon: Smartphone },
-        // { label: t.professional.sidebar.privacyCenter, href: "/dashboard/settings-privacy/privacy", icon: Shield },
+        { label: t.professional.sidebar.privacyPolicyProfessional, href: "/dashboard/settings-privacy/privacy-policy", icon: BriefcaseBusiness },
       ],
     },
   ];
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) =>
-      prev.includes(section)
-        ? prev.filter((s) => s !== section)
-        : [...prev, section]
+      prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
     );
   };
 
@@ -131,13 +356,21 @@ const professionalId = useAppStateStore((state) => state.professionalId);
     <nav className="flex h-full flex-col overflow-y-auto p-4">
       <div className="space-y-1">
         {navItems.map((item) => {
+          // 1. Skip top-level items if they are verifiedOnly and user is not verified
+          if (item.verifiedOnly && !isVerified) return null;
+
           const Icon = item.icon;
           const isActive = pathname === item.href;
-          const hasChildren = item.children && item.children.length > 0;
           const sectionKey = item.href.split("/").pop() || "";
           const isOpen = openSections.includes(sectionKey);
 
-          if (hasChildren) {
+          // 2. Filter children based on verification status
+          const visibleChildren = item.children?.filter(child => 
+            !child.verifiedOnly || isVerified
+          );
+          const hasVisibleChildren = visibleChildren && visibleChildren.length > 0;
+
+          if (hasVisibleChildren) {
             return (
               <Collapsible
                 key={item.href}
@@ -147,8 +380,8 @@ const professionalId = useAppStateStore((state) => state.professionalId);
                 <CollapsibleTrigger
                   className={cn(
                     "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
+                    isActive || pathname.startsWith(item.href)
+                      ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
@@ -156,15 +389,11 @@ const professionalId = useAppStateStore((state) => state.professionalId);
                     <Icon className="h-4 w-4" />
                     {item.label}
                   </div>
-                  <ChevronDown
-                    className={cn(
-                      "h-4 w-4 transition-transform",
-                      isOpen && "rotate-180"
-                    )}
-                  />
+                  <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
                 </CollapsibleTrigger>
                 <CollapsibleContent className="ml-4 mt-1 space-y-1 border-l border-border pl-4">
-                  {item.children?.map((child) => {
+                  {/* 3. IMPORTANT: Map over visibleChildren, not item.children */}
+                  {visibleChildren.map((child) => {
                     const ChildIcon = child.icon;
                     const isChildActive = pathname === child.href;
                     return (
@@ -188,6 +417,7 @@ const professionalId = useAppStateStore((state) => state.professionalId);
             );
           }
 
+          // Render single items
           return (
             <Link
               key={item.href}

@@ -307,7 +307,7 @@ const getTimeProgress = (scheduledTime: Date | string | undefined) => {
           <p className="mt-1 text-muted-foreground">{t.professional.welcome.subtitle}</p>
         </div>
         <div className="flex items-center gap-2">
-          {user?.isProfessionalVerified ? (
+          {user?.is_admin_approved ? (
             <Badge className="gap-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500">
               <CheckCircle className="h-3 w-3" />
               {t.professional.verification.verified}

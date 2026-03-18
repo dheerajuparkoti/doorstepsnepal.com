@@ -373,12 +373,19 @@ const navigateToServices = (subCategory: SubCategory) => {
                 {/* Image */}
                 <div className="relative h-48 w-full overflow-hidden bg-muted">
                   {sub.image ? (
+                      console.log("Subcategory Image URL:",sub.id, sub.image) ,
                     <Image
+                        key={sub.id}
+          
+               
+              
                       src={sub.image}
                       alt={getLocalizedName(sub)}
                       fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      // sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      unoptimized
+                      priority
                     />
                   ) : (
                     <div className="flex h-full items-center justify-center bg-gradient-to-br from-primary/10 to-secondary/10">

@@ -792,12 +792,18 @@ const handleServiceFavorite = async (serId: number) => {
         <CardContent className="p-0">
           {/* Professional Header with Image */}
           <div className="relative h-48 w-full">
+         
             {professional.profile_image_url ? (
+              console.log("Professional Image URL:", professional.id, professional.profile_image_url) ,
               <Image
+                key={professional.id}
                 src={professional.profile_image_url}
                 alt={professional.full_name}
                 fill
                 className="object-cover"
+                unoptimized
+                priority
+                // crossOrigin="anonymous"
               />
             ) : (
               <div className="h-full w-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
@@ -805,8 +811,8 @@ const handleServiceFavorite = async (serId: number) => {
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-<TooltipProvider>
-  <div className="absolute top-3 right-3 z-10 flex gap-2">
+              <TooltipProvider>
+         <div className="absolute top-3 right-3 z-10 flex gap-2">
 
     {/* Favorite Professional */}
     <Tooltip>

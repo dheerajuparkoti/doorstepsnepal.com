@@ -27,10 +27,10 @@ export async function fetchPromotions(
         ...(search && { search }),
       },
       cache: 'force-cache',
-      next: { revalidate: 1800 }, // Revalidate every 30 minutes
+      next: { revalidate: 60 }, // Revalidate every minute
     });
   } catch (error) {
-    console.error('Error fetching promotions:', error);
+   
     return {
       promotions: [],
       total: 0,

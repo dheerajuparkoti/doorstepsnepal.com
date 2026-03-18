@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"; // Add this import
-import { Home, Bell, Sun, Moon, Globe, User, Settings, LogOut, ChevronDown, Loader2 } from "lucide-react";
+import { Home, Bell, Sun, Moon, Globe, User, Settings, LogOut, ChevronDown, Loader2, Clock } from "lucide-react";
 
 // Import notification store
 import { useNotificationStore, useUnreadCount, useIsLoading } from "@/stores/notification-store";
@@ -67,8 +67,8 @@ export function DashboardTopbar() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [showOnboardingDialog, setShowOnboardingDialog] = useState(false);
   const [pendingMode, setPendingMode] = useState<"customer" | "professional" | null>(null);
-  
-
+  const [showModeSwitchDialog, setShowModeSwitchDialog] = useState(false);
+  const getLocalizedText = (en: string, ne: string) => (language === "ne" ? ne : en);
    const needsOnboarding = (() => {
     if (!user) return false;
     const isProfessional = user.user_type === "professional" || user.type === "professional";
@@ -148,17 +148,40 @@ const profileRoute =
   //   performModeSwitch(newMode);
   // };
 
- const handleModeSwitch = (newMode: "customer" | "professional") => {
-    // Now this will use the current, correct value
-    if (newMode === "professional") {
-      if (needsOnboarding) {
-        setPendingMode(newMode);
-        setShowOnboardingDialog(true);
-        return;
-      }
+//  const handleModeSwitch = (newMode: "customer" | "professional") => {
+//     // Now this will use the current, correct value
+//     if (newMode === "professional") {
+//       if (needsOnboarding) {
+//         setPendingMode(newMode);
+//         setShowOnboardingDialog(true);
+//         return;
+//       }
+//     }
+//     // performModeSwitch(newMode);
+//     setShowModeSwitchDialog(true);
+//   };
+
+const confirmModeSwitch = () => {
+  setShowModeSwitchDialog(false);
+  
+  if (pendingMode === "professional") {
+    // Check onboarding only when actually moving to professional
+    if (needsOnboarding) {
+      setShowOnboardingDialog(true);
+      return;
     }
-    performModeSwitch(newMode);
-  };
+  }
+  
+  if (pendingMode) {
+    performModeSwitch(pendingMode);
+    setPendingMode(null);
+  }
+};
+
+const handleModeSwitch = (newMode: "customer" | "professional") => {
+  setPendingMode(newMode);
+  setShowModeSwitchDialog(true);
+};
 
 
 
@@ -170,6 +193,8 @@ const profileRoute =
   };
 
    
+
+  
 
   // Handle onboarding dialog confirmation
   const handleStartOnboarding = () => {
@@ -391,6 +416,67 @@ const profileRoute =
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+{/* Mode Switch Confirmation Dialog */}
+<AlertDialog open={showModeSwitchDialog} onOpenChange={setShowModeSwitchDialog}>
+  <AlertDialogContent className="sm:max-w-md">
+    <AlertDialogHeader>
+      <AlertDialogTitle className="text-xl">
+        {getLocalizedText(
+          `Switch to ${pendingMode} mode?`,
+          `${pendingMode === 'customer' ? 'ग्राहक' : 'प्रोफेशनल'} मोडमा स्विच गर्ने?`
+        )}
+      </AlertDialogTitle>
+      <AlertDialogDescription className="text-base text-muted-foreground">
+        {getLocalizedText(
+          `You'll see notifications and features relevant to your role as a`,
+          `तपाईंले आफ्नो भूमिका अनुसारको सूचना र सुविधाहरू देख्नुहुनेछ`
+        )}{' '}
+        <span className="font-semibold text-foreground">
+          {pendingMode === 'customer' 
+            ? getLocalizedText('customer', 'ग्राहक')
+            : getLocalizedText('professional', 'प्रोफेशनल')}
+        </span>.
+        {getLocalizedText(
+          ' You can switch back anytime from the top bar.',
+          ' तपाईं माथिको बारबाट कुनै पनि समय फर्कन सक्नुहुन्छ।'
+        )}
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    
+    <div className="mt-4 rounded-lg bg-muted/50 p-3">
+      <p className="text-sm flex items-center gap-2 text-muted-foreground">
+        <Clock className="h-4 w-4" />
+        <span>
+          {getLocalizedText(
+            'Your current dashboard view will be updated', 
+            'तपाईंको हालको ड्यासबोर्ड अपडेट हुनेछ'
+          )}
+        </span>
+      </p>
+    </div>
+
+ <AlertDialogFooter className="mt-6 flex flex-col-reverse sm:flex-row gap-3"> 
+  <AlertDialogCancel className="rounded-full mt-0 sm:mt-0">
+        {getLocalizedText('Cancel', 'रद्द गर्नुहोस्')}
+      </AlertDialogCancel>
+      <AlertDialogAction 
+        onClick={confirmModeSwitch}
+        className={`rounded-full ${
+          pendingMode === 'professional' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
+        }`}
+      >
+        {getLocalizedText(
+          `Switch to ${pendingMode}`,
+          `${pendingMode === 'customer' ? 'ग्राहक' : 'प्रोफेशनल'}मा स्विच गर्नुहोस्`
+        )}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
+
+
+
     </>
   );
 }
