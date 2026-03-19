@@ -41,7 +41,7 @@ export const useUserStore = create<UserState>()(
         
         // When user is set (login), register FCM token
         if (user?.id && typeof window !== 'undefined') {
-          console.log("🔔 User logged in, registering FCM token");
+          console.log("User logged in, registering FCM token");
           // Small delay to ensure store is updated
           setTimeout(() => {
             refreshTokenRegistration();
@@ -66,7 +66,7 @@ export const useUserStore = create<UserState>()(
         clearUser: async () => { 
         // When user logs out, unregister token from server
         if (typeof window !== 'undefined') {
-          console.log("🚪 User logging out, unregistering FCM token");
+          console.log("User logging out, unregistering FCM token");
           await unregisterToken();
         }
         

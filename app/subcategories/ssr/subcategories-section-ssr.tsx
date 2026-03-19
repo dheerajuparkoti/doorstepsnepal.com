@@ -15,7 +15,7 @@ export async function SubCategoriesSection({
 }: SubCategoriesSectionProps) {
   try {
     // Fetch subcategories (filtered by categoryId if provided)
-    const data = await fetchSubCategories(1, 50, categoryId);
+    const data = await fetchSubCategories(1,100, categoryId);
     
     return (
       <SubCategoriesClient 

@@ -135,8 +135,8 @@ export async function searchProfessionalServices(
           ...(professional_id && { professional_id }),  
   ...(service_id && { service_id }),            
       },
-     cache: 'force-cache',
-      next: { revalidate: 60 }, 
+     cache: 'no-store',
+      // next: { revalidate: 60 }, 
     });
   } catch (error) {
     console.error('Error searching professional services:', error);

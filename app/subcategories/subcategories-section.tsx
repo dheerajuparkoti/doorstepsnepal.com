@@ -74,7 +74,7 @@ export function SubCategoriesClient({
   useEffect(() => {
     if (filterType === 'category' && categories.length === 0) {
       setIsLoadingCategories(true);
-      fetchCategories(1, 50)
+      fetchCategories(1, 100)
         .then(data => setCategories(data.categories))
         .finally(() => setIsLoadingCategories(false));
     }
@@ -146,6 +146,7 @@ export function SubCategoriesClient({
   // Handle category selection
   const handleCategorySelect = (categoryName: string) => {
     setSearchQuery(categoryName);
+    console.log('Selected category:', categoryName);
   };
 
   // Clear all filters
@@ -301,14 +302,14 @@ const navigateToServices = (subCategory: SubCategory) => {
                     <Badge
                       key={category.id}
                       variant={
-                        searchQuery === (language === 'ne' ? category.name_np.toLowerCase() : category.name_en.toLowerCase())
+                        searchQuery === (language === 'ne' ? category.name_np: category.name_en.toLowerCase())
                           ? "default"
                           : "outline"
                       }
                       className="cursor-pointer whitespace-nowrap px-4 py-2"
                       onClick={() => handleCategorySelect(
                         language === 'ne' 
-                          ? category.name_np.toLowerCase()
+                          ? category.name_np
                           : category.name_en.toLowerCase()
                       )}
                     >
@@ -424,7 +425,7 @@ const navigateToServices = (subCategory: SubCategory) => {
       e.stopPropagation();
       // Navigate to subcategory detail page
       router.push(`/subcategories/sub-category-detail/${sub.id}`);
-      // OR if you're not using router directly:
+   
       // window.location.href = `/subcategories/${subcategory.id}`;
     }}
   >

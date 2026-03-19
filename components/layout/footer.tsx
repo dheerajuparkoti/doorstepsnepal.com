@@ -136,14 +136,41 @@ export function Footer() {
                   {t.footer.termsConditions}
                 </a>
               </li>
-<li>
+{/* <li>
   <button
     onClick={() => scrollTofaqSection("faq")}
     className="text-sm text-muted-foreground transition-colors hover:text-primary"
   >
     {t.footer.faqs}
   </button>
-</li>
+</li> */}
+                <li>
+                <a
+                  // href="/terms"
+                  href="/faqs"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.footer.faqs}
+                </a>
+              </li>
+                <li>
+                <a
+                 
+                  href="/safety-policy"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.footer.safetyPolicy}
+                </a>
+              </li>
+                <li>
+                <a
+                 
+                  href="/cancellation-refund-policy"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.footer.cancellationRefundPolicy}
+                </a>
+              </li>
             </ul>
           </div>
 
