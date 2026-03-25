@@ -132,7 +132,7 @@ emergencyDesc: '24/7 emergency service available for urgent needs',
 
      about: {
       heroTitle: 'Transforming Home Services',
-      heroDescription: 'We connect trusted professionals with homeowners, making quality services accessible, reliable, and convenient for everyone.',
+      heroDescription: 'We connect trusted professionals with homeowners, making quality services accessible, reliable, and convenient for everyone',
       happyCustomers: 'Happy Customers',
       happyProfessionals: 'Happy Professionals',
       verifiedPros: 'Verified Professionals',
