@@ -111,14 +111,7 @@ export function Footer() {
                   {t.footer.location}
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => scrollToSection("contact")}
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                >
-                  {t.footer.contactUs}
-                </button>
-              </li>
+            
               <li>
                 <a
                   href="/privacy-policy"
@@ -144,15 +137,7 @@ export function Footer() {
     {t.footer.faqs}
   </button>
 </li> */}
-                <li>
-                <a
-                  // href="/terms"
-                  href="/faqs"
-                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
-                >
-                  {t.footer.faqs}
-                </a>
-              </li>
+             
                 <li>
                 <a
                  
@@ -207,17 +192,48 @@ export function Footer() {
               
               </li>
             </ul>
-            <h3 className="font-semibold">{t.footer.download}</h3>
+
+
+               <h3 className="font-semibold">{t.footer.support}</h3>
               <ul className="space-y-2">
               <li>
                 <a
-                  href="/downloads-app"
+                
+                  href="/faqs"
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
-                  {t.hero.downloadApp}
+                  {t.footer.faqs}
                 </a>
               </li>
+
+                <li>
+                <button
+                  onClick={() => scrollToSection("contact")}
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.footer.contactUs}
+                </button>
+              </li>
+            
+                  <li>
+                <a
+                  href="/tutorials-guides"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.hero.tutorialsGuide}
+                </a>
+                
+              </li>
             </ul>
+
+
+
+
+
+
+        
+
+         
           </div>
 
           {/* Contact Info -  scroll functionality */}
@@ -256,6 +272,19 @@ export function Footer() {
                 <span>info@doorstepsnepal.com</span>
               </li>
             </ul>
+
+    <h3 className="font-semibold">{t.footer.download}</h3>
+              <ul className="space-y-2">
+              <li>
+                <a
+                  href="/downloads-app"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  {t.hero.downloadApp}
+                </a>
+              </li>
+            </ul>
+            
           </div>
         </div>
 

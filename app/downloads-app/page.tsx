@@ -290,7 +290,8 @@ const screenshots = [
         {/* Hero Section */}
         <section className="py-12 md:py-20 bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/10">
           <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
+            {/* <div className="max-w-6xl mx-auto"> */}
+                 <div className="px-4 md:px-8 lg:px-12">
               <div className="grid lg:grid-cols-2 gap-12 items-center">
                 {/* Left Content */}
                 <div className="space-y-8">
@@ -409,7 +410,8 @@ const screenshots = [
         {/* Features Section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
+            {/* <div className="max-w-6xl mx-auto"> */}
+                 <div className="px-4 md:px-8 lg:px-12">
               <div className="text-center mb-12">
                 <h2 className="text-3xl font-bold mb-4">
                   {locale === "ne" ? "एपका विशेषताहरू" : "App Features"}
@@ -441,7 +443,8 @@ const screenshots = [
     {/* Screenshots Gallery */}
 <section className="py-16 bg-muted/30">
   <div className="container mx-auto px-4">
-    <div className="max-w-6xl mx-auto">
+    {/* <div className="max-w-6xl mx-auto"> */}
+         <div className="px-4 md:px-8 lg:px-12">
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold mb-4">
           {locale === "ne" ? "एप स्क्रिनसटहरू" : "App Screenshots"}
@@ -503,7 +506,8 @@ const screenshots = [
         {/* Download Instructions */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <div className="max-w-6xl mx-auto">
+            {/* <div className="max-w-6xl mx-auto"> */}
+                 <div className="px-4 md:px-8 lg:px-12">
               {/* QR Code Section */}
               <div className="mt-16">
                 <div className="text-center mb-8">
