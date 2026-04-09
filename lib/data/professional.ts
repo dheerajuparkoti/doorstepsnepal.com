@@ -105,3 +105,12 @@ export interface EmergencyContact {
   ec_relationship: string;
   ec_phone: string;
 }
+
+
+export interface TopProfessional {
+  id: number;
+  user_id: number;
+  full_name: string;
+  skill: string;
+  profile_image: string;
+}

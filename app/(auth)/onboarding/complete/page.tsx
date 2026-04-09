@@ -718,7 +718,7 @@ const handleComplete = async () => {
                     <button
                       type="button"
                       className="text-primary hover:underline ml-1"
-                      onClick={() => window.open('/privacy-policy/professional', '_blank')}
+                      onClick={() => window.open('/privacy-policy-professionals', '_blank')}
                     >
                       {locale === 'ne' ? '(पूरा पढ्नुहोस्)' : '(Read full)'}
                     </button>

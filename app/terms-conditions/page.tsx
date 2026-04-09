@@ -792,7 +792,7 @@ export default function TermsAndConditionsPage() {
   const current = locale === 'ne' ? content.ne : content.en;
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
         
         {/* Hero Section */}

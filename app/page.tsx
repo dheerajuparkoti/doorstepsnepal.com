@@ -19,8 +19,7 @@ import { FeaturedServicesCarouselSkeleton } from "@/components/home/skeleton/fea
 import { FeaturedServicesCarouselSection } from "@/components/home/ssr/featured-services-carousel-ssr";
 
 
-import { SearchSectionSSR } from "@/components/home/ssr/search-section-ssr";
-import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
+import { SearchClient } from "@/components/home/client/search-client";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
 import { BecomeAPartnerSection } from "@/components/home/become-a-partner";
@@ -43,10 +42,8 @@ export default function HomePage() {
             <HeroCarousel />
           </section>
           
-          {/* Search Section with Suspense boundary */}
-          <Suspense fallback={<SearchSkeleton />}>
-            <SearchSectionSSR />
-          </Suspense>
+          {/* Search Section - client-side to include auth token for image URLs */}
+          <SearchClient />
 
           {/* featured services Section with Suspense boundary */}
           <Suspense fallback={<FeaturedServicesCarouselSkeleton/>}>

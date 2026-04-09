@@ -42,6 +42,9 @@ export interface Order {
   price_unit_name?:string;
   quality_type_id: number;
   quality_type_name?:string;
+  has_warranty?: boolean;
+  warranty_duration?: number | null;
+  warranty_unit?: string | null;
   quantity: number;
   total_price: number;
   initial_price :number;

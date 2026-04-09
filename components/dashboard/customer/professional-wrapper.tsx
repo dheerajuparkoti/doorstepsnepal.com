@@ -1,12 +1,11 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { ProfessionalsSection } from "@/components/home/professionals-section";
-import { fetchProfessionalServices } from "@/lib/api/professional-services";
+import { professionalApi } from "@/lib/api/professional";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
-
+import type { TopProfessional } from "@/lib/data/professional";
 
 function ProfessionalsSkeleton() {
   return (
@@ -25,12 +24,12 @@ function ProfessionalsSkeleton() {
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {[...Array(8)].map((_, i) => (
             <Card key={i} className="overflow-hidden">
-              <div className="mx-auto mt-6 h-36 w-36">
-                <Skeleton className="h-full w-full rounded-full" />
+              <div className="h-40 w-full">
+                <Skeleton className="h-full w-full" />
               </div>
-              <CardContent className="p-4 text-center space-y-2">
-                <Skeleton className="h-5 w-32 mx-auto" />
-                <Skeleton className="h-4 w-24 mx-auto" />
+              <CardContent className="p-4 space-y-2">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-4 w-24" />
               </CardContent>
             </Card>
           ))}
@@ -41,37 +40,24 @@ function ProfessionalsSkeleton() {
 }
 
 export default function ProfessionalsWrapper() {
-  const [data, setData] = useState<{ professionals: any[]; total: number } | null>(null);
+  const [data, setData] = useState<{
+    professionals: TopProfessional[];
+    total: number;
+  } | null>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetchProfessionalServices({
-          page:1,
-          per_page:50
-        });
-        const professionalServices = response.professional_services || [];
-
-        // Deduplicate by professional ID
-        const uniqueProfessionalsMap = new Map<number, any>();
-        professionalServices.forEach((ps: any) => {
-          const id = ps.professional.id;
-          if (!uniqueProfessionalsMap.has(id)) {
-            uniqueProfessionalsMap.set(id, ps);
-          }
-        });
-
-        const uniqueProfessionalServices = Array.from(uniqueProfessionalsMap.values());
-        const topProfessionals = uniqueProfessionalServices.slice(0, 8);
-        const totalProfessionals = uniqueProfessionalServices.length;
+        const res = await professionalApi.getTopProfessionals(8);
 
         setData({
-          professionals: topProfessionals,
-          total: totalProfessionals,
+          professionals: res.professionals,
+          total: res.total_professionals,
         });
       } catch (error) {
-        console.error("Error fetching professionals:", error);
+        console.error("Error fetching top professionals:", error);
       } finally {
         setLoading(false);
       }
@@ -85,12 +71,12 @@ export default function ProfessionalsWrapper() {
   }
 
   if (!data || data.professionals.length === 0) {
-    return null; 
+    return null;
   }
 
   return (
     <ProfessionalsSection
-      professionalServices={data.professionals}
+      professionals={data.professionals}
       total={data.total}
     />
   );

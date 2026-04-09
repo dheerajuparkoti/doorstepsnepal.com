@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogTitle, DialogOverlay } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tag } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 interface ServiceDialogProps {
   open: boolean;
@@ -25,6 +25,9 @@ interface ServiceDialogProps {
   } | null;
   prices?: Array<{
     price: number;
+    has_warranty?: boolean;
+    warranty_duration?: number | null;
+    warranty_unit?: string | null;
     quality_type: {
       name: string;
       name_np?: string | null;
@@ -174,15 +177,23 @@ export function ServiceDialog({
                 </h3>
                 <div className="bg-gray-50 dark:bg-gray-800 rounded-lg divide-y divide-gray-200 dark:divide-gray-700">
                   {prices.map((price, index) => (
-                    <div key={index} className="flex items-center justify-between p-3">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {isNepali 
-                          ? price.quality_type.name_np || price.quality_type.name 
-                          : price.quality_type.name_en || price.quality_type.name}
-                      </span>
-                      <span className="text-sm font-bold text-gray-900 dark:text-white">
-                        {currencySymbol} {price.price.toLocaleString()}
-                      </span>
+                    <div key={index} className="p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">
+                          {isNepali
+                            ? price.quality_type.name_np || price.quality_type.name
+                            : price.quality_type.name_en || price.quality_type.name}
+                        </span>
+                        <span className="text-sm font-bold text-gray-900 dark:text-white">
+                          {currencySymbol} {price.price.toLocaleString()}
+                        </span>
+                      </div>
+                      {price.has_warranty && (
+                        <div className="flex items-center gap-1 mt-1 text-xs text-emerald-600 font-medium">
+                          <ShieldCheck className="h-3 w-3" />
+                          {price.warranty_duration} {price.warranty_unit} {isNepali ? 'वारेन्टी' : 'warranty'}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

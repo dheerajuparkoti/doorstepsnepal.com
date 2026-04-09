@@ -5,9 +5,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useI18n } from '@/lib/i18n/context';
 import { useRouter } from 'next/navigation';
 import { 
-  Search, 
-  X, 
-  Filter, 
+  Search,
+  X,
+  Filter,
   ChevronRight,
   User,
   MapPin,
@@ -19,7 +19,8 @@ import {
   CheckCircle,
   SlidersHorizontal,
   Heart,
-  Info
+  Info,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -685,24 +686,30 @@ toast.error(
         {prices.map((priceItem, index) => {
           const priceInfo = formatPrice(priceItem);
           return (
-            <Badge 
-              key={index}
-              variant="secondary"
-              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              onClick={(e) => {
-                
-                e.stopPropagation();
-                handleBookNow(selectedProfessional || professionalsData[0], priceItem);
-              }}
-            >
-              <DollarSign className="h-3 w-3 mr-1" />
-              {priceInfo.display}
-              {priceItem.is_minimum_price && (
-                <Badge variant="outline" className="ml-1 text-xs">
-                  {getLocalizedText('Starting at', 'सुरु हुन्छ')}
-                </Badge>
+            <div key={index} className="flex flex-col items-start">
+              <Badge
+                variant="secondary"
+                className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleBookNow(selectedProfessional || professionalsData[0], priceItem);
+                }}
+              >
+                <DollarSign className="h-3 w-3 mr-1" />
+                {priceInfo.display}
+                {priceItem.is_minimum_price && (
+                  <Badge variant="outline" className="ml-1 text-xs">
+                    {getLocalizedText('Starting at', 'सुरु हुन्छ')}
+                  </Badge>
+                )}
+              </Badge>
+              {priceItem.has_warranty && (
+                <div className="flex items-center gap-1 mt-0.5 text-xs text-emerald-600 font-medium">
+                  <ShieldCheck className="h-3 w-3" />
+                  {priceItem.warranty_duration} {priceItem.warranty_unit} {getLocalizedText('warranty', 'वारेन्टी')}
+                </div>
               )}
-            </Badge>
+            </div>
           );
         })}
       </div>
@@ -1034,6 +1041,18 @@ const handleServiceFavorite = async (serId: number) => {
       return;
     }
     else{
+  // Check if booking own profile
+  if (professional.user_id === user.id) {
+    toast.error(
+      getLocalizedText('Cannot Book', 'बुक गर्न सकिँदैन'),
+      {
+        description: getLocalizedText('You cannot book your own service', 'तपाईं आफ्नै सेवा बुक गर्न सक्नुहुन्न'),
+      }
+    );
+    return;
+  }
+
+
    setSelectedProfessional(professional);
                   setShowBookingSheet(true);
     }

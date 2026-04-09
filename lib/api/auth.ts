@@ -153,16 +153,21 @@ export async function setupProfile(
     gender: string;
     age_group: string;
     email: string;
-    professional_id ?:number
+    phone_number?: string;
+    professional_id?: number;
   }
 ): Promise<User> {
   try {
-    const results = await Promise.allSettled([
+    const requests: Promise<User>[] = [
       api.patch<User>('/users/fullname', { full_name: profileData.full_name }),
       api.patch<User>('/users/gender', { gender: profileData.gender }),
       api.patch<User>('/users/age-group', { age_group: profileData.age_group }),
-      api.patch<User>('/users/email', { email: profileData.email })
-    ]);
+      api.patch<User>('/users/email', { email: profileData.email }),
+    ];
+    if (profileData.phone_number) {
+      requests.push(api.patch<User>('/users/phone', { phone_number: profileData.phone_number }));
+    }
+    const results = await Promise.allSettled(requests);
     
     // Check if any requests failed
     const failed = results.filter(r => r.status === 'rejected');
@@ -221,6 +226,55 @@ export async function getUserProfile(): Promise<User> {
   return userData;
 }
 
+
+export async function loginViaEmail(email: string): Promise<boolean> {
+  try {
+    const response = await api.post<{ message: string }>(
+      '/auth/login-via-email',
+      { email },
+      { skipAuth: true }
+    );
+    return response.message?.includes('OTP') || false;
+  } catch (error) {
+    console.error('Login via email error:', error);
+    throw error;
+  }
+}
+
+export async function verifyEmailOTP(
+  email: string,
+  otp: string,
+  rememberMe: boolean = true
+): Promise<VerifyOTPResponse & { remember?: boolean }> {
+  try {
+    const response = await api.post<VerifyOTPResponse>(
+      '/auth/verify-email-otp',
+      { email, otp },
+      { skipAuth: true }
+    );
+
+    if (response.access_token) {
+      setToken(response.access_token, rememberMe);
+    }
+
+    try {
+      const userProfile = await getUserProfile();
+      useUserStore.getState().setUser(userProfile);
+      useAppStateStore.getState().login(
+        userProfile.id,
+        userProfile.type,
+        userProfile.professional_id
+      );
+      return { ...response, remember: rememberMe, user: userProfile };
+    } catch (profileError) {
+      console.error('Failed to fetch user profile after email OTP:', profileError);
+      return { ...response, remember: rememberMe };
+    }
+  } catch (error) {
+    console.error('Verify email OTP error:', error);
+    throw error;
+  }
+}
 
 // Logout - clear token
 export function logout(): void {

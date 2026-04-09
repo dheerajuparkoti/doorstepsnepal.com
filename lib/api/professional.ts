@@ -3,7 +3,8 @@ import { api } from '@/config/api-client';
 import { 
   ProfessionalProfile, 
   ProfessionalUpdateData, 
-  ProfessionalRegistrationData 
+  ProfessionalRegistrationData, 
+  TopProfessional
 } from '@/lib/data/professional';
 
 
@@ -15,6 +16,12 @@ export interface ServiceArea {
 
 export interface ServiceAreaCreateRequest {
   name: string;
+}
+
+export interface TopProfessionalsResponse {
+  professionals: TopProfessional[];
+  total_professionals: number;
+  returned_count: number;
 }
 
 export const professionalApi = {
@@ -39,6 +46,21 @@ export const professionalApi = {
       throw error;
     }
   },
+
+
+  // Get top professionals
+async getTopProfessionals(limit: number = 50): Promise<TopProfessionalsResponse> {
+  try {
+    const endpoint = `/professionals/top-professionals`;
+    const response = await api.get<TopProfessionalsResponse>(endpoint, {
+      params: { limit },
+    });
+    return response;
+  } catch (error) {
+    throw error;
+  }
+},
+
 
   // Get professional by phone number
   async getProfessionalByPhone(phoneNumber: string): Promise<ProfessionalProfile> {

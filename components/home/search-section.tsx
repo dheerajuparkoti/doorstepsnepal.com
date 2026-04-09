@@ -48,18 +48,59 @@ export function SearchSection({ servicesData = [] }: SearchSectionProps) {
     }));
   }, [servicesData, language]);
 
-  // Filter services based on search query
-  const filteredServices = useMemo(() => {
-    if (!searchQuery.trim()) return allServices.slice(0, 10); // Show top 10 when empty
-    
+  // Filter services and find related ones via shared subcategory
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return { direct: allServices.slice(0, 8), related: [] as typeof allServices };
+    }
+
     const query = searchQuery.toLowerCase();
-    return allServices
-      .filter(service => 
-        service.name_en.toLowerCase().includes(query) || 
-        service.name_np.toLowerCase().includes(query)
+
+    // Direct matches — name contains query
+    const direct = allServices
+      .filter(s =>
+        s.name_en.toLowerCase().includes(query) ||
+        s.name_np.toLowerCase().includes(query)
       )
-      .slice(0, 10); // Limit to 10 results
+      .slice(0, 6);
+
+    // Collect unique subcategory IDs from direct matches
+    const matchedSubCatIds = new Set(
+      direct.filter(s => s.sub_category?.id).map(s => s.sub_category!.id)
+    );
+
+    // Related: same subcategory, not already in direct matches
+    const directIds = new Set(direct.map(s => s.id));
+    const related = matchedSubCatIds.size > 0
+      ? allServices
+          .filter(s =>
+            s.sub_category?.id &&
+            matchedSubCatIds.has(s.sub_category.id) &&
+            !directIds.has(s.id)
+          )
+          .slice(0, 8)
+      : [];
+
+    return { direct, related };
   }, [searchQuery, allServices]);
+
+  // Group related services by subcategory name for display
+  const relatedBySubCategory = useMemo(() => {
+    const map = new Map<string, { subCatName: string; subCatName_np: string; services: typeof allServices }>();
+    for (const s of searchResults.related) {
+      if (!s.sub_category) continue;
+      const key = String(s.sub_category.id);
+      if (!map.has(key)) {
+        map.set(key, {
+          subCatName: s.sub_category.name_en,
+          subCatName_np: s.sub_category.name_np,
+          services: [],
+        });
+      }
+      map.get(key)!.services.push(s);
+    }
+    return Array.from(map.values());
+  }, [searchResults.related]);
 
   const handleSearchFocus = () => {
     setShowServiceSuggestions(true);
@@ -142,16 +183,22 @@ export function SearchSection({ servicesData = [] }: SearchSectionProps) {
                   />
                   
                   {/* Service Suggestions Dropdown with Images */}
-                  {showServiceSuggestions && filteredServices.length > 0 && (
+                  {showServiceSuggestions && (searchResults.direct.length > 0 || searchResults.related.length > 0) && (
                     <div className="absolute top-full left-0 right-0 mt-1 z-50">
                       <div className="rounded-lg border bg-popover shadow-lg max-h-96 overflow-y-auto">
-                        {filteredServices.map((service) => (
+
+                        {/* Direct matches */}
+                        {searchQuery.trim() && searchResults.direct.length > 0 && (
+                          <div className="px-3 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide bg-muted/40 border-b">
+                            {language === 'ne' ? 'मिल्दो सेवाहरू' : 'Matching Services'}
+                          </div>
+                        )}
+                        {searchResults.direct.map((service) => (
                           <div
                             key={service.id}
                             className="px-4 py-3 hover:bg-accent hover:text-accent-foreground cursor-pointer border-b last:border-b-0 transition-colors flex items-center gap-3"
                             onMouseDown={() => handleServiceSelect(service)}
                           >
-                            {/* Service Image */}
                             <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden bg-muted">
                               {service.image ? (
                                 <Image
@@ -167,8 +214,6 @@ export function SearchSection({ servicesData = [] }: SearchSectionProps) {
                                 </div>
                               )}
                             </div>
-                            
-                            {/* Service Details */}
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center justify-between">
                                 <div>
@@ -186,9 +231,52 @@ export function SearchSection({ servicesData = [] }: SearchSectionProps) {
                             </div>
                           </div>
                         ))}
-                        
-                        {/* "Search for" option */}
-                        {searchQuery.trim() && !filteredServices.some(s => 
+
+                        {/* Related services grouped by subcategory */}
+                        {relatedBySubCategory.map((group) => (
+                          <div key={group.subCatName}>
+                            <div className="px-3 py-1.5 text-[11px] font-semibold text-muted-foreground uppercase tracking-wide bg-muted/40 border-y">
+                              {language === 'ne'
+                                ? `${group.subCatName_np} मा सम्बन्धित`
+                                : `Related in ${group.subCatName}`}
+                            </div>
+                            {group.services.map((service) => (
+                              <div
+                                key={service.id}
+                                className="px-4 py-2.5 hover:bg-accent hover:text-accent-foreground cursor-pointer border-b last:border-b-0 transition-colors flex items-center gap-3"
+                                onMouseDown={() => handleServiceSelect(service)}
+                              >
+                                <div className="flex-shrink-0 w-10 h-10 rounded-lg overflow-hidden bg-muted">
+                                  {service.image ? (
+                                    <Image
+                                      src={service.image}
+                                      alt={service.name_en}
+                                      width={40}
+                                      height={40}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-primary/10">
+                                      <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between">
+                                    <div>
+                                      <span className="font-medium text-sm block truncate">{service.name_en}</span>
+                                      <span className="text-xs text-muted-foreground block truncate">{service.name_np}</span>
+                                    </div>
+                                    <ChevronRight className="h-4 w-4 opacity-50 flex-shrink-0 ml-2" />
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+
+                        {/* "Search for" free-text fallback */}
+                        {searchQuery.trim() && !searchResults.direct.some((s) =>
                           s.name_en.toLowerCase() === searchQuery.toLowerCase() ||
                           s.name_np.toLowerCase() === searchQuery.toLowerCase()
                         ) && (

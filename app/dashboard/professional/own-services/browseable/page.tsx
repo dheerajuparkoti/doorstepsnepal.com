@@ -57,15 +57,16 @@ import {
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Search, 
-  X, 
-  Check, 
+import {
+  Search,
+  X,
+  Check,
   ChevronsUpDown,
   Plus,
   ArrowLeft,
   Loader2,
-  Image as ImageIcon
+  Image as ImageIcon,
+  ShieldCheck
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
@@ -106,6 +107,9 @@ export default function BrowseableServicesPage() {
   const [selectedQualityTypeId, setSelectedQualityTypeId] = useState<number | null>(null);
   const [discountIsActive, setDiscountIsActive] = useState(false);
   const [isMinimumPrice, setIsMinimumPrice] = useState(false);
+  const [hasWarranty, setHasWarranty] = useState(false);
+  const [warrantyDuration, setWarrantyDuration] = useState('');
+  const [warrantyUnit, setWarrantyUnit] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const getLocalizedText = (en: string, ne: string) => {
@@ -188,6 +192,9 @@ export default function BrowseableServicesPage() {
     setSelectedQualityTypeId(null);
     setDiscountIsActive(false);
     setIsMinimumPrice(false);
+    setHasWarranty(false);
+    setWarrantyDuration('');
+    setWarrantyUnit(null);
   };
 
   const handleSaveServiceWithPrice = async () => {
@@ -224,6 +231,9 @@ export default function BrowseableServicesPage() {
         discount_name: discountName,
         discount_is_active: discountIsActive,
         is_minimum_price: isMinimumPrice,
+        has_warranty: hasWarranty,
+        warranty_duration: hasWarranty && warrantyDuration ? Number(warrantyDuration) : null,
+        warranty_unit: hasWarranty ? warrantyUnit : null,
       });
 
       toast({
@@ -588,7 +598,7 @@ export default function BrowseableServicesPage() {
   <DialogContent className="sm:max-w-[425px]">
     <DialogHeader>
       <DialogTitle className="truncate" title={getLocalizedText(`Set Price for ${selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : ''}`, `${selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : ''} को मूल्य सेट गर्नुहोस्`)}>
-        {getLocalizedText('Set Price for', 'मूल्य सेट गर्नुहोस्')} {selectedService && (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en)}
+        {getLocalizedText('Set Price', 'मूल्य सेट गर्नुहोस्')}
       </DialogTitle>
       <DialogDescription className="truncate" title={selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : undefined}>
         {selectedService && (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en)}
@@ -726,8 +736,62 @@ export default function BrowseableServicesPage() {
                 onCheckedChange={setDiscountIsActive}
               />
             </div>
+
+            {/* Warranty */}
+            <div className="flex items-center justify-between">
+              <Label htmlFor="has-warranty" className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                {getLocalizedText('Has Warranty', 'वारेन्टी छ')}
+              </Label>
+              <Switch
+                id="has-warranty"
+                checked={hasWarranty}
+                onCheckedChange={setHasWarranty}
+              />
+            </div>
+
+            {hasWarranty && (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="warranty-duration">
+                    {getLocalizedText('Warranty Duration', 'वारेन्टी अवधि')} *
+                  </Label>
+                  <Input
+                    id="warranty-duration"
+                    type="number"
+                    value={warrantyDuration}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val.length <= 2) setWarrantyDuration(val);
+                    }}
+                    placeholder={getLocalizedText('e.g., 6', 'जस्तै, ६')}
+                    min="1"
+                    max="99"
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="warranty-unit">
+                    {getLocalizedText('Warranty Unit', 'वारेन्टी एकाइ')} *
+                  </Label>
+                  <Select
+                    value={warrantyUnit ?? undefined}
+                    onValueChange={setWarrantyUnit}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={getLocalizedText('Select unit', 'एकाइ चयन गर्नुहोस्')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="days">{getLocalizedText('Days', 'दिन')}</SelectItem>
+                      <SelectItem value="months">{getLocalizedText('Months', 'महिना')}</SelectItem>
+                      <SelectItem value="years">{getLocalizedText('Years', 'वर्ष')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            )}
           </div>
-          
+
           <DialogFooter>
             <Button
               variant="outline"

@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { User, UserMode } from "@/lib/data/user"; 
-import { login as apiLogin, verifyOTP as apiVerifyOTP,setupProfile as apiSetupProfile  } from "@/lib/api/auth";
+import { login as apiLogin, verifyOTP as apiVerifyOTP, setupProfile as apiSetupProfile, loginViaEmail as apiLoginViaEmail, verifyEmailOTP as apiVerifyEmailOTP } from "@/lib/api/auth";
 
 import { getUserProfile } from "@/lib/api/user";
 import { checkIfUserNeedsSetup } from '@/lib/utils/auth-helpers'
@@ -20,6 +20,8 @@ interface AuthContextType {
   // Auth actions
   login: (phone: string) => Promise<void>;
   verifyOTP: (phone: string, otp: string) => Promise<void>;
+  loginViaEmail: (email: string) => Promise<void>;
+  verifyEmailOTP: (email: string, otp: string) => Promise<void>;
   setupProfile: (data: any) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
@@ -320,6 +322,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   
+const loginViaEmail = async (email: string) => {
+    try {
+      localStorage.setItem("temp_email", email);
+      await apiLoginViaEmail(email);
+    } catch (error: any) {
+      console.error("Login via email error:", error);
+      throw new Error(error.message || "Failed to send OTP");
+    }
+  };
+
+  const verifyEmailOTP = async (email: string, otp: string) => {
+    try {
+      const response = await apiVerifyEmailOTP(email, otp);
+
+      const authToken = response.access_token;
+      localStorage.setItem("auth_token", authToken);
+      setToken(authToken);
+
+      let userData: User;
+      try {
+        const apiUserData = await getUserProfile();
+        userData = apiUserData;
+      } catch (error) {
+        const apiUser = response.user || {
+          id: 1,
+          phone_number: "",
+          email,
+          full_name: "",
+          is_setup_complete: false,
+          type: "customer" as UserMode,
+        };
+        userData = {
+          id: apiUser.id,
+          phone_number: apiUser.phone_number,
+          phone: apiUser.phone_number,
+          full_name: apiUser.full_name || "",
+          name: apiUser.full_name || "",
+          nameNe: apiUser.full_name || "",
+          email: apiUser.email || email,
+          gender: apiUser.gender || "",
+          age_group: apiUser.age_group || "",
+          profile_image: apiUser.profile_image || "",
+          avatar: apiUser.profile_image || "",
+          mode: apiUser.type || "customer",
+          type: apiUser.type || "customer",
+          is_setup_complete: apiUser.is_setup_complete || false,
+          is_onboarding_complete: apiUser.is_onboarding_complete || false,
+          isVerified: true,
+          isProfessionalVerified: apiUser.type === "professional",
+        };
+      }
+
+      localStorage.setItem("auth_user", JSON.stringify(userData));
+      localStorage.removeItem("temp_email");
+      setAuthCookies(authToken, userData);
+      setUser(userData);
+      setModeState(userData.mode);
+
+      const needsSetup = checkIfUserNeedsSetup(userData);
+      if (needsSetup) {
+        router.push("/setup");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Verify email OTP error:", error);
+      throw new Error(error.message || "Invalid OTP");
+    }
+  };
+
 const setupProfile = async (data: any) => {
   try {
     console.log("IM FROM AUTH -CONTEXT SETUP PROFILE");
@@ -334,8 +406,8 @@ const setupProfile = async (data: any) => {
       gender: data.gender,
       age_group: data.age_group,
       email: data.email || user.email,
+      phone_number: data.phone_number || undefined,
       professional_id: data.professional_id,
-
     });
 
     // Create updated user object with the response from API
@@ -502,6 +574,8 @@ if (!isInitialized) {
     isLoading,
     login,
     verifyOTP,
+    loginViaEmail,
+    verifyEmailOTP,
     setupProfile,
     logout,
     updateUser,

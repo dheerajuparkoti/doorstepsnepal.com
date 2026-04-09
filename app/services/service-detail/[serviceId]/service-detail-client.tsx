@@ -1,408 +1,3 @@
-
-// "use client";
-
-// import { useI18n } from "@/lib/i18n/context";
-// import Image from "next/image";
-// import Link from "next/link";
-// import { Button } from "@/components/ui/button";
-// import { Card, CardContent } from "@/components/ui/card";
-// import { Badge } from "@/components/ui/badge";
-// import { Separator } from "@/components/ui/separator";
-// import { 
-//   ArrowLeft, 
-//   Tag, 
-//   Clock, 
-//   CheckCircle, 
-//   Star,
-//   Shield,
-//   Award,
-//   Calendar,
-//   MapPin,
-//   Phone,
-//   User
-// } from "lucide-react";
-// import type { ProfessionalService } from "@/lib/data/professional-services";
-
-// interface ServiceDetailClientProps {
-//   service: ProfessionalService;
-// }
-
-// export function ServiceDetailClient({ service }: ServiceDetailClientProps) {
-//   const { language } = useI18n();
-  
-
-//   const getCurrencySymbol = () => {
-//     return language === "ne" ? "रु" : "Rs.";
-//   };
-
-//   // Calculate price range
-//   const getPriceRange = () => {
-//     const validPrices = service.prices.filter(p => p.price !== null);
-//     if (validPrices.length === 0) return null;
-    
-//     const priceValues = validPrices.map(p => p.price);
-//     const minPrice = Math.min(...priceValues);
-//     const maxPrice = Math.max(...priceValues);
-    
-//     return {
-//       min: minPrice,
-//       max: maxPrice,
-//       isRange: minPrice !== maxPrice
-//     };
-//   };
-
-//   const priceRange = getPriceRange();
-//   const currencySymbol = getCurrencySymbol();
-  
-//   // Localized content
-//   const serviceName = language === "ne" ? service.service.name_np : service.service.name_en;
-//   const description = language === "ne" ? service.service.description_np : service.service.description_en;
-  
-//   // Group prices by quality type
-//   const pricesByQuality = service.prices.reduce((acc, price) => {
-//     const qualityName =price.quality_type.name ;
-//     if (!acc[qualityName]) {
-//       acc[qualityName] = [];
-//     }
-//     acc[qualityName].push(price);
-//     return acc;
-//   }, {} as Record<string, typeof service.prices>);
-
-//   // Professional info
-//   const professional = service.professional;
-//   const professionalName = professional.user.full_name;
-//   const professionalImage = professional.user.profile_image;
-//   const professionalSkill = professional.skill;
-//   const serviceAreas = professional.service_areas || [];
-
-//   return (
-//     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-//       {/* Hero Section with Image */}
-//       <div className="relative h-[300px] md:h-[400px] w-full bg-gray-900">
-//         {service.service.image ? (
-//           <Image
-//             src={service.service.image}
-//             alt={serviceName}
-//             fill
-//             className="object-cover opacity-60"
-//             priority
-//           />
-//         ) : (
-//           <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10" />
-//         )}
-        
-//         {/* Overlay Content */}
-//         <div className="absolute inset-0 bg-black/50" />
-        
-//         <div className="absolute inset-0 flex items-center">
-//           <div className="container mx-auto px-4">
-//             <Link 
-//               href="/services" 
-//               className="inline-flex items-center text-white/80 hover:text-white mb-4 transition-colors"
-//             >
-//               <ArrowLeft className="h-4 w-4 mr-2" />
-//               {language === "ne" ? "सेवाहरूमा फर्कनुहोस्" : "Back to Services"}
-//             </Link>
-            
-//             <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 max-w-3xl">
-//               {serviceName}
-//             </h1>
-            
-//             {description && (
-//               <p className="text-white/90 text-lg max-w-2xl line-clamp-2">
-//                 {description}
-//               </p>
-//             )}
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Main Content */}
-//       <div className="container mx-auto px-4 py-8 md:py-12">
-//         <div className="grid lg:grid-cols-3 gap-8">
-//           {/* Left Column - Main Content */}
-//           <div className="lg:col-span-2 space-y-8">
-//             {/* Full Description */}
-//             {description && (
-//               <Card>
-//                 <CardContent className="p-6">
-//                   <h2 className="text-xl font-semibold mb-4">
-//                     {language === "ne" ? "विवरण" : "Description"}
-//                   </h2>
-//                   <p className="text-muted-foreground whitespace-pre-line leading-relaxed">
-//                     {description}
-//                   </p>
-//                 </CardContent>
-//               </Card>
-//             )}
-
-//             {/* Professional Information */}
-//             <Card>
-//               <CardContent className="p-6">
-//                 <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-//                   <User className="h-5 w-5" />
-//                   {language === "ne" ? "व्यवसायिक जानकारी" : "Professional Information"}
-//                 </h2>
-                
-//                 <div className="flex items-start gap-4">
-//                   {professionalImage && (
-//                     <div className="relative h-16 w-16 rounded-full overflow-hidden">
-//                       <Image
-//                         src={professionalImage}
-//                         alt={professionalName}
-//                         fill
-//                         className="object-cover"
-//                       />
-//                     </div>
-//                   )}
-//                   <div>
-//                     <h3 className="font-semibold text-lg">{professionalName}</h3>
-//                     <p className="text-sm text-muted-foreground">{professionalSkill}</p>
-                    
-//                     {/* Service Areas */}
-//                     {serviceAreas.length > 0 && (
-//                       <div className="mt-2 flex items-start gap-2">
-//                         <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-//                         <div className="flex flex-wrap gap-1">
-//                           {serviceAreas.map((area) => (
-//                             <Badge key={area.id} variant="outline" className="text-xs">
-//                               {area.name}
-//                             </Badge>
-//                           ))}
-//                         </div>
-//                       </div>
-//                     )}
-//                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-
-//             {/* Price Options by Quality */}
-//             <Card>
-//               <CardContent className="p-6">
-//                 <h2 className="text-xl font-semibold mb-6">
-//                   {language === "ne" ? "मूल्य विकल्पहरू" : "Price Options"}
-//                 </h2>
-                
-//                 <div className="space-y-8">
-//                   {Object.entries(pricesByQuality).map(([qualityName, prices]) => (
-//                     <div key={qualityName}>
-//                       <h3 className="font-medium text-lg mb-4 flex items-center gap-2">
-//                         <Award className="h-5 w-5 text-primary" />
-//                         {qualityName}
-//                       </h3>
-//                       <div className="grid gap-4">
-//                         {prices.map((price) => {
-//                           const hasDiscount = price.discount_percentage > 0;
-//                           const originalPrice = price.price;
-//                           const discountedPrice = hasDiscount && originalPrice
-//                             ? originalPrice - (originalPrice * price.discount_percentage / 100)
-//                             : null;
-                          
-//                           return (
-//                             <div 
-//                               key={price.id}
-//                               className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border rounded-lg hover:border-primary transition-colors bg-white dark:bg-gray-800"
-//                             >
-//                               <div className="flex-1 mb-3 sm:mb-0">
-//                                 <div className="flex flex-wrap items-center gap-2 mb-2">
-//                                   {price.is_minimum_price && (
-//                                     <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
-//                                       {language === "ne" ? "सुरुवाती मूल्य" : "Starting Price"}
-//                                     </Badge>
-//                                   )}
-//                                   {hasDiscount && (
-//                                     <Badge variant="destructive" className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
-//                                       {price.discount_percentage}% OFF
-//                                     </Badge>
-//                                   )}
-//                                 </div>
-                                
-//                                 {/* {price.description && (
-//                                   <p className="text-sm text-muted-foreground">
-//                                     {language === "ne" ? price.description_np : price.description_en}
-//                                   </p>
-//                                 )} */}
-
-//                                 {/* Price Unit */}
-//                                 {price.price_unit && (
-//                                   <p className="text-xs text-muted-foreground mt-1">
-//                                     {language === "ne" ? "प्रति" : "Per"} {price.price_unit.name}
-//                                   </p>
-//                                 )}
-//                               </div>
-                              
-//                               <div className="text-right sm:ml-4">
-//                                 {hasDiscount && discountedPrice ? (
-//                                   <>
-//                                     <p className="text-sm text-muted-foreground line-through">
-//                                       {currencySymbol} {originalPrice?.toLocaleString()}
-//                                     </p>
-//                                     <p className="text-2xl font-bold text-primary">
-//                                       {currencySymbol} {discountedPrice.toLocaleString()}
-//                                     </p>
-//                                     {price.discount_name && (
-//                                       <p className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">
-//                                         {price.discount_name}
-//                                       </p>
-//                                     )}
-//                                   </>
-//                                 ) : (
-//                                   <p className="text-2xl font-bold">
-//                                     {currencySymbol} {originalPrice?.toLocaleString()}
-//                                   </p>
-//                                 )}
-//                               </div>
-//                             </div>
-//                           );
-//                         })}
-//                       </div>
-//                     </div>
-//                   ))}
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           </div>
-
-//           {/* Right Column - Sidebar */}
-//           <div className="space-y-6">
-//             {/* Quick Info Card */}
-//             <Card>
-//               <CardContent className="p-6">
-//                 <h3 className="font-semibold mb-4 flex items-center gap-2">
-//                   <Tag className="h-5 w-5" />
-//                   {language === "ne" ? "द्रुत जानकारी" : "Quick Info"}
-//                 </h3>
-                
-//                 <div className="space-y-5">
-//                   {/* Price Range */}
-//                   {priceRange && (
-//                     <div className="flex items-start gap-3 pb-3 border-b">
-//                       <div className="bg-primary/10 p-2 rounded-lg">
-//                         <Tag className="h-5 w-5 text-primary" />
-//                       </div>
-//                       <div>
-//                         <p className="text-sm text-muted-foreground">
-//                           {language === "ne" ? "मूल्य दायरा" : "Price Range"}
-//                         </p>
-//                         <p className="font-bold text-xl">
-//                           {currencySymbol} {priceRange.min.toLocaleString()}
-//                           {priceRange.isRange && ` - ${currencySymbol} ${priceRange.max.toLocaleString()}`}
-//                         </p>
-//                       </div>
-//                     </div>
-//                   )}
-
-//                   {/* Total Options */}
-//                   <div className="flex items-start gap-3 pb-3 border-b">
-//                     <div className="bg-primary/10 p-2 rounded-lg">
-//                       <CheckCircle className="h-5 w-5 text-primary" />
-//                     </div>
-//                     <div>
-//                       <p className="text-sm text-muted-foreground">
-//                         {language === "ne" ? "उपलब्ध विकल्प" : "Available Options"}
-//                       </p>
-//                       <p className="font-semibold text-lg">
-//                         {service.prices.length} {language === "ne" ? "विकल्पहरू" : "options"}
-//                       </p>
-//                     </div>
-//                   </div>
-
-//                   {/* Quality Types */}
-//                   <div className="flex items-start gap-3 pb-3 border-b">
-//                     <div className="bg-primary/10 p-2 rounded-lg">
-//                       <Award className="h-5 w-5 text-primary" />
-//                     </div>
-//                     <div>
-//                       <p className="text-sm text-muted-foreground mb-2">
-//                         {language === "ne" ? "गुणस्तर प्रकार" : "Quality Types"}
-//                       </p>
-//                       <div className="flex flex-wrap gap-2">
-//                         {Object.keys(pricesByQuality).map((quality) => (
-//                           <Badge key={quality} variant="outline" className="px-3 py-1">
-//                             {quality}
-//                           </Badge>
-//                         ))}
-//                       </div>
-//                     </div>
-//                   </div>
-
-//                   {/* Professional Status */}
-//                   <div className="flex items-start gap-3">
-//                     <div className="bg-primary/10 p-2 rounded-lg">
-//                       <Shield className="h-5 w-5 text-primary" />
-//                     </div>
-//                     <div>
-//                       <p className="text-sm text-muted-foreground">
-//                         {language === "ne" ? "व्यवसायिक स्थिति" : "Professional Status"}
-//                       </p>
-//                       <p className="font-semibold">
-//                         {professional.user.is_admin_approved ? (
-//                           <span className="text-green-600">✓ {language === "ne" ? "प्रमाणित" : "Verified"}</span>
-//                         ) : (
-//                           <span className="text-yellow-600">{language === "ne" ? "प्रमाणित हुन बाँकी" : "Pending Verification"}</span>
-//                         )}
-//                       </p>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-
-//             {/* Booking Card */}
-//             <Card className="sticky top-24">
-//               <CardContent className="p-6">
-//                 <h3 className="font-semibold mb-4 flex items-center gap-2">
-//                   <Calendar className="h-5 w-5" />
-//                   {language === "ne" ? "बुक गर्नुहोस्" : "Book This Service"}
-//                 </h3>
-                
-//                 <p className="text-sm text-muted-foreground mb-6">
-//                   {language === "ne" 
-//                     ? "यो सेवा बुक गर्न तलको बटनमा क्लिक गर्नुहोस्। हाम्रो व्यवसायिक टोलीले चाँडै सम्पर्क गर्नेछ।" 
-//                     : "Click the button below to book this service. Our professional team will contact you soon."}
-//                 </p>
-                
-//                 <div className="space-y-3">
-//                   <Button className="w-full" size="lg" asChild>
-//                     <Link href={`/services/${service.id}/book`}>
-//                       {language === "ne" ? "अहिले बुक गर्नुहोस्" : "Book Now"}
-//                     </Link>
-//                   </Button>
-                  
-//                   <Button variant="outline" className="w-full" asChild>
-//                     <Link href={`tel:${professional.user.phone_number}`}>
-//                       <Phone className="h-4 w-4 mr-2" />
-//                       {language === "ne" ? "सम्पर्क गर्नुहोस्" : "Contact"}
-//                     </Link>
-//                   </Button>
-//                 </div>
-                
-//                 <div className="mt-6 flex items-center justify-center gap-6 text-xs text-muted-foreground">
-//                   <div className="flex items-center gap-1.5">
-//                     <Shield className="h-4 w-4" />
-//                     <span>{language === "ne" ? "सुरक्षित" : "Secure"}</span>
-//                   </div>
-//                   <div className="flex items-center gap-1.5">
-//                     <Clock className="h-4 w-4" />
-//                     <span>{language === "ne" ? "द्रुत" : "Quick"}</span>
-//                   </div>
-//                   <div className="flex items-center gap-1.5">
-//                     <Star className="h-4 w-4" />
-//                     <span>{language === "ne" ? "ग्यारेन्टी" : "Guaranteed"}</span>
-//                   </div>
-//                 </div>
-//               </CardContent>
-//             </Card>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -412,18 +7,18 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  ArrowLeft, 
-  Tag, 
-  Clock, 
-  CheckCircle, 
+import {
+  ArrowLeft,
+  Tag,
+  Clock,
+  CheckCircle,
   Star,
   Shield,
   Award,
   Calendar,
   MapPin,
-  Phone,
-  User
+  User,
+  ShieldCheck
 } from "lucide-react";
 import type { ProfessionalService } from "@/lib/data/professional-services";
 import { BookingSheet, BookingDetails, AddressData } from "@/components/booking/booking-sheet";
@@ -963,6 +558,14 @@ const handleBookNow = (priceItem: any) => {
                                     {language === "ne" ? "प्रति" : "Per"} {price.price_unit.name}
                                   </p>
                                 )}
+
+                                {/* Warranty */}
+                                {price.has_warranty && (
+                                  <div className="flex items-center gap-1 mt-2 text-xs text-emerald-600 font-medium">
+                                    <ShieldCheck className="h-3.5 w-3.5" />
+                                    {price.warranty_duration} {price.warranty_unit} {language === "ne" ? "वारेन्टी" : "warranty"}
+                                  </div>
+                                )}
                               </div>
                               
                               <div className="text-right sm:ml-4">
@@ -1059,6 +662,27 @@ const handleBookNow = (priceItem: any) => {
                       </div>
                     </div>
                   </div>
+
+                  {/* Warranty Info */}
+                  {service.prices.some(p => p.has_warranty) && (
+                    <div className="flex items-start gap-3 pb-3 border-b">
+                      <div className="bg-emerald-50 dark:bg-emerald-950 p-2 rounded-lg">
+                        <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">
+                          {language === "ne" ? "वारेन्टी" : "Warranty"}
+                        </p>
+                        <div className="flex flex-col gap-0.5">
+                          {service.prices.filter(p => p.has_warranty).map(p => (
+                            <p key={p.id} className="font-semibold text-emerald-600 text-sm">
+                              {p.warranty_duration} {p.warranty_unit} ({p.quality_type.name})
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Professional Status */}
                   <div className="flex items-start gap-3">

@@ -9,65 +9,77 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { AuthLayout } from "@/components/auth/auth-layout";
-import { Phone, ArrowRight, Loader2, ArrowLeft, AlertCircle } from "lucide-react";
+import { Phone, Mail, ArrowRight, Loader2, ArrowLeft, AlertCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
+type LoginMethod = "phone" | "email";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, verifyOTP } = useAuth(); 
-  const [step, setStep] = useState<"phone" | "otp">("phone");
+  const { login, verifyOTP, loginViaEmail, verifyEmailOTP } = useAuth();
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>("phone");
+  const [step, setStep] = useState<"input" | "otp">("input");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [countdown, setCountdown] = useState(0);
 
+  const startCountdown = () => {
+    setCountdown(30);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleSendOTP = async () => {
-    if (phone.length < 10) {
-      setError("Please enter a valid 10-digit phone number");
-      return;
-    }
-    
     setError("");
     setIsLoading(true);
-    
     try {
-      // Use auth context login function
-      await login(phone);
-      
-      // Start resend countdown (30 seconds)
-      setCountdown(30);
-      const interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-      
-      setIsLoading(false);
+      if (loginMethod === "phone") {
+        if (phone.length < 10) {
+          setError("Please enter a valid 10-digit phone number");
+          setIsLoading(false);
+          return;
+        }
+        await login(phone);
+      } else {
+        if (!email.includes("@")) {
+          setError("Please enter a valid email address");
+          setIsLoading(false);
+          return;
+        }
+        await loginViaEmail(email);
+      }
+      startCountdown();
       setStep("otp");
     } catch (err: any) {
       setError(err.message || "Failed to send OTP. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };
 
   const handleVerifyOTP = async () => {
-    if (otp.length !== 4) { // Changed to 4 digits
+    if (otp.length !== 4) {
       setError("Please enter the 4-digit OTP");
       return;
     }
-    
     setError("");
     setIsLoading(true);
-    
     try {
-      // Use auth context verifyOTP function
-      await verifyOTP(phone, otp);
-      // Auth context will handle redirection automatically
+      if (loginMethod === "phone") {
+        await verifyOTP(phone, otp);
+      } else {
+        await verifyEmailOTP(email, otp);
+      }
     } catch (err: any) {
       setError(err.message || "Invalid OTP. Please try again.");
       setIsLoading(false);
@@ -76,22 +88,15 @@ export default function LoginPage() {
 
   const handleResendOTP = async () => {
     if (countdown > 0) return;
-    
     setIsLoading(true);
     try {
-      await login(phone);
-      setCountdown(30);
+      if (loginMethod === "phone") {
+        await login(phone);
+      } else {
+        await loginViaEmail(email);
+      }
+      startCountdown();
       setError("");
-      
-      const interval = setInterval(() => {
-        setCountdown((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to resend OTP. Please try again.");
     } finally {
@@ -99,17 +104,29 @@ export default function LoginPage() {
     }
   };
 
+  const handleMethodSwitch = (method: LoginMethod) => {
+    setLoginMethod(method);
+    setStep("input");
+    setPhone("");
+    setEmail("");
+    setOtp("");
+    setError("");
+    setCountdown(0);
+  };
+
+  const contactDisplay = loginMethod === "phone" ? `+977 ${phone}` : email;
+
   return (
     <AuthLayout>
       <Card className="border-0 shadow-none lg:shadow-lg lg:border">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-2xl font-bold">
-            {step === "phone" ? "Welcome Back" : "Verify OTP"}
+            {step === "input" ? "Welcome Back" : "Verify OTP"}
           </CardTitle>
           <CardDescription>
-            {step === "phone"
-              ? "Enter your phone number to continue"
-              : `We sent a 4-digit code to +977 ${phone}`} {/* Changed to 4-digit */}
+            {step === "input"
+              ? "Enter your details to continue"
+              : `We sent a 4-digit code to ${contactDisplay}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -119,38 +136,85 @@ export default function LoginPage() {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          
-          {step === "phone" ? (
+
+          {step === "input" ? (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex gap-2">
-                  <div className="flex items-center px-3 bg-muted rounded-md border border-input text-sm font-medium">
-                    +977
+              {/* Tab toggle */}
+              <div className="flex rounded-lg border border-input p-1 gap-1">
+                <button
+                  onClick={() => handleMethodSwitch("phone")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    loginMethod === "phone"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Phone className="h-4 w-4" />
+                  Phone
+                </button>
+                <button
+                  onClick={() => handleMethodSwitch("email")}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    loginMethod === "email"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Mail className="h-4 w-4" />
+                  Email
+                </button>
+              </div>
+
+              {loginMethod === "phone" ? (
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <div className="flex gap-2">
+                    <div className="flex items-center px-3 bg-muted rounded-md border border-input text-sm font-medium">
+                      +977
+                    </div>
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        type="tel"
+                        placeholder="98XXXXXXXX"
+                        value={phone}
+                        onChange={(e) => {
+                          setPhone(e.target.value.replace(/\D/g, "").slice(0, 10));
+                          setError("");
+                        }}
+                        className="pl-10"
+                        maxLength={10}
+                      />
+                    </div>
                   </div>
-                  <div className="relative flex-1">
-                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
-                      id="phone"
-                      type="tel"
-                      placeholder="98XXXXXXXX"
-                      value={phone}
+                      id="email"
+                      type="email"
+                      placeholder="you@example.com"
+                      value={email}
                       onChange={(e) => {
-                        const value = e.target.value.replace(/\D/g, "").slice(0, 10);
-                        setPhone(value);
+                        setEmail(e.target.value);
                         setError("");
                       }}
                       className="pl-10"
-                      maxLength={10}
                     />
                   </div>
                 </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-              </div>
+              )}
 
               <Button
                 onClick={handleSendOTP}
-                disabled={isLoading || phone.length < 10}
+                disabled={
+                  isLoading ||
+                  (loginMethod === "phone" ? phone.length < 10 : !email.includes("@"))
+                }
                 className="w-full"
                 size="lg"
               >
@@ -164,11 +228,11 @@ export default function LoginPage() {
 
               <p className="text-center text-sm text-muted-foreground">
                 By continuing, you agree to our{" "}
-                <a href="/terms" className="text-primary hover:underline">
+                <a href="/terms-conditions" className="text-primary hover:underline">
                   Terms of Service
                 </a>{" "}
                 and{" "}
-                <a href="/privacy" className="text-primary hover:underline">
+                <a href="/privacy-policy" className="text-primary hover:underline">
                   Privacy Policy
                 </a>
               </p>
@@ -176,19 +240,19 @@ export default function LoginPage() {
           ) : (
             <>
               <button
-                onClick={() => setStep("phone")}
+                onClick={() => { setStep("input"); setOtp(""); setError(""); }}
                 className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
                 disabled={isLoading}
               >
                 <ArrowLeft className="h-4 w-4" />
-                Change number
+                {loginMethod === "phone" ? "Change number" : "Change email"}
               </button>
 
               <div className="space-y-4">
-                <Label className="text-center block">Enter 4-digit OTP</Label> {/* Changed to 4-digit */}
+                <Label className="text-center block">Enter 4-digit OTP</Label>
                 <div className="flex justify-center">
                   <InputOTP
-                    maxLength={4} // Changed to 4 digits
+                    maxLength={4}
                     value={otp}
                     onChange={(value) => {
                       setOtp(value);
@@ -201,19 +265,18 @@ export default function LoginPage() {
                       <InputOTPSlot index={1} />
                       <InputOTPSlot index={2} />
                       <InputOTPSlot index={3} />
-                      {/* Removed index 4 and 5 */}
                     </InputOTPGroup>
                   </InputOTP>
                 </div>
                 {error && <p className="text-sm text-destructive text-center">{error}</p>}
                 <p className="text-center text-xs text-muted-foreground">
-                  Enter the 4-digit code sent to +977 {phone}
+                  Enter the 4-digit code sent to {contactDisplay}
                 </p>
               </div>
 
               <Button
                 onClick={handleVerifyOTP}
-                disabled={isLoading || otp.length !== 4} // Changed to 4
+                disabled={isLoading || otp.length !== 4}
                 className="w-full"
                 size="lg"
               >
@@ -235,7 +298,7 @@ export default function LoginPage() {
                   </button>
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  OTP is valid for 10 minutes
+                  OTP is valid for 5 minutes
                 </p>
               </div>
             </>

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/lib/i18n/context';
 import type { ProfessionalService, ProfessionalServicePrice } from '@/lib/data/professional-services';
-import { Wrench, RefreshCw, ArrowRight, Briefcase, Package, Clock, Tag, Sparkles, TrendingUp, ChevronRight } from 'lucide-react';
+import { Wrench, RefreshCw, ArrowRight, Briefcase, Package, Clock, Tag, Sparkles, TrendingUp, ChevronRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useProfessionalServicesViewStore } from '@/stores/professional-service-view-store';
@@ -353,6 +353,14 @@ function ProfessionalPriceTile({ price }: { price: ProfessionalServicePrice }) {
           <div className="text-xs text-primary/70 flex items-center gap-1 pt-2 border-t border-border/50">
             <Sparkles className="h-3 w-3" />
             <span className="truncate">{price.discount_name}</span>
+          </div>
+        )}
+
+        {/* Warranty badge */}
+        {price.has_warranty && (
+          <div className="text-xs text-emerald-600 flex items-center gap-1 pt-2 border-t border-border/50">
+            <ShieldCheck className="h-3 w-3" />
+            <span>{price.warranty_duration} {price.warranty_unit} {language === 'ne' ? 'वारेन्टी' : 'warranty'}</span>
           </div>
         )}
       </div>

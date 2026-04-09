@@ -6,7 +6,7 @@ import Image from "next/image";
 import { useI18n } from "@/lib/i18n/context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Tag } from "lucide-react";
+import { ArrowRight, Tag, ShieldCheck } from "lucide-react";
 import type { ProfessionalService } from "@/lib/data/professional-services";
 
 interface PopularServicesProps {
@@ -51,13 +51,18 @@ export function PopularServicesSection({
     // Find the price with discount for display (if any)
     const discountedPrice = validPrices.find(p => p.discount_percentage > 0);
     
+    const warrantyPrice = validPrices.find(p => p.has_warranty);
+
     return {
       min: minPrice,
       max: maxPrice,
       hasDiscount,
       hasMinimumPrice,
       discountedPrice,
-      isRange: minPrice !== maxPrice
+      isRange: minPrice !== maxPrice,
+      hasWarranty: !!warrantyPrice,
+      warrantyDuration: warrantyPrice?.warranty_duration ?? null,
+      warrantyUnit: warrantyPrice?.warranty_unit ?? null,
     };
   };
 
@@ -188,6 +193,14 @@ export function PopularServicesSection({
                             <span className="text-xs text-muted-foreground">
                               {priceRange.discountedPrice.discount_name}
                             </span>
+                          </div>
+                        )}
+
+                        {/* Warranty badge */}
+                        {priceRange.hasWarranty && (
+                          <div className="flex items-center gap-1 text-xs text-emerald-600 font-medium">
+                            <ShieldCheck className="h-3.5 w-3.5" />
+                            {priceRange.warrantyDuration} {priceRange.warrantyUnit} {language === "ne" ? "वारेन्टी" : "warranty"}
                           </div>
                         )}
 

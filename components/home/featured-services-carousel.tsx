@@ -7,7 +7,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/lib/i18n/context";
-import { ArrowLeft, ArrowRight, Tag, Percent } from "lucide-react";
+import { ArrowLeft, ArrowRight, Tag, Percent, ShieldCheck } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
@@ -179,9 +179,15 @@ export function FeaturedServicesCarousel({
                                     </>
                                   )}
                                 </div>
-                                <div className="text-xs text-gray-300 mt-1">
+                                        <div className="text-xs text-gray-300 mt-1">
                                   {price.quality_type.name} • {price.price_unit.name}
                                 </div>
+                                {price.has_warranty && (
+                                  <div className="flex items-center gap-1 text-xs text-emerald-400 mt-1">
+                                    <ShieldCheck className="h-3 w-3" />
+                                    {price.warranty_duration} {price.warranty_unit} {language === "ne" ? "वारेन्टी" : "warranty"}
+                                  </div>
+                                )}
                               </div>
                             );
                           })}

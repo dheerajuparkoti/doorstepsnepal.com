@@ -6,7 +6,7 @@ import { ServicesSection } from './ssr/services-section-ssr';
 import { ServicesSkeleton } from './skeleton/services-skeleton';
 import Loading from '../loading';
 
-// export const dynamic = 'force-dynamic'; 
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: 'Services | DoorStep',

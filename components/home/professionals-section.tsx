@@ -7,16 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import type { ProfessionalService } from "@/lib/data/professional-services";
-
+import type { TopProfessional } from "@/lib/data/professional";
+// interface ProfessionalsClientProps {
+//   professionalServices: ProfessionalService[];
+//   total: number;
+// }
 interface ProfessionalsClientProps {
-  professionalServices: ProfessionalService[];
+  professionals: TopProfessional[];
   total: number;
 }
 
-export function ProfessionalsSection({ professionalServices, total }: ProfessionalsClientProps) {
+export function ProfessionalsSection({ professionals, total }: ProfessionalsClientProps) {
   const { language } = useI18n();
 
-  if (!professionalServices || professionalServices.length === 0) {
+  if (!professionals || professionals.length === 0) {
     return (
         <section className="py-2 md:py-4">
         <div className="container mx-auto px-4 text-center">
@@ -32,7 +36,7 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
   }
 
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-2 md:py-4">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-12 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
@@ -56,61 +60,90 @@ export function ProfessionalsSection({ professionalServices, total }: Profession
           </Button>
         </div>
 
-        {/* Professionals Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {professionalServices.map((ps) => {
-            const user = ps.professional.user;
+<div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+  {professionals.map((pro, index) => {
+    const skill = pro.skill || (language === "ne" ? "व्यावसायिक" : "Professional");
 
-            return (
-              <Link key={ps.professional.id} href={`/professionals?professionalId=${ps.professional.id}`}>
-                <Card className="group h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg">
-                  {/* Circular Avatar */}
-                  <div className="relative mx-auto mt-6 h-36 w-36 overflow-hidden rounded-full bg-muted">
-                    {user.profile_image ? (
-                      <Image
-                        src={user.profile_image}
-                        alt={user.full_name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
-                        N/A
-                      </div>
-                    )}
-                  </div>
+    return (
+      <div key={pro.id} className="block">
+        <Link href={`/professionals?professionalId=${pro.id}`} className="block">
+       <Card className="group relative h-full overflow-hidden transition-all hover:border-primary hover:shadow-lg p-0 gap-0 cursor-pointer">
 
-                  {/* Content with Price Display */}
-                  <CardContent className="p-4 text-center">
-                    <h3 className="font-semibold text-foreground line-clamp-1">
-                      {user.full_name}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                      {ps.professional.skill}
-                    </p>
-                    
-                    {/* Starting Price Display */}
-                    {ps.prices && ps.prices.length > 0 && (
-                      <p className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                        {language === "ne" ? "सुरु" : "Starting from"}{" "}
-                        {language === "ne" ? "रु" : "Rs."} {Math.min(...ps.prices.map(p => p.price)).toLocaleString()}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+  {/* Background Image */}
+  <div className="relative h-40 w-full overflow-hidden bg-muted">
+    {pro.profile_image ? (
+      <Image
+        src={pro.profile_image}
+        alt={pro.full_name}
+        fill
+        className="object-cover transition duration-300 group-hover:scale-105 group-hover:opacity-40"
+      />
+    ) : (
+      <div className="flex h-full items-center justify-center">
+        <span className="text-muted-foreground text-sm">
+          {language === "ne" ? "तस्बिर छैन" : "No Image"}
+        </span>
+      </div>
+    )}
+  </div>
+
+  {/* 👇 POPUP IMAGE (CENTER) */}
+  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+    <div className="
+      h-24 w-24 md:h-28 md:w-28 
+      rounded-full overflow-hidden 
+      bg-white/20 backdrop-blur-md
+      scale-50 opacity-0
+      transition-all duration-300
+      group-hover:scale-100 group-hover:opacity-100
+    ">
+      {pro.profile_image && (
+        <Image
+          src={pro.profile_image}
+          alt={pro.full_name}
+          fill
+          className="object-cover"
+        />
+      )}
+    </div>
+  </div>
+
+  {/* Content */}
+  <CardContent className="p-4 relative z-10 text-center">
+    <h3 className="font-semibold text-foreground line-clamp-1">
+      {pro.full_name}
+    </h3>
+
+    <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+      {skill}
+    </p>
+
+    <span className="text-xs text-primary mt-2 inline-block group-hover:underline">
+      {language === "ne" ? "प्रोफाइल हेर्नुहोस्" : "View profile"}
+    </span>
+  </CardContent>
+
+  {/* Optional subtle overlay */}
+  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition" />
+</Card>
+        </Link>
+      </div>
+    );
+  })}
+
+</div>
+
+              
+       
 
         {/* Footer: Show more if total > displayed */}
-        {total > professionalServices.length && (
+        {total > professionals.length && (
           <div className="mt-12 text-center">
             <Button variant="ghost" className="gap-2" asChild>
               <Link href="/professionals">
                 {language === "ne"
-                  ? `थप ${total - professionalServices.length} प्रोफेशनलहरू हेर्नुहोस्`
-                  : `View ${total - professionalServices.length} more professionals`}
+                  ? `थप ${total - professionals.length} प्रोफेशनलहरू हेर्नुहोस्`
+                  : `View ${total - professionals.length} more professionals`}
                
                 <ArrowRight className="h-4 w-4" />
               </Link>

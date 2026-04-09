@@ -4,8 +4,8 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useI18n } from '@/lib/i18n/context';
 import { useRouter, useSearchParams } from 'next/navigation'; 
 import { 
-  Search, 
-  X, 
+  Search,
+  X,
   ChevronRight,
   User,
   MapPin,
@@ -18,7 +18,8 @@ import {
   Star,
   MoreVertical,
   Heart,
-  Loader2
+  Loader2,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -276,6 +277,7 @@ const [displayProfessionals, setDisplayProfessionals] = useState<any[]>(() => {
       service_name: prof.service_names.join(', '),
       is_minimum_price: prof.all_prices.some((p: any) => p.is_minimum_price),
       has_discount: prof.all_prices.some((p: any) => p.discount_is_active && p.discount_percentage > 0),
+      has_warranty: prof.all_prices.some((p: any) => p.has_warranty),
     }));
   };
 
@@ -1354,6 +1356,12 @@ const [displayProfessionals, setDisplayProfessionals] = useState<any[]>(() => {
                                 </Badge>
                               )}
                             </div>
+                            {price.has_warranty && (
+                              <div className="flex items-center gap-1 mt-1 text-xs text-emerald-600 font-medium">
+                                <ShieldCheck className="h-3.5 w-3.5" />
+                                {price.warranty_duration} {price.warranty_unit} {getLocalizedText('warranty', 'वारेन्टी')}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

@@ -25,14 +25,14 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { 
-  MapPin, 
-  User, 
-  Calendar, 
-  Clock, 
-  FileText, 
-  Check, 
-  X, 
-  Edit, 
+  MapPin,
+  User,
+  Calendar,
+  Clock,
+  FileText,
+  Check,
+  X,
+  Edit,
   Plus,
   ChevronRight,
   Home,
@@ -40,7 +40,8 @@ import {
   MapPinned,
   Tag,
   Package,
-  CreditCard
+  CreditCard,
+  ShieldCheck
 } from 'lucide-react';
 import { AddressDialog } from '@/components/booking/address-picker';
 import { cn } from '@/lib/utils';
@@ -61,8 +62,11 @@ export interface PriceItem {
   price_unit?: { name: string; name_ne?: string };
   quality_type?: { name: string; name_ne?: string };
   is_minimum_price?: boolean;
-  price_unit_id: number; 
-  quality_type_id: number; 
+  price_unit_id: number;
+  quality_type_id: number;
+  has_warranty?: boolean;
+  warranty_duration?: number | null;
+  warranty_unit?: string | null;
 }
 
 export interface AddressData {
@@ -372,6 +376,12 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                                     )}
                                   </Badge>
                                 )}
+                                {price.has_warranty && (
+                                  <div className="flex items-center gap-1 mt-0.5 text-[10px] text-emerald-600 font-medium">
+                                    <ShieldCheck className="h-3 w-3" />
+                                    {price.warranty_duration} {price.warranty_unit} {getLocalizedText('warranty', 'वारेन्टी')}
+                                  </div>
+                                )}
                               </div>
                               <div className="text-right flex-shrink-0">
                                 {priceInfo.hasDiscount ? (
@@ -397,7 +407,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                   </div>
 
                   {/* Quantity */}
-                  <div className="space-y-1.5">
+                  {/* <div className="space-y-1.5">
                     <Label className="text-sm font-semibold flex items-center gap-1">
                       <Package className="h-3.5 w-3.5" />
                       {getLocalizedText('Quantity', 'परिमाण')}
@@ -430,7 +440,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                         <Plus className="h-3.5 w-3.5" />
                       </Button>
                     </div>
-                  </div>
+                  </div> */}
 
                   {/* Date and Time */}
                   <div className="space-y-1.5">
@@ -677,12 +687,12 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                             : selectedPriceInfo?.quality}
                         </span>
                       </div>
-                      <div className="flex justify-between text-xs">
+                      {/* <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Quantity', 'परिमाण')}
                         </span>
                         <span className="font-medium">{bookingDetails.quantity}</span>
-                      </div>
+                      </div> */}
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
                           {getLocalizedText('Unit Price', 'एकाइ मूल्य')}
@@ -691,6 +701,17 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                           Rs. {selectedPriceInfo?.discountedPrice}
                         </span>
                       </div>
+                      {bookingDetails.priceItem?.has_warranty && (
+                        <div className="flex justify-between text-xs">
+                          <span className="text-muted-foreground">
+                            {getLocalizedText('Warranty', 'वारेन्टी')}
+                          </span>
+                          <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                            <ShieldCheck className="h-3 w-3" />
+                            {bookingDetails.priceItem.warranty_duration} {bookingDetails.priceItem.warranty_unit}
+                          </span>
+                        </div>
+                      )}
                     </Card>
 
                     {/* Schedule */}

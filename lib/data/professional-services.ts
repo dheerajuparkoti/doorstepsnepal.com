@@ -57,6 +57,9 @@ export interface ProfessionalServicePrice {
   discount_name: string;
   discount_is_active: boolean;
   is_minimum_price: boolean;
+  has_warranty: boolean;
+  warranty_duration: number | null;
+  warranty_unit: string | null;
   price_unit: {
     id: number;
     name: string;
@@ -64,6 +67,8 @@ export interface ProfessionalServicePrice {
   quality_type: {
     id: number;
     name: string;
+    name_np?: string | null;
+    name_en?: string | null;
   };
 }
 
@@ -97,6 +102,9 @@ export interface CreatePriceRequest {
   discount_name: string;
   discount_is_active: boolean;
   is_minimum_price: boolean;
+  has_warranty?: boolean;
+  warranty_duration?: number | null;
+  warranty_unit?: string | null;
 }
 
 export interface UpdatePriceRequest {
@@ -107,6 +115,9 @@ export interface UpdatePriceRequest {
   discount_name?: string;
   discount_is_active?: boolean;
   is_minimum_price?: boolean;
+  has_warranty?: boolean;
+  warranty_duration?: number | null;
+  warranty_unit?: string | null;
 }
 
 export interface CreateProfessionalServiceRequest {

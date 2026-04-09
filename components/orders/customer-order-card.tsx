@@ -442,6 +442,17 @@ const handleCustomerApproval = async (approved: boolean) => {
                   </span>
                   <span className="font-medium">{order.price_unit_name}</span>
                 </div>
+                {order.has_warranty && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">
+                      {getLocalizedText('Warranty:', 'वारेन्टी:')}
+                    </span>
+                    <span className="flex items-center gap-1 text-emerald-600 font-medium text-xs">
+                      <span>🛡</span>
+                      {order.warranty_duration} {order.warranty_unit}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
