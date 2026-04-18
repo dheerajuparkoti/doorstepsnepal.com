@@ -795,6 +795,23 @@ const handleCustomerApproval = async (approved: boolean) => {
   </div>
 )} */}
 
+          {/* Rejected Reason - Cancelled Orders */}
+          {status === OrderStatus.CANCELLED && order.rejected_reason && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-start gap-2">
+                <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-red-700 dark:text-red-300 mb-0.5">
+                    {getLocalizedText('Rejection Reason', 'अस्वीकृति कारण')}
+                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {order.rejected_reason}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Expandable Details (same as before) */}
           {isExpanded && (
             <div className="mt-4 pt-4 border-t space-y-3">

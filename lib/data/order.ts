@@ -55,6 +55,7 @@ export interface Order {
   scheduled_time: Date;
   order_notes: string;
   inspection_notes: string;
+  rejected_reason?: string;
   customer_address: CustomerAddress;
   total_paid_amount: number;
   payment_summary: PaymentSummary;
@@ -130,6 +131,7 @@ export interface UpdateOrderDTO {
   inspection_notes?: string;
   total_price?: number;
   total_paid_amount?: number;
+  rejected_reason?: string;
 }
 
 // Validation Schemas

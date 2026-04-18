@@ -182,12 +182,9 @@ const handleFieldUpdate = useCallback(async (value: string) => {
       await updateAgeGroup(value);
     } else if (currentEditField.field === 'bio') {
       schema.pick({ bio: true }).parse({ bio: value });
-     
-    } 
-    // Professional fields
-    else if (currentEditField.field === 'bio' && user.professional_id) {
-      await patchProfessionalProfile(user.professional_id, { bio: value });
-      toast.success(getLocalizedText('Bio updated successfully', 'बायो सफलतापूर्वक अद्यावधिक गरियो'));
+      if (user.professional_id) {
+        await patchProfessionalProfile(user.professional_id, { bio: value });
+      }
     } else if (currentEditField.field === 'experience' && user.professional_id) {
       const exp = parseInt(value, 10);
       if (isNaN(exp) || exp < 1 || exp > 65) {

@@ -234,9 +234,7 @@ useEffect(() => {
 
 // Update handleBankDetailsComplete to use the ref
 const handleBankDetailsComplete = (bankData: BankDetailsFormValues) => {
-  console.log("Bank details received:", bankData);
-  console.log("Current skillsPayment before update:", formDataRef.current.skillsPayment);
-  
+
   // Update form data with bank details
   const updatedSkillsPayment = {
     ...formDataRef.current.skillsPayment,
@@ -246,7 +244,7 @@ const handleBankDetailsComplete = (bankData: BankDetailsFormValues) => {
     bank_branch_name: bankData.bank_branch_name,
   };
   
-  console.log("Updated skillsPayment after bank details:", updatedSkillsPayment);
+
   
   // Update the form data
   updateFormData('skillsPayment', updatedSkillsPayment);

@@ -53,7 +53,6 @@ export function SubCategoriesClient({
   subCategoriesData,
   initialCategoryId,
   screenTitle = 'Subcategories',
-   isCategorySpecific = false, 
 }: SubCategoriesClientProps) {
   const { language } = useI18n();
   const router = useRouter();
@@ -61,9 +60,7 @@ export function SubCategoriesClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 //   const [filterType, setFilterType] = useState<FilterType>('name');
-  const [filterType, setFilterType] = useState<FilterType>(
-    isCategorySpecific ? 'category' : 'name'
-  );
+  const [filterType, setFilterType] = useState<FilterType>('category');
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [selectedTag, setSelectedTag] = useState<string>('');
