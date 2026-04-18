@@ -1596,6 +1596,8 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
   const [inspectionNotes, setInspectionNotes] = useState('');
   const [newPrice, setNewPrice] = useState(order.total_price.toString());
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
 
   const getLocalizedText = (en: string, np: string) => {
     return locale === 'ne' ? np : en;
@@ -1641,12 +1643,6 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
         confirmDescription = getLocalizedText(
           'Are you sure you want to accept this job?',
           'के तपाईं यो काम स्वीकार गर्न निश्चित हुनुहुन्छ?'
-        );
-      } else if (newStatus === OrderStatus.CANCELLED) {
-        confirmTitle = getLocalizedText('Reject Job?', 'काम अस्वीकार गर्ने?');
-        confirmDescription = getLocalizedText(
-          'Are you sure you want to reject this job?',
-          'के तपाईं यो काम अस्वीकार गर्न निश्चित हुनुहुन्छ?'
         );
       } else if (newStatus === OrderStatus.COMPLETED) {
         confirmTitle = getLocalizedText('Mark as Completed?', 'सम्पन्न भयो चिन्हित गर्ने?');
@@ -1730,6 +1726,40 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
       toast({
         title: getLocalizedText('Error', 'त्रुटि'),
         description: getLocalizedText('Failed to update job status', 'कामको स्थिति अद्यावधिक गर्न असफल'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle reject with reason
+  const handleRejectSubmit = async () => {
+    if (!rejectReason.trim()) return;
+    try {
+      setIsSubmitting(true);
+      await updateOrder(order.id, {
+        order_status: OrderStatus.CANCELLED,
+        rejected_reason: rejectReason.trim(),
+      });
+      await createNotification({
+        user_id: order.customer_id,
+        type: 'Order Update',
+        title: 'Order Expired',
+        body: `We apologize! Your order has been automatically canceled because no professional accepted the request in time. Please try booking again or adjust your service time.`,
+        action_route: 'order',
+        custom_data: { orderId: order.id },
+      });
+      setIsRejectDialogOpen(false);
+      setRejectReason('');
+      toast({
+        title: getLocalizedText('Order Rejected', 'काम अस्वीकार गरियो'),
+        description: getLocalizedText('The job has been rejected with a reason.', 'कारण सहित काम अस्वीकार गरियो।'),
+      });
+    } catch (error) {
+      toast({
+        title: getLocalizedText('Error', 'त्रुटि'),
+        description: getLocalizedText('Failed to reject job', 'काम अस्वीकार गर्न असफल'),
         variant: 'destructive',
       });
     } finally {
@@ -2135,6 +2165,23 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
             </div>
           )}
 
+          {/* Rejected Reason - Cancelled Orders */}
+          {status === OrderStatus.CANCELLED && order.rejected_reason && (
+            <div className="mt-4 p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+              <div className="flex items-start gap-2">
+                <XCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-red-700 dark:text-red-300 mb-0.5">
+                    {getLocalizedText('Rejection Reason', 'अस्वीकृति कारण')}
+                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300">
+                    {order.rejected_reason}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Expandable Details */}
           {isExpanded && (
             <div className="mt-4 pt-4 border-t space-y-3">
@@ -2230,15 +2277,11 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
                   </Button>
                   <Button
                     variant="destructive"
-                    onClick={() => handleStatusUpdate(OrderStatus.CANCELLED)}
+                    onClick={() => setIsRejectDialogOpen(true)}
                     disabled={isSubmitting}
                     className="flex-1"
                   >
-                    {isSubmitting ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <XCircle className="w-4 h-4 mr-2" />
-                    )}
+                    <XCircle className="w-4 h-4 mr-2" />
                     {getLocalizedText('Reject', 'अस्वीकार गर्नुहोस्')}
                   </Button>
                 </div>
@@ -2442,6 +2485,73 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
           </CardFooter>
         )}
       </Card>
+      {/* Reject Job Dialog */}
+      <Dialog open={isRejectDialogOpen} onOpenChange={(open) => { setIsRejectDialogOpen(open); if (!open) setRejectReason(''); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{getLocalizedText('Reject Job', 'काम अस्वीकार गर्नुहोस्')}</DialogTitle>
+            <DialogDescription>
+              {getLocalizedText(
+                'Please provide a reason for rejecting this job. This will be visible to the customer.',
+                'कृपया यो काम अस्वीकार गर्नुको कारण लेख्नुहोस्। यो ग्राहकलाई देखिनेछ।'
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-md border border-red-200 dark:border-red-800">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" />
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  {getLocalizedText(
+                    'This action is irreversible. The customer will be notified with your reason.',
+                    'यो कार्य फिर्ता गर्न सकिन्न। ग्राहकलाई तपाईंको कारण सहित सूचित गरिनेछ।'
+                  )}
+                </p>
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="reject-reason">
+                {getLocalizedText('Reason for Rejection', 'अस्वीकृतिको कारण')} *
+              </Label>
+              <Textarea
+                id="reject-reason"
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder={getLocalizedText(
+                  'e.g. Location is too far, Schedule conflict, Unable to perform this service...',
+                  'जस्तै: स्थान धेरै टाढा छ, समय मिलेन, यो सेवा गर्न असमर्थ...'
+                )}
+                rows={4}
+                maxLength={300}
+                className="mt-1"
+              />
+              <p className="text-xs text-muted-foreground text-right mt-1">
+                {rejectReason.length}/300
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setIsRejectDialogOpen(false); setRejectReason(''); }}>
+              {getLocalizedText('Cancel', 'रद्द गर्नुहोस्')}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRejectSubmit}
+              disabled={isSubmitting || !rejectReason.trim()}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {getLocalizedText('Rejecting...', 'अस्वीकार गर्दै...')}
+                </>
+              ) : (
+                getLocalizedText('Confirm Rejection', 'अस्वीकृति पुष्टि गर्नुहोस्')
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <ConfirmationDialog />
     </>
   );

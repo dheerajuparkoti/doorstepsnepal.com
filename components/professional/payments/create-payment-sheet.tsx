@@ -21,6 +21,7 @@ interface CreatePaymentSheetProps {
   remainingAmount: number;
   isProfessional?: boolean;
   onPaymentSuccess: () => void;
+  hasExistingPayments?: boolean;
 }
 
 export function CreatePaymentSheet({
@@ -28,7 +29,8 @@ export function CreatePaymentSheet({
   onClose,
   orderId,
   remainingAmount,
-  onPaymentSuccess
+  onPaymentSuccess,
+  hasExistingPayments = false
 }: CreatePaymentSheetProps) {
   const { t, language } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,7 +41,7 @@ export function CreatePaymentSheet({
   const getLocalizedText = (en: string, ne: string) => (language === 'ne' ? ne : en);
 const defaultValues: PaymentFormData = {
   amount: 0,
-  payment_method: PaymentMethod.CASH as PaymentFormData['payment_method'],
+  payment_method: PaymentMethod.QR_PAYMENT as PaymentFormData['payment_method'],
   transaction_id: undefined,
   notes: undefined
 };
@@ -233,13 +235,15 @@ const isProfessional = mode === 'professional';
                 {...register('payment_method')}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-primary-500 focus:ring-primary-500"
               >
-                {Object.values(PaymentMethod).map((method) => (
-                  <option key={method} value={method}>
-                    {method.split('_').map(word => 
-                      word.charAt(0).toUpperCase() + word.slice(1)
-                    ).join(' ')}
-                  </option>
-                ))}
+                {Object.values(PaymentMethod)
+                  .filter((method) => hasExistingPayments || method === PaymentMethod.QR_PAYMENT)
+                  .map((method) => (
+                    <option key={method} value={method}>
+                      {method.split('_').map(word =>
+                        word.charAt(0).toUpperCase() + word.slice(1)
+                      ).join(' ')}
+                    </option>
+                  ))}
               </select>
             </div>
 

@@ -226,11 +226,11 @@ useEffect(() => {
       
       // Check if this is still the latest request
       if (latestRequestId.current !== requestId) {
-        console.log('Ignoring stale request:', requestId);
+        // console.log('Ignoring stale request:', requestId);
         return;
       }
       
-      console.log('API response:', response);
+      // console.log('API response:', response);
       
       // Group the results
       const groupedServices = groupProfessionalServices(response.professional_services || []);
@@ -241,7 +241,7 @@ useEffect(() => {
         professionalCount: group.professionalCount,
       }));
       
-      console.log('Services array length:', servicesArray.length);
+      // console.log('Services array length:', servicesArray.length);
       
       if (loadMore) {
         setServices(prev => [...prev, ...servicesArray]);
