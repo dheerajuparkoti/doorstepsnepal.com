@@ -4,7 +4,7 @@ import { ServicesResponse, Service } from '@/lib/data/service';
 
 export async function fetchServices(
   page: number = 1,
-  size: number = 10000,
+  size: number = 20,
   categoryId?: number,
   subCategoryId?: number,
   search?: string
@@ -29,8 +29,7 @@ export async function fetchServices(
 
     return await api.get<ServicesResponse>('/services', {
       params,
-      cache: 'force-cache',
-      next: { revalidate: 3600 }
+      cache: 'no-store',
     });
   } catch (error) {
     console.error('API Error fetching services:', error);

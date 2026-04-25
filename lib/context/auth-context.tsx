@@ -394,8 +394,6 @@ const loginViaEmail = async (email: string) => {
 
 const setupProfile = async (data: any) => {
   try {
-    console.log("IM FROM AUTH -CONTEXT SETUP PROFILE");
-    
     if (!user || !token) {
       throw new Error("User not authenticated");
     }
@@ -448,10 +446,7 @@ const setupProfile = async (data: any) => {
     
     setUser(updatedUser);
     setModeState(data.user_type);
-    
-    // Redirect to dashboard
-    router.push("/dashboard");
-    
+
     return;
   } catch (error: any) {
     console.error("Setup profile error:", error);
