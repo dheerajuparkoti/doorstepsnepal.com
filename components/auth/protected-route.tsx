@@ -32,6 +32,7 @@ export function ProtectedRoute({
   -----------------------------------------*/
   const checkIfUserNeedsSetup = () => {
     if (!user) return true;
+    if (user.is_setup_complete === true) return false;
 
     const fullName = user.full_name;
     const phoneNumber = user.phone_number;
