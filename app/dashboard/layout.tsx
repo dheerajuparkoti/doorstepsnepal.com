@@ -2,7 +2,6 @@
 
 import React from "react"
 
-import { AuthProvider } from "@/lib/context/auth-context";
 import { DashboardTopbar } from "@/components/dashboard/topbar";
 import { CustomerSidebar } from "@/components/dashboard/customer-sidebar";
 import { ProfessionalSidebar } from "@/components/dashboard/professional-sidebar";
@@ -38,9 +37,5 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <AuthProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
-    </AuthProvider>
-  );
+  return <DashboardLayoutContent>{children}</DashboardLayoutContent>;
 }

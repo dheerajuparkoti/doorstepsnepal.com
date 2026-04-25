@@ -118,10 +118,7 @@ fetchOrders: async (filters: OrderFilters = {}) => {
     const currentFilters = get().filters;
     const mergedFilters = { ...currentFilters, ...filters };
     
-
     const response = await OrderAPI.getOrders(mergedFilters);
-    
-  
     
     set({
       orders: response.orders,

@@ -8,11 +8,11 @@ import type { Service } from "@/lib/data/service";
 import { SearchSkeleton } from "@/components/home/skeleton/search-skeleton";
 
 export default function SearchWrapper() {
-  const [data, setData] = useState<any[] | null>(null);
+  const [data, setData] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchInitial() {
       try {
         //console.log("Fetching services for search...");
 
@@ -56,12 +56,10 @@ export default function SearchWrapper() {
       }
     }
 
-    fetchData();
+    fetchInitial();
   }, []);
 
-  if (loading) {
-    return <SearchSkeleton />;
-  }
+  if (loading) return <SearchSkeleton />;
 
-  return <SearchSection servicesData={data || []} />;
+  return <SearchSection servicesData={data} />;
 }

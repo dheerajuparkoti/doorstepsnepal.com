@@ -274,7 +274,7 @@ const handleSubmit = async () => {
     const currentFormData = formDataRef.current;
     const skillsPaymentData = currentFormData.skillsPayment;
     
-
+   
 
     const professionalData = {
       ...(professionalId && { id: professionalId }),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/context/auth-context";
 import { ProtectedRoute } from "@/components/auth/protected-route";
@@ -52,11 +52,15 @@ export default function SetupPage() {
     mode: "" as UserMode | "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const isSubmitting = useRef(false);
 
   // Detect login method: email login sets a real email, phone login leaves email empty
   const loggedInViaEmail = !!(user?.email && user.email.includes("@"));
 
+  // Redirect already-setup users away — but not when we're mid-submission
+  // (submission triggers setUser which re-fires this effect, causing a navigation clash)
   useEffect(() => {
+    if (isSubmitting.current) return;
     if (user && user.full_name && user.full_name.trim().length > 1) {
       const cleanedName = user.full_name.replace(/\D/g, "");
       const cleanedPhone = user.phone_number?.replace(/\D/g, "") || "";
@@ -125,6 +129,7 @@ export default function SetupPage() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
 
+    isSubmitting.current = true;
     setIsLoading(true);
     setError("");
 
@@ -140,11 +145,8 @@ export default function SetupPage() {
         user_type: formData.mode,
       });
 
-      if (formData.mode === "professional") {
-        router.push("/onboarding");
-      } else {
-        router.push("/dashboard");
-      }
+      setIsLoading(false);
+      window.location.href = formData.mode === "professional" ? "/onboarding" : "/dashboard";
     } catch (err: any) {
       const message = err?.message || "Failed to save profile. Please try again.";
       setError(message);

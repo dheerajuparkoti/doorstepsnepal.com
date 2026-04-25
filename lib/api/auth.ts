@@ -148,7 +148,6 @@ export async function setupProfile(
       useAppStateStore.getState().setUserType(response.value.type);
     }
     
-
     return response.value;
   } catch (error) {
     console.error('Setup profile error:', error);

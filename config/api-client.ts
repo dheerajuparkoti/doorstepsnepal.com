@@ -109,14 +109,6 @@ async function baseRequest<T = any>(
   try {
     const response = await fetch(url, finalOptions);
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(' API Response:', {
-        status: response.status,
-        ok: response.ok,
-        url: response.url,
-      });
-    }
-
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401 && !skipAuth) {
       removeToken();

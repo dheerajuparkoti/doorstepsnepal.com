@@ -78,7 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             // Use getUserProfile from api/user.ts instead of getCurrentUser
             const freshUserData = await getUserProfile();
-    
                const modeToUse = savedMode || freshUserData.mode || "customer";
                       // Update the user data with the correct mode
           freshUserData.mode = modeToUse;
@@ -172,21 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                               pathname.startsWith('/settings');
       
       if (isAuthPage && user) {
-        // If logged in and trying to access auth pages
-      
         if (pathname === '/login') {
           router.push('/dashboard');
-        } else if (pathname === '/setup' && user.is_setup_complete ) {
-          router.push('/dashboard');
         }
-        // else if (pathname == '/dashboard' && (user.professional_id)==null){
-        //     router.push('/onboarding');
-        // }
-        else if (pathname == '/onboarding'){
-            router.push('/onboarding');
-        }
-
-        
       }
       
       if (isProtectedPage && !user) {
@@ -394,8 +381,6 @@ const loginViaEmail = async (email: string) => {
 
 const setupProfile = async (data: any) => {
   try {
-  
-    
     if (!user || !token) {
       throw new Error("User not authenticated");
     }
@@ -448,10 +433,7 @@ const setupProfile = async (data: any) => {
     
     setUser(updatedUser);
     setModeState(data.user_type);
-    
-    // Redirect to dashboard
-    router.push("/dashboard");
-    
+
     return;
   } catch (error: any) {
     console.error("Setup profile error:", error);
@@ -530,11 +512,6 @@ const setupProfile = async (data: any) => {
       // Use getUserProfile from api/user.ts instead of getCurrentUser
       const freshUserData = await getUserProfile();
 
-    //       console.log("Refreshed user data:", {
-    //   mode: freshUserData.mode,
-    //   professional_id: freshUserData.professional_id,
-    //   hasProfessionalId: !!freshUserData.professional_id
-    // });
       
       // Update stored user data
       localStorage.setItem("auth_user", JSON.stringify(freshUserData));

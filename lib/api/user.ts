@@ -75,8 +75,6 @@ import { useAppStateStore } from '@/stores/app-state-store';
 
 
 export async function getUserProfile(): Promise<User> {
-  //console.log("Fetching user profile...");
-  
   try {
     const response = await api.get<any>('/users/me', { 
       cache: 'no-store' 
@@ -124,7 +122,6 @@ export async function getUserProfile(): Promise<User> {
     console.error('Get user profile error:', error);
     
     if (error instanceof Error && error.message.includes('401')) {
-      //console.log("401 error detected, clearing auth state");
       removeToken();
       
       useUserStore.getState().clearUser();
@@ -226,8 +223,6 @@ export async function deleteAccount(): Promise<{ message: string }> {
  * Any authenticated user can fetch any user by ID
  */
 export async function getUserById(userId: number): Promise<User> {
-  //console.log(`Fetching user with ID: ${userId}...`);
-  
   try {
     const response = await api.get<any>(`/users/${userId}`, { 
       cache: 'no-store' 
