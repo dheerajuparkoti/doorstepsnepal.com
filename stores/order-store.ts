@@ -118,11 +118,10 @@ fetchOrders: async (filters: OrderFilters = {}) => {
     const currentFilters = get().filters;
     const mergedFilters = { ...currentFilters, ...filters };
     
-    console.log('Fetching orders with merged filters:', mergedFilters);
-    
+
     const response = await OrderAPI.getOrders(mergedFilters);
     
-    console.log('Received orders response:', response);
+  
     
     set({
       orders: response.orders,

@@ -476,7 +476,7 @@ const handleBookNow = (professional: any, priceItem: any) => {
 
   // Handle booking confirmation
   // const handleBookingConfirm = (bookingDetails: BookingDetails) => {
-  //   console.log('Booking confirmed:', bookingDetails);
+  //   //console.log('Booking confirmed:', bookingDetails);
   //   // TODO: Implement actual booking submission
   //   alert('Booking confirmed! (Demo)');
   // };
@@ -584,7 +584,7 @@ const localISOString = `${dateString}T${timeStringFormatted}`;
 
 
 
-    console.log('Order created successfully:', createdOrder);
+    //console.log('Order created successfully:', createdOrder);
 
     try {
       await createOrderNotifications(
@@ -801,7 +801,7 @@ const handleServiceFavorite = async (serId: number) => {
           <div className="relative h-48 w-full">
          
             {professional.profile_image_url ? (
-              console.log("Professional Image URL:", professional.id, professional.profile_image_url) ,
+              //console.log("Professional Image URL:", professional.id, professional.profile_image_url) ,
               <Image
                 key={professional.id}
                 src={professional.profile_image_url}

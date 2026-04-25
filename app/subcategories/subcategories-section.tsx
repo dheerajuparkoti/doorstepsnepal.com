@@ -143,7 +143,7 @@ export function SubCategoriesClient({
   // Handle category selection
   const handleCategorySelect = (categoryName: string) => {
     setSearchQuery(categoryName);
-    console.log('Selected category:', categoryName);
+    //console.log('Selected category:', categoryName);
   };
 
   // Clear all filters
@@ -371,7 +371,7 @@ const navigateToServices = (subCategory: SubCategory) => {
                 {/* Image */}
                 <div className="relative h-48 w-full overflow-hidden bg-muted">
                   {sub.image ? (
-                      console.log("Subcategory Image URL:",sub.id, sub.image) ,
+                      //console.log("Subcategory Image URL:",sub.id, sub.image) ,
                     <Image
                         key={sub.id}
           

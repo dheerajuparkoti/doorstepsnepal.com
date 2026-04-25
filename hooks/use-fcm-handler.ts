@@ -31,7 +31,7 @@ export function useFCMHandler() {
 
     // Listen for foreground messages
     const unsubscribe = onMessage(messaging, async (payload) => {
-      console.log("📨 Foreground notification:", payload);
+      //console.log("📨 Foreground notification:", payload);
       
       const data = payload.data || {};
       const notification = payload.notification;
@@ -131,7 +131,7 @@ export function useFCMHandler() {
     const handleSWMessage = (event: MessageEvent) => {
       if (event.data?.type === 'FCM_MESSAGE') {
         const { title, body, data } = event.data.payload;
-        console.log("📨 Message from SW:", { title, body, data });
+        //console.log("📨 Message from SW:", { title, body, data });
         
         // Handle the same way as foreground
         if (data?.payment_success) {

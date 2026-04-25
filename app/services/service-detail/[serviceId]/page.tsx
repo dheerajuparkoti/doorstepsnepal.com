@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const { serviceId } = await params;
   
-  console.log("Raw serviceId from params:", serviceId);
+  //console.log("Raw serviceId from params:", serviceId);
   
 
   if (serviceId === 'NaN') {
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   
   const parsedId = parseInt(serviceId);
-  console.log("Generating metadata for service ID:", parsedId);
+  //console.log("Generating metadata for service ID:", parsedId);
   
   if (isNaN(parsedId) || parsedId <= 0) {
     return {

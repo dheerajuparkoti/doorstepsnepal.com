@@ -46,11 +46,6 @@ const isProfessionalOnboardingComplete = (user: any): boolean => {
     const needsOnboarding = isProfessional && !user.professional_id;
 
 
-      console.log("Professional check:", { 
-    isProfessional, 
-    professional_id: user.professional_id,
-    needsOnboarding 
-  });
       return needsOnboarding;
 
 

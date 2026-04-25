@@ -46,7 +46,7 @@ export async function fetchRandomProfessionals({
      
       if (data.total_unique_professionals !== undefined) {
         totalUniqueProfessionals = data.total_unique_professionals;
-        console.log('Total unique professionals from API:', totalUniqueProfessionals); 
+        //console.log('Total unique professionals from API:', totalUniqueProfessionals); 
       }
 
       for (const service of services) {
@@ -84,7 +84,7 @@ export async function fetchRandomProfessionals({
     }
 
     if (validProfessionals.length < limit) {
-      console.log(`Only found ${validProfessionals.length} valid professionals, need to add extras`);
+      //console.log(`Only found ${validProfessionals.length} valid professionals, need to add extras`);
       
       currentPage = 1;
       hasMore = true;
@@ -147,7 +147,7 @@ export async function fetchRandomProfessionals({
     let randomProfessionals = shuffled.slice(0, limit);
 
     if (randomProfessionals.length < limit) {
-      console.log(`Still only have ${randomProfessionals.length} professionals, creating unique entries to reach ${limit}`);
+      //console.log(`Still only have ${randomProfessionals.length} professionals, creating unique entries to reach ${limit}`);
       
       const result = [...randomProfessionals];
       

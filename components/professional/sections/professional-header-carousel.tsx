@@ -74,9 +74,9 @@ export function ProfessionalHeaderCarousel({
   }, [emblaApi, onSelect]);
 
   const handleImageError = (index: number) => {
-    console.log(`❌ Image failed to load at index ${index}`);
+
     setImageErrors(prev => ({ ...prev, [index]: true }));
-  };
+  }
 
   const getImageSrc = (imageUrl: string, index: number) => {
     if (imageErrors[index]) {

@@ -199,10 +199,10 @@ useEffect(() => {
     const requestId = `${Date.now()}-${Math.random()}`;
     latestRequestId.current = requestId;
     
-    console.log('========== HANDLE SEARCH ==========');
-    console.log('Request ID:', requestId);
-    console.log('loadMore:', loadMore);
-    console.log('filters received:', filters);
+    //console.log('========== HANDLE SEARCH ==========');
+    //console.log('Request ID:', requestId);
+    //console.log('loadMore:', loadMore);
+    //console.log('filters received:', filters);
     
     setIsSearchLoading(true);
     try {
@@ -213,8 +213,8 @@ useEffect(() => {
       const subCategoryId = filters?.subCategoryId !== undefined ? filters.subCategoryId : selectedSubCategory?.id;
       const searchTerm = filters?.search !== undefined ? filters.search : debouncedSearchQuery;
       
-      console.log('Using categoryId:', categoryId);
-      console.log('Using subCategoryId:', subCategoryId);
+      //console.log('Using categoryId:', categoryId);
+      //console.log('Using subCategoryId:', subCategoryId);
       
       const response = await searchProfessionalServices({
         page: nextPage,
@@ -226,11 +226,11 @@ useEffect(() => {
       
       // Check if this is still the latest request
       if (latestRequestId.current !== requestId) {
-        // console.log('Ignoring stale request:', requestId);
+        // //console.log('Ignoring stale request:', requestId);
         return;
       }
       
-      // console.log('API response:', response);
+      // //console.log('API response:', response);
       
       // Group the results
       const groupedServices = groupProfessionalServices(response.professional_services || []);
@@ -241,7 +241,7 @@ useEffect(() => {
         professionalCount: group.professionalCount,
       }));
       
-      // console.log('Services array length:', servicesArray.length);
+      // //console.log('Services array length:', servicesArray.length);
       
       if (loadMore) {
         setServices(prev => [...prev, ...servicesArray]);
@@ -255,7 +255,7 @@ useEffect(() => {
       setTotalResults(response.total);
       setHasMorePages(response.page < response.total_pages);
       
-      console.log('========== SEARCH COMPLETE ==========');
+      //console.log('========== SEARCH COMPLETE ==========');
     } catch (error) {
       console.error('Error searching services:', error);
     } finally {
@@ -718,8 +718,8 @@ useEffect(() => {
                         className="cursor-pointer px-4 py-2 whitespace-nowrap"
                         onClick={() => {
                           const newSubCategoryId = selectedSubCategory?.id === sub.id ? null : sub.id;
-                          console.log('Clicking subcategory:', sub.id, sub.name_en);
-                          console.log('newSubCategoryId:', newSubCategoryId);
+                          //console.log('Clicking subcategory:', sub.id, sub.name_en);
+                          //console.log('newSubCategoryId:', newSubCategoryId);
                           
                           setSelectedSubCategory(newSubCategoryId ? sub : null);
                           

@@ -454,7 +454,7 @@ setIsBookingSheetOpen(true);
 
     const createdOrder = await createOrder(orderData);
 
-    console.log('Order created successfully:', createdOrder);
+    //console.log('Order created successfully:', createdOrder);
 
 setIsBookingSheetOpen(false);
 
@@ -484,7 +484,7 @@ setIsBookingSheetOpen(false);
       if (shouldProceedToPayment) {
         router.push(`/orders/${createdOrder.id}/payment`);
       }
-  console.log('Toast shown'); // Add this
+  //console.log('Toast shown'); // Add this
     } catch (error: any) {
       console.error('Error creating order:', error);
       

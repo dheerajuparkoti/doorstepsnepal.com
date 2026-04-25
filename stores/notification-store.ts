@@ -150,11 +150,7 @@ export const useNotificationStore = create<NotificationState>()(
         
             const sortedNotifications = sortNotificationsByDate(notifications);
    
-            console.log('Sorted notifications:', sortedNotifications.map(n => ({
-              id: n.id,
-              created_at: n.created_at,
-              title: n.title
-            })));
+          
             
             set({ 
               notifications: sortedNotifications, 

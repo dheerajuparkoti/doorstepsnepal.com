@@ -17,7 +17,7 @@ export async function ServiceProfessionalsSection({
 }: ServiceProfessionalsSectionProps) {
   try {
     // SINGLE API CALL - Get all professional services at once
-    console.log("Fetching professional services...");
+    //console.log("Fetching professional services...");
     // const professionalServicesData = await searchProfessionalServices({
     // page:1,
     // per_page:50
@@ -36,7 +36,7 @@ export async function ServiceProfessionalsSection({
     }
 
     let filteredServices = professionalServicesData.professional_services;
-    console.log(`Total services fetched: ${filteredServices.length}`);
+    //console.log(`Total services fetched: ${filteredServices.length}`);
 
     const isSearchByServiceName = serviceId === 0;
 
@@ -54,7 +54,7 @@ export async function ServiceProfessionalsSection({
       filteredServices = filteredServices.filter(ps => ps.service_id === serviceId);
     }
 
-    console.log(`Filtered services: ${filteredServices.length}`);
+    //console.log(`Filtered services: ${filteredServices.length}`);
 
     // Handle location filtering from query params
     const locationParams = {
@@ -118,7 +118,7 @@ export async function ServiceProfessionalsSection({
     });
 
     let validData = Array.from(professionalsMap.values());
-    console.log(`Unique professionals: ${validData.length}`);
+    //console.log(`Unique professionals: ${validData.length}`);
 
     // Apply location filtering if needed
     if (locationParams.filterType === 'address' && 
@@ -159,7 +159,7 @@ export async function ServiceProfessionalsSection({
       });
     }
 
-    console.log(`Final professionals count: ${validData.length}`);
+    //console.log(`Final professionals count: ${validData.length}`);
 
     return (
       <ServiceProfessionalsClient 

@@ -81,12 +81,7 @@ export async function verifyOTP(
         userProfile.professional_id // Pass professional_id here
       );
       
-      console.log('User stored after OTP verification:', {
-        id: userProfile.id,
-        type: userProfile.type,
-        professional_id: userProfile.professional_id
-      });
-      
+   
       // Add user to response
       return { 
         ...response, 
@@ -105,47 +100,6 @@ export async function verifyOTP(
 }
 
 
-// export async function setupProfile(
-//   profileData: {
-//     full_name: string;
-//     gender: string;
-//     age_group: string;
-//     email: string;
-//   }
-// ): Promise<User> {
-//   try {
-//     const results = await Promise.allSettled([
-//       api.patch<User>('/users/fullname', { full_name: profileData.full_name }),
-//       api.patch<User>('/users/gender', { gender: profileData.gender }),
-//       api.patch<User>('/users/age-group', { age_group: profileData.age_group }),
-//       api.patch<User>('/users/email', { email: profileData.email })
-//     ]);
-    
-    
-//     // Check if any requests failed
-//     const failed = results.filter(r => r.status === 'rejected');
-//     if (failed.length > 0) {
-//       console.error('Some profile updates failed:', failed);
-//       throw new Error('Profile setup partially failed');
-//     }
-    
-//     // Get the last successful response 
-//     const response = results[results.length - 1] as PromiseFulfilledResult<User>;
-    
-//     // Update store
-//     if (useUserStore) {
-//       useUserStore.getState().updateUser(response.value);
-//     }
-
-    
-    
-//     console.log("USERS DATA", response.value);
-//     return response.value;
-//   } catch (error) {
-//     console.error('Setup profile error:', error);
-//     throw error;
-//   }
-// }
 
 export async function setupProfile(
   profileData: {
@@ -194,7 +148,7 @@ export async function setupProfile(
       useAppStateStore.getState().setUserType(response.value.type);
     }
     
-    console.log("USERS DATA", response.value);
+
     return response.value;
   } catch (error) {
     console.error('Setup profile error:', error);

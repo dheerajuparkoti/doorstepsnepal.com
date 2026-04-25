@@ -317,7 +317,7 @@ export function SingleProfessionalServiceClient({
       };
 
       const createdOrder = await createOrder(orderData);
-      console.log('Order created successfully:', createdOrder);
+      //console.log('Order created successfully:', createdOrder);
 
       setIsBookingSheetOpen(false);
 

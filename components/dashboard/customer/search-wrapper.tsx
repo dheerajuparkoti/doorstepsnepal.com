@@ -14,7 +14,7 @@ export default function SearchWrapper() {
   useEffect(() => {
     async function fetchData() {
       try {
-        console.log("Fetching services for search...");
+        //console.log("Fetching services for search...");
 
         // SINGLE API CALL - Fetch all services
         const response = await fetchServices(
@@ -26,13 +26,13 @@ export default function SearchWrapper() {
         );
 
         if (!response?.services) {
-          console.log("No services found");
+          //console.log("No services found");
           setData([]);
           return;
         }
 
         const services: Service[] = response.services;
-        console.log(`Fetched ${services.length} services`);
+        //console.log(`Fetched ${services.length} services`);
 
         // Transform services data 
         const servicesData = services.map((service) => ({

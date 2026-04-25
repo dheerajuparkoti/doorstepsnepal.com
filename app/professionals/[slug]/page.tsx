@@ -13,15 +13,15 @@ export default async function ProfessionalProfilePage({
   
   // Validate slug format
   if (!isValidProfessionalSlug(slug)) {
-    console.log('Invalid slug format:', slug);
+    //console.log('Invalid slug format:', slug);
     notFound();
   }
   
   // Extract ID from slug
   const professionalId = extractIdFromSlug(slug);
-  console.log("PROFESSOINAL ID",professionalId);
+  //console.log("PROFESSOINAL ID",professionalId);
   if (!professionalId) {
-    console.log('Could not extract ID from slug:', slug);
+    //console.log('Could not extract ID from slug:', slug);
     notFound();
   }
 

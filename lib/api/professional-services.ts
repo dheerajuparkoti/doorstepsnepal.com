@@ -302,7 +302,7 @@ export async function fetchQualityTypes(): Promise<QualityType[]> {
   try {
     // You might need to create this endpoint or get it from another API
 
-    console.log("SERVICE QUALITY TYPES",    await api.get<QualityType[]>('/service-quality-types/', { cache: 'force-cache' }));
+    //console.log("SERVICE QUALITY TYPES",    await api.get<QualityType[]>('/service-quality-types/', { cache: 'force-cache' }));
     return await api.get<QualityType[]>('/service-quality-types/', { cache: 'force-cache' });
   } catch (error) {
     console.error('Error fetching quality types:', error);

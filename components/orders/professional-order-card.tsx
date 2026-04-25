@@ -1662,13 +1662,13 @@ export function ProfessionalOrderCard({ order, showActions = true }: Professiona
       if (!confirmed) return;
 
       setIsSubmitting(true);
-       console.log("=================ORDER CHECK");
+       //console.log("=================ORDER CHECK");
       // Update order status
      const response= await updateOrder(order.id, { order_status: newStatus });
-      console.log(response);
-      console.log(newStatus);
+      //console.log(response);
+      //console.log(newStatus);
 
-      console.log("=================ORDER COMPLETED");
+      //console.log("=================ORDER COMPLETED");
 
 
 

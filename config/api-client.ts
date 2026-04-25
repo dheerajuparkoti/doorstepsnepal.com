@@ -1,48 +1,4 @@
-// // config/api-client.ts
-// import { ApiConstants } from 'config/api-constants';
 
-// export async function apiRequest<T = any>(
-//   endpoint: string, 
-//   options?: RequestInit & {
-//     cache?: RequestCache;
-//     next?: { revalidate?: number | false };
-//   }
-// ): Promise<T> {
-//   const url = `${ApiConstants.baseUrl}${endpoint}`;
-  
-//   const fetchOptions: RequestInit & { next?: any } = {
-//     ...options,
-//     headers: {
-//       'Content-Type': 'application/json',
-//       'accept': 'application/json',
-//       ...options?.headers,
-//     },
-//   };
-
-//   // Add Next.js specific caching options
-//   if (options?.cache) {
-//     fetchOptions.cache = options.cache;
-//   }
-
-//   if (options?.next) {
-//     fetchOptions.next = options.next;
-//   }
-
-//   const response = await fetch(url, fetchOptions);
-
-//   if (!response.ok) {
-//     const errorText = await response.text().catch(() => response.statusText);
-//     throw new Error(`API Error (${response.status}): ${errorText}`);
-//   }
-
-//   return response.json();
-// }
-
-
-
-
-
-// config/api-client.ts
 import { ApiConstants } from 'config/api-constants';
 
 // Token management utilities
@@ -150,17 +106,6 @@ async function baseRequest<T = any>(
     credentials: 'omit',
   };
   
-  // Add logging for debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.log(' API Request:', {
-      url,
-      method: finalOptions.method || 'GET',
-      hasToken: !skipAuth && !!getToken(),
-      skipAuth,
-      params,
-    });
-  }
-
   try {
     const response = await fetch(url, finalOptions);
 

@@ -17,7 +17,7 @@ export async function SearchSectionSSR() {
     );
     
     if (!data?.services || data.services.length === 0) {
-      console.log("No services found");
+      //console.log("No services found");
       return <SearchSection servicesData={[]} />;
     }
 

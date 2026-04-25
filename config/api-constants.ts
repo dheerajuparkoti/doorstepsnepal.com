@@ -10,7 +10,7 @@ export class ApiConstants {
       ?"https://hrtgwbtnq9.execute-api.ap-south-1.amazonaws.com/api/v1"
       :"http://localhost:8000/api/v1";
     
-    // console.log(' API URL:', url); 
+    // //console.log(' API URL:', url); 
     return url;
   }
 }

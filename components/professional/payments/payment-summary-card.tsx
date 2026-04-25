@@ -52,7 +52,7 @@ export function PaymentSummaryCard({
 
 
 const paymentPercentage = Number(summary.payment_percentage) || 0;
-console.log("pAYMENTE PERCENTAGE",pendingCount,completedCount,totalCompletedAmount);
+//console.log("pAYMENTE PERCENTAGE",pendingCount,completedCount,totalCompletedAmount);
 
   const status = statusConfig[summary.payment_status];
     useEffect(() => {

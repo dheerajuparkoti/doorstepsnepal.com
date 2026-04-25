@@ -18,7 +18,7 @@ export default async function ViewProfessionalPage({
   const professionalIdNum = parseInt(professionalId);
   
   if (isNaN(professionalIdNum)) {
-    console.log(' Invalid ID:', professionalId);
+    // //console.log(' Invalid ID:', professionalId);
     notFound();
   }
 

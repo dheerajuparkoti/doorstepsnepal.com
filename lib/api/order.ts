@@ -56,7 +56,7 @@ export class OrderAPI {
     if (filters.min_price) params.min_price = filters.min_price;
     if (filters.max_price) params.max_price = filters.max_price;
     
-    console.log('Fetching orders with params:', params);
+    //console.log('Fetching orders with params:', params);
     
     return await api.get<OrdersResponse>('/orders/', {
       params,
@@ -85,14 +85,14 @@ export class OrderAPI {
     perPage: number = 10000
   ): Promise<OrdersResponse> {
     try {
-      console.log(`Fetching orders for customer ${customerId}...`);
+      //console.log(`Fetching orders for customer ${customerId}...`);
       
       const response = await api.get<OrdersResponse>(`/orders/customer/${customerId}`, {
         params: { page, per_page: perPage },
         cache: 'no-store',
       });
       
-      console.log(`Fetched ${response.orders?.length || 0} orders for customer ${customerId}`);
+      //console.log(`Fetched ${response.orders?.length || 0} orders for customer ${customerId}`);
       return response;
     } catch (error) {
       console.error(`Error fetching orders for customer ${customerId}:`, error);

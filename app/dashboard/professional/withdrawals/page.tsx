@@ -153,7 +153,7 @@ export default function WithdrawalsPage() {
             stats={withdrawalStats}
             onDownloadPDF={async () => {
               // Implement PDF download
-              console.log('Download PDF');
+              // //console.log('Download PDF');
               // You can implement your PDF generation here
             }}
           />

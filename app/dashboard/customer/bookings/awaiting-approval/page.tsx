@@ -443,7 +443,7 @@ export default function InspectedBookingsPage() {
             </Card>
           </div>
 
-          {/* Use your existing OrderCard component */}
+          {/* Use existing OrderCard component */}
           <div className="space-y-4">
             {inspectedOrders.map((order) => (
               <OrderCard

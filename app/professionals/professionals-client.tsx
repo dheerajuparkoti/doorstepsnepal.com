@@ -803,7 +803,7 @@ const [displayProfessionals, setDisplayProfessionals] = useState<any[]>(() => {
         break;
       case 'favorite':
         // Add to favorites logic
-        console.log('Add to favorites:', professional.id);
+        //console.log('Add to favorites:', professional.id);
         break;
     }
   };

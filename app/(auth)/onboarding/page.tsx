@@ -274,11 +274,7 @@ const handleSubmit = async () => {
     const currentFormData = formDataRef.current;
     const skillsPaymentData = currentFormData.skillsPayment;
     
-    console.log("FINAL CHECK - skillsPaymentData:", skillsPaymentData);
-    console.log("FINAL CHECK - bank_account_holder_name:", skillsPaymentData.bank_account_holder_name);
-    console.log("FINAL CHECK - bank_account_number:", skillsPaymentData.bank_account_number);
-    console.log("FINAL CHECK - bank_name:", skillsPaymentData.bank_name);
-    console.log("FINAL CHECK - bank_branch_name:", skillsPaymentData.bank_branch_name);
+
 
     const professionalData = {
       ...(professionalId && { id: professionalId }),
@@ -313,7 +309,7 @@ const handleSubmit = async () => {
       })),
     };
 
-    console.log("FINAL professionalData being sent:", professionalData);
+    //console.log("FINAL professionalData being sent:", professionalData);
 
     let professional;
     

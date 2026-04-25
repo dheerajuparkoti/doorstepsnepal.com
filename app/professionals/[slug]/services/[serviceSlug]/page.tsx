@@ -22,7 +22,7 @@ export default async function SingleServicePage({
   const serviceId = extractIdFromServiceSlug(serviceSlug);
 
   if (!professionalId || !serviceId) {
-    console.log('Invalid IDs - showing 404');
+    //console.log('Invalid IDs - showing 404');
     notFound();
   }
 
@@ -35,7 +35,7 @@ export default async function SingleServicePage({
 
   // Verify this service belongs to the professional
   if (service.professional_id !== professionalId) {
-    console.log('Service does not belong to professional - showing 404');
+    //console.log('Service does not belong to professional - showing 404');
     notFound();
   }
 
