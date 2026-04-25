@@ -150,27 +150,8 @@ async function baseRequest<T = any>(
     credentials: 'omit',
   };
   
-  // Add logging for debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.log(' API Request:', {
-      url,
-      method: finalOptions.method || 'GET',
-      hasToken: !skipAuth && !!getToken(),
-      skipAuth,
-      params,
-    });
-  }
-
   try {
     const response = await fetch(url, finalOptions);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(' API Response:', {
-        status: response.status,
-        ok: response.ok,
-        url: response.url,
-      });
-    }
 
     // Handle 401 Unauthorized - token expired or invalid
     if (response.status === 401 && !skipAuth) {

@@ -78,7 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           try {
             // Use getUserProfile from api/user.ts instead of getCurrentUser
             const freshUserData = await getUserProfile();
-          console.log("USER DATA ===========================================================",freshUserData);
                const modeToUse = savedMode || freshUserData.mode || "customer";
                       // Update the user data with the correct mode
           freshUserData.mode = modeToUse;
@@ -173,7 +172,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (isAuthPage && user) {
         // If logged in and trying to access auth pages
-        console.log("PROFESSIONAL ID IS",user.professional_id);
         if (pathname === '/login') {
           router.push('/dashboard');
         } else if (pathname === '/setup' && user.is_setup_complete ) {
@@ -525,11 +523,6 @@ const setupProfile = async (data: any) => {
       // Use getUserProfile from api/user.ts instead of getCurrentUser
       const freshUserData = await getUserProfile();
 
-          console.log("Refreshed user data:", {
-      mode: freshUserData.mode,
-      professional_id: freshUserData.professional_id,
-      hasProfessionalId: !!freshUserData.professional_id
-    });
       
       // Update stored user data
       localStorage.setItem("auth_user", JSON.stringify(freshUserData));
