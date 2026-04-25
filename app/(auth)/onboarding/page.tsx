@@ -181,7 +181,7 @@ useEffect(() => {
       }
     }
 
-    // If on step 2 (skills & payment) and payment method is bank_transfer
+    // If on step 2 (skills & payment) and payment method is bank_tgit sransfer
     if (currentStep === 2) {
       const skillsPaymentData = formData.skillsPayment;
       
