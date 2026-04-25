@@ -140,6 +140,7 @@ export default function SetupPage() {
         user_type: formData.mode,
       });
 
+      setIsLoading(false);
       if (formData.mode === "professional") {
         router.push("/onboarding");
       } else {

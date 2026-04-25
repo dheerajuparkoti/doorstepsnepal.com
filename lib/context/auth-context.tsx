@@ -171,20 +171,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                               pathname.startsWith('/settings');
       
       if (isAuthPage && user) {
-        // If logged in and trying to access auth pages
         if (pathname === '/login') {
           router.push('/dashboard');
-        } else if (pathname === '/setup' && user.is_setup_complete ) {
-          router.push('/dashboard');
         }
-        // else if (pathname == '/dashboard' && (user.professional_id)==null){
-        //     router.push('/onboarding');
-        // }
-        else if (pathname == '/onboarding'){
-            router.push('/onboarding');
-        }
-
-        
       }
       
       if (isProtectedPage && !user) {
