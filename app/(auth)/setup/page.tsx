@@ -52,17 +52,7 @@ export default function SetupPage() {
     mode: "" as UserMode | "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [navigateTo, setNavigateTo] = useState<string | null>(null);
   const isSubmitting = useRef(false);
-
-  // Navigate only after React has committed the setUser update from setupProfile.
-  // Calling router.push directly in the async callback races with the auth context
-  // re-render, so ProtectedRoute on the target page can see stale user state.
-  useEffect(() => {
-    if (navigateTo) {
-      router.push(navigateTo);
-    }
-  }, [navigateTo, router]);
 
   // Detect login method: email login sets a real email, phone login leaves email empty
   const loggedInViaEmail = !!(user?.email && user.email.includes("@"));
@@ -156,7 +146,7 @@ export default function SetupPage() {
       });
 
       setIsLoading(false);
-      setNavigateTo(formData.mode === "professional" ? "/onboarding" : "/dashboard");
+      window.location.href = formData.mode === "professional" ? "/onboarding" : "/dashboard";
     } catch (err: any) {
       const message = err?.message || "Failed to save profile. Please try again.";
       setError(message);
