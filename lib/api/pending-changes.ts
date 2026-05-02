@@ -3,7 +3,7 @@ import { api } from '@/config/api-client';
 export interface PendingChange {
   id: number;
   user_id: number;
-  entity_type: 'user' | 'professional' | 'address';
+  entity_type: 'user' | 'professional' | 'address' | 'service_price';
   entity_id: number | null;
   field_name: string;
   old_value: string | null;
@@ -30,6 +30,23 @@ export function formatPendingAddress(jsonValue: string | null | undefined): stri
       map['province'],
     ].filter((s): s is string => !!s && s.toLowerCase() !== 'n/a');
     return parts.join(', ');
+  } catch {
+    return jsonValue;
+  }
+}
+
+export function formatPendingPrice(jsonValue: string | null | undefined): string {
+  if (!jsonValue) return '';
+  try {
+    const map = JSON.parse(jsonValue) as Record<string, any>;
+    const price = map['price'] != null ? `NPR ${map['price']}` : null;
+    const discount = map['discount_is_active'] && map['discount_percentage']
+      ? `${map['discount_percentage']}% off`
+      : null;
+    const warranty = map['has_warranty'] && map['warranty_duration']
+      ? `${map['warranty_duration']} ${map['warranty_unit']} warranty`
+      : null;
+    return [price, discount, warranty].filter(Boolean).join(' | ');
   } catch {
     return jsonValue;
   }

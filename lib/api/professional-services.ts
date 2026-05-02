@@ -251,41 +251,21 @@ export async function fetchPrices(
 
 export async function createPrice(
   data: CreatePriceRequest
-): Promise<ProfessionalServicePrice | null> {
-  try {
-    return await api.post<ProfessionalServicePrice>('/professional-service-prices/', data);
-  } catch (error) {
-    console.error('Error creating price:', error);
-    return null;
-  }
+): Promise<{ message: string; pending_change_id: number }> {
+  return api.post<{ message: string; pending_change_id: number }>('/professional-service-prices/', data);
 }
 
 export async function updatePrice(
   priceId: number,
   data: UpdatePriceRequest
-): Promise<ProfessionalServicePrice | null> {
-  try {
-    return await api.put<ProfessionalServicePrice>(`/professional-service-prices/${priceId}`, data, {
-      params: { price_id: priceId }
-    });
-  } catch (error) {
-    console.error('Error updating price:', error);
-    return null;
-  }
+): Promise<{ message: string; pending_change_id: number }> {
+  return api.put<{ message: string; pending_change_id: number }>(`/professional-service-prices/${priceId}`, data);
 }
 
 export async function deletePrice(
   priceId: number
-): Promise<boolean> {
-  try {
-    await api.delete(`/professional-service-prices/${priceId}`, {
-      params: { price_id: priceId }
-    });
-    return true;
-  } catch (error) {
-    console.error('Error deleting price:', error);
-    return false;
-  }
+): Promise<{ message: string; pending_change_id: number }> {
+  return api.delete<{ message: string; pending_change_id: number }>(`/professional-service-prices/${priceId}`);
 }
 
 export async function fetchPriceUnits(): Promise<PriceUnit[]> {

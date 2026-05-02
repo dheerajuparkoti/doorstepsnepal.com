@@ -14,12 +14,13 @@ import {
   fetchPrices
 } from '@/lib/api/professional-services';
 import { ProfessionalService, ProfessionalServicePrice } from '@/lib/data/professional-services';
-import { 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import { PendingChange, getMyPendingChanges, formatPendingPrice } from '@/lib/api/pending-changes';
+import {
+  Card,
+  CardContent,
+  CardHeader,
   CardTitle,
-  CardDescription 
+  CardDescription
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,7 +66,8 @@ import {
   ArrowLeft,
   Loader2,
   Image as ImageIcon,
-  ShieldCheck
+  ShieldCheck,
+  Clock,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { PriceUnit, QualityType } from '@/lib/data/professional-services';
@@ -79,20 +81,20 @@ export default function ProfessionalServicesChoosePage() {
   const router = useRouter();
   const { toast } = useToast();
   const {user} = useAuth();
-  
-  // const professionalId = Number(params.professionalId);
+
   const professionalId = user?.professional_id ?? 0;
   const [services, setServices] = useState<ProfessionalService[]>([]);
   const [loading, setLoading] = useState(true);
   const [priceUnits, setPriceUnits] = useState<PriceUnit[]>([]);
   const [qualityTypes, setQualityTypes] = useState<QualityType[]>([]);
-  
+  const [pricePendingChanges, setPricePendingChanges] = useState<PendingChange[]>([]);
+
   // Modal states
   const [priceModalOpen, setPriceModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedService, setSelectedService] = useState<ProfessionalService | null>(null);
   const [selectedPrice, setSelectedPrice] = useState<ProfessionalServicePrice | null>(null);
-  
+
   // Form states
   const [price, setPrice] = useState('');
   const [discountName, setDiscountName] = useState('');
@@ -114,13 +116,13 @@ export default function ProfessionalServicesChoosePage() {
     if (professionalId) {
       loadData();
       loadDropdowns();
+      loadPendingChanges();
     }
   }, [professionalId]);
 
   const loadData = async () => {
     setLoading(true);
     try {
-
       const servicesData = await fetchServicesByProfessionalId(professionalId);
       setServices(servicesData);
     } catch (error) {
@@ -131,6 +133,17 @@ export default function ProfessionalServicesChoosePage() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPendingChanges = async () => {
+    try {
+      const all = await getMyPendingChanges();
+      setPricePendingChanges(
+        all.filter(c => c.entity_type === 'service_price' && c.status === 'pending')
+      );
+    } catch {
+      // silently ignore — pending badges are non-critical
     }
   };
 
@@ -151,6 +164,18 @@ export default function ProfessionalServicesChoosePage() {
       });
     }
   };
+
+  // Returns a pending change for an existing price (update or delete)
+  const getPendingForPrice = (priceId: number) =>
+    pricePendingChanges.find(
+      c => c.entity_id === priceId && (c.field_name === 'update' || c.field_name === 'delete')
+    ) ?? null;
+
+  // Returns a pending create change for a given professional service
+  const getPendingCreateForService = (professionalServiceId: number) =>
+    pricePendingChanges.find(
+      c => c.entity_id === professionalServiceId && c.field_name === 'create'
+    ) ?? null;
 
   const handleOpenPriceModal = (service: ProfessionalService, price?: ProfessionalServicePrice) => {
     setSelectedService(service);
@@ -216,24 +241,31 @@ export default function ProfessionalServicesChoosePage() {
       if (selectedPrice) {
         await updatePrice(selectedPrice.id, priceData);
         toast({
-          title: getLocalizedText('Success', 'सफल'),
-          description: getLocalizedText('Price updated successfully', 'मूल्य सफलतापूर्वक अद्यावधिक गरियो'),
+          title: getLocalizedText('Submitted for Approval', 'अनुमोदनको लागि पेश गरियो'),
+          description: getLocalizedText(
+            'Price update submitted for admin approval',
+            'मूल्य अद्यावधिक प्रशासक अनुमोदनको लागि पेश गरियो'
+          ),
         });
       } else {
         await createPrice(priceData);
         toast({
-          title: getLocalizedText('Success', 'सफल'),
-          description: getLocalizedText('Price added successfully', 'मूल्य सफलतापूर्वक थपियो'),
+          title: getLocalizedText('Submitted for Approval', 'अनुमोदनको लागि पेश गरियो'),
+          description: getLocalizedText(
+            'New price submitted for admin approval',
+            'नयाँ मूल्य प्रशासक अनुमोदनको लागि पेश गरियो'
+          ),
         });
       }
 
       setPriceModalOpen(false);
       resetForm();
-      loadData(); // Refresh the list
-    } catch (error) {
+      await loadPendingChanges();
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail || error?.message;
       toast({
         title: getLocalizedText('Error', 'त्रुटि'),
-        description: getLocalizedText('Failed to save price', 'मूल्य सुरक्षित गर्न असफल'),
+        description: detail || getLocalizedText('Failed to submit price change', 'मूल्य परिवर्तन पेश गर्न असफल'),
         variant: 'destructive',
       });
     } finally {
@@ -252,14 +284,18 @@ export default function ProfessionalServicesChoosePage() {
     try {
       await deletePrice(selectedPrice.id);
       toast({
-        title: getLocalizedText('Success', 'सफल'),
-        description: getLocalizedText('Price removed successfully', 'मूल्य सफलतापूर्वक हटाइयो'),
+        title: getLocalizedText('Submitted for Approval', 'अनुमोदनको लागि पेश गरियो'),
+        description: getLocalizedText(
+          'Price deletion submitted for admin approval',
+          'मूल्य मेटाउने अनुरोध प्रशासक अनुमोदनको लागि पेश गरियो'
+        ),
       });
-      loadData(); // Refresh the list
-    } catch (error) {
+      await loadPendingChanges();
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail || error?.message;
       toast({
         title: getLocalizedText('Error', 'त्रुटि'),
-        description: getLocalizedText('Failed to delete price', 'मूल्य मेटाउन असफल'),
+        description: detail || getLocalizedText('Failed to submit deletion request', 'मेटाउने अनुरोध पेश गर्न असफल'),
         variant: 'destructive',
       });
     } finally {
@@ -347,122 +383,161 @@ export default function ProfessionalServicesChoosePage() {
         </Card>
       ) : (
         <Accordion type="multiple" className="space-y-4">
-          {services.map((service) => (
-            <Card key={service.id}>
-              <AccordionItem value={service.id.toString()} className="border-0">
-                <AccordionTrigger className="px-6 py-4 hover:no-underline">
-                  <div className="flex items-start gap-4 text-left">
-                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted">
-                      {service.service.image ? (
-                        <Image
-                          src={service.service.image}
-                          alt={service.service.name_en}
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+          {services.map((service) => {
+            const pendingCreate = getPendingCreateForService(service.id);
+
+            return (
+              <Card key={service.id}>
+                <AccordionItem value={service.id.toString()} className="border-0">
+                  <AccordionTrigger className="px-6 py-4 hover:no-underline">
+                    <div className="flex items-start gap-4 text-left">
+                      <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted">
+                        {service.service.image ? (
+                          <Image
+                            src={service.service.image}
+                            alt={service.service.name_en}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-lg">
+                          {language === 'ne' ? service.service.name_np : service.service.name_en}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline">
+                            {getLocalizedText('Service ID', 'सेवा आईडी')}: {service.service_id}
+                          </Badge>
                         </div>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-lg">
-                        {language === 'ne' ? service.service.name_np : service.service.name_en}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline">
-                          {getLocalizedText('Service ID', 'सेवा आईडी')}: {service.service_id}
-                        </Badge>
                       </div>
                     </div>
-                  </div>
-                </AccordionTrigger>
-                <AccordionContent>
-                  <CardContent className="pt-0">
-                    {service.prices.length > 0 ? (
-                      <div className="space-y-2">
-                        {service.prices.map((price) => {
-                          const discountedPrice = calculateDiscountedPrice(price);
-                          const hasDiscount = price.discount_is_active && price.discount_percentage > 0;
-                          
-                          return (
-                            <div
-                              key={price.id}
-                              className={`flex items-center justify-between p-4 rounded-lg ${
-                                hasDiscount ? 'bg-primary/5' : 'bg-muted/30'
-                              }`}
-                            >
-                              <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-semibold text-lg">
-                                    {formatCurrency(discountedPrice)}
-                                  </span>
-                                  {hasDiscount && (
-                                    <>
-                                      <span className="text-muted-foreground line-through text-sm">
-                                        {formatCurrency(price.price)}
-                                      </span>
-                                      <Badge variant="secondary" className="ml-2">
-                                        {price.discount_name} ({price.discount_percentage}%)
-                                      </Badge>
-                                    </>
-                                  )}
-                                  {price.is_minimum_price && (
-                                    <Badge variant="outline" className="ml-2">
-                                      {getLocalizedText('Minimum Price', 'न्यूनतम मूल्य')}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {price.price_unit.name} | {price.quality_type.name}
-                                </div>
-                                {price.has_warranty && (
-                                  <div className="flex items-center gap-1 mt-1 text-xs text-primary font-medium">
-                                    <ShieldCheck className="h-3.5 w-3.5" />
-                                    {price.warranty_duration} {price.warranty_unit} {getLocalizedText('warranty', 'वारेन्टी')}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <CardContent className="pt-0">
+                      {service.prices.length > 0 ? (
+                        <div className="space-y-2">
+                          {service.prices.map((priceItem) => {
+                            const discountedPrice = calculateDiscountedPrice(priceItem);
+                            const hasDiscount = priceItem.discount_is_active && priceItem.discount_percentage > 0;
+                            const pendingChange = getPendingForPrice(priceItem.id);
+
+                            return (
+                              <div key={priceItem.id} className="rounded-lg overflow-hidden border">
+                                {pendingChange && (
+                                  <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800">
+                                    <Clock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                                    <span className="text-xs text-amber-700 dark:text-amber-400">
+                                      {pendingChange.field_name === 'delete'
+                                        ? getLocalizedText('Pending deletion — awaiting admin approval', 'मेटाउने अनुरोध — प्रशासक अनुमोदन पर्खँदै')
+                                        : getLocalizedText(
+                                            `Pending update: ${formatPendingPrice(pendingChange.new_value)}`,
+                                            `अद्यावधिक पर्खँदै: ${formatPendingPrice(pendingChange.new_value)}`
+                                          )
+                                      }
+                                    </span>
                                   </div>
                                 )}
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleOpenPriceModal(service, price)}
+                                <div
+                                  className={`flex items-center justify-between p-4 ${
+                                    hasDiscount ? 'bg-primary/5' : 'bg-muted/30'
+                                  }`}
                                 >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleDeletePrice(price)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
+                                  <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <span className="font-semibold text-lg">
+                                        {formatCurrency(discountedPrice)}
+                                      </span>
+                                      {hasDiscount && (
+                                        <>
+                                          <span className="text-muted-foreground line-through text-sm">
+                                            {formatCurrency(priceItem.price)}
+                                          </span>
+                                          <Badge variant="secondary" className="ml-2">
+                                            {priceItem.discount_name} ({priceItem.discount_percentage}%)
+                                          </Badge>
+                                        </>
+                                      )}
+                                      {priceItem.is_minimum_price && (
+                                        <Badge variant="outline" className="ml-2">
+                                          {getLocalizedText('Minimum Price', 'न्यूनतम मूल्य')}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <div className="text-sm text-muted-foreground">
+                                      {priceItem.price_unit.name} | {priceItem.quality_type.name}
+                                    </div>
+                                    {priceItem.has_warranty && (
+                                      <div className="flex items-center gap-1 mt-1 text-xs text-primary font-medium">
+                                        <ShieldCheck className="h-3.5 w-3.5" />
+                                        {priceItem.warranty_duration} {priceItem.warranty_unit} {getLocalizedText('warranty', 'वारेन्टी')}
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleOpenPriceModal(service, priceItem)}
+                                      disabled={!!pendingChange}
+                                      title={pendingChange ? getLocalizedText('A change is already pending approval', 'परिवर्तन अनुमोदन पर्खँदैछ') : undefined}
+                                    >
+                                      <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleDeletePrice(priceItem)}
+                                      disabled={!!pendingChange}
+                                      title={pendingChange ? getLocalizedText('A change is already pending approval', 'परिवर्तन अनुमोदन पर्खँदैछ') : undefined}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    ) : (
-                      <div className="text-center py-4 text-muted-foreground">
-                        {getLocalizedText('No prices set for this service', 'यस सेवाको लागि कुनै मूल्य सेट गरिएको छैन')}
-                      </div>
-                    )}
-                    
-                    <Button
-                      variant="ghost"
-                      className="w-full mt-4"
-                      onClick={() => handleOpenPriceModal(service)}
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      {getLocalizedText('Add New Price', 'नयाँ मूल्य थप्नुहोस्')}
-                    </Button>
-                  </CardContent>
-                </AccordionContent>
-              </AccordionItem>
-            </Card>
-          ))}
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 text-muted-foreground">
+                          {getLocalizedText('No prices set for this service', 'यस सेवाको लागि कुनै मूल्य सेट गरिएको छैन')}
+                        </div>
+                      )}
+
+                      {/* Pending create indicator */}
+                      {pendingCreate && (
+                        <div className="flex items-center gap-2 mt-3 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                          <Clock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+                          <span className="text-xs text-amber-700 dark:text-amber-400">
+                            {getLocalizedText(
+                              `New price pending approval: ${formatPendingPrice(pendingCreate.new_value)}`,
+                              `नयाँ मूल्य अनुमोदन पर्खँदैछ: ${formatPendingPrice(pendingCreate.new_value)}`
+                            )}
+                          </span>
+                        </div>
+                      )}
+
+                      <Button
+                        variant="ghost"
+                        className="w-full mt-4"
+                        onClick={() => handleOpenPriceModal(service)}
+                        disabled={!!pendingCreate}
+                        title={pendingCreate ? getLocalizedText('A new price is already pending approval', 'नयाँ मूल्य अनुमोदन पर्खँदैछ') : undefined}
+                      >
+                        <Plus className="mr-2 h-4 w-4" />
+                        {getLocalizedText('Add New Price', 'नयाँ मूल्य थप्नुहोस्')}
+                      </Button>
+                    </CardContent>
+                  </AccordionContent>
+                </AccordionItem>
+              </Card>
+            );
+          })}
         </Accordion>
       )}
 
@@ -471,19 +546,25 @@ export default function ProfessionalServicesChoosePage() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {selectedPrice 
+              {selectedPrice
                 ? getLocalizedText('Edit Price', 'मूल्य सम्पादन गर्नुहोस्')
                 : getLocalizedText('Add New Price', 'नयाँ मूल्य थप्नुहोस्')
               }
             </DialogTitle>
             <DialogDescription>
-              {selectedService && (language === 'ne' 
-                ? selectedService.service.name_np 
+              {selectedService && (language === 'ne'
+                ? selectedService.service.name_np
                 : selectedService.service.name_en
               )}
+              <span className="block text-xs text-amber-600 mt-1">
+                {getLocalizedText(
+                  'Changes require admin approval before taking effect.',
+                  'परिवर्तनहरू लागू हुनु अघि प्रशासक अनुमोदन आवश्यक छ।'
+                )}
+              </span>
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="price">
@@ -494,20 +575,17 @@ export default function ProfessionalServicesChoosePage() {
                 type="number"
                 value={price}
                  onChange={(e) => {
-
       const val = e.target.value;
       if (val.length <= 8) {
         setPrice(val);
       }
-      
     }}
      min="1"
     step="1"
-
                 placeholder={getLocalizedText('Enter price', 'मूल्य प्रविष्ट गर्नुहोस्')}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="minimum-price">
                 {getLocalizedText('Minimum Price', 'न्यूनतम मूल्य')}
@@ -518,7 +596,7 @@ export default function ProfessionalServicesChoosePage() {
                 onCheckedChange={setIsMinimumPrice}
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="price-unit">
                 {getLocalizedText('Price Unit', 'मूल्य एकाइ')} *
@@ -539,7 +617,7 @@ export default function ProfessionalServicesChoosePage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="quality-type">
                 {getLocalizedText('Quality Type', 'गुणस्तर प्रकार')} *
@@ -560,7 +638,7 @@ export default function ProfessionalServicesChoosePage() {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="discount-name">
                 {getLocalizedText('Discount Name', 'छुटको नाम')}
@@ -578,7 +656,7 @@ export default function ProfessionalServicesChoosePage() {
   maxLength={50}
               />
             </div>
-            
+
             <div className="grid gap-2">
               <Label htmlFor="discount-percentage">
                 {getLocalizedText('Discount Percentage', 'छुट प्रतिशत')}
@@ -587,9 +665,7 @@ export default function ProfessionalServicesChoosePage() {
                 id="discount-percentage"
                 type="number"
                 value={discountPercentage}
-             
                  onChange={(e) => {
-
       const val = e.target.value;
       if (val.length <= 2) {
        setDiscountPercentage(e.target.value)}
@@ -601,7 +677,7 @@ export default function ProfessionalServicesChoosePage() {
                 maxLength={1}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="discount-active">
                 {getLocalizedText('Activate Discount', 'छुट सक्रिय गर्नुहोस्')}
@@ -678,9 +754,9 @@ export default function ProfessionalServicesChoosePage() {
             </Button>
             <Button onClick={handleSavePrice} disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {selectedPrice 
-                ? getLocalizedText('Update Price', 'मूल्य अद्यावधिक गर्नुहोस्')
-                : getLocalizedText('Add Price', 'मूल्य थप्नुहोस्')
+              {selectedPrice
+                ? getLocalizedText('Submit for Approval', 'अनुमोदनको लागि पेश गर्नुहोस्')
+                : getLocalizedText('Submit for Approval', 'अनुमोदनको लागि पेश गर्नुहोस्')
               }
             </Button>
           </DialogFooter>
@@ -692,12 +768,12 @@ export default function ProfessionalServicesChoosePage() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {getLocalizedText('Remove Price', 'मूल्य हटाउनुहोस्')}
+              {getLocalizedText('Request Price Removal', 'मूल्य हटाउने अनुरोध')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {getLocalizedText(
-                'Are you sure you want to remove this price? This action cannot be undone.',
-                'के तपाईं यो मूल्य हटाउन निश्चित हुनुहुन्छ? यो कार्य पूर्ववत गर्न सकिँदैन।'
+                'This will submit a deletion request for admin approval. The price will be removed once approved.',
+                'यसले प्रशासक अनुमोदनको लागि मेटाउने अनुरोध पेश गर्नेछ। अनुमोदन भएपछि मूल्य हटाइनेछ।'
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -709,7 +785,7 @@ export default function ProfessionalServicesChoosePage() {
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {getLocalizedText('Remove', 'हटाउनुहोस्')}
+              {getLocalizedText('Submit Request', 'अनुरोध पेश गर्नुहोस्')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

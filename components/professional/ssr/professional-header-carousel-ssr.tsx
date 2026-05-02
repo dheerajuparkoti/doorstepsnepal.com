@@ -27,7 +27,7 @@ import { notFound } from 'next/navigation';
 //     notFound();
 //   }
 
-//   const activeShowcases = showcases.filter(s => s.is_active === true);
+//   const activeShowcases = showcases.filter(s => s.is_active === true && s.status !== 'PENDING');
   
 //   const showcaseImages = [
 //     profile.user.profile_image,
@@ -84,7 +84,7 @@ export async function ProfessionalHeaderCarouselSSR({
     notFound();
   }
 
-  const activeShowcases = showcases.filter(s => s.is_active === true);
+  const activeShowcases = showcases.filter(s => s.is_active === true && s.status !== 'PENDING');
   
   const showcaseImages = [
     profile.user.profile_image,
