@@ -22,6 +22,7 @@ import {
   deleteAccount,
   cancelAccountDeletion,
 } from '@/lib/api/user';
+import { getMyPendingChanges, PendingChange } from '@/lib/api/pending-changes';
 import { ProfileHeader } from '@/components/account/profile-header';
 import { DetailItem } from '@/components/account/detail-item';
 import { EditDialog } from '@/components/account/edit-dialog';
@@ -77,6 +78,7 @@ export default function AccountInfoPage() {
   const [isUpdatingProfileImage, setIsUpdatingProfileImage] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
   const [currentEditField, setCurrentEditField] = useState<{
     field: string;
     title: string;
@@ -102,9 +104,28 @@ export default function AccountInfoPage() {
         }
       }
     };
-    
+
     loadProfessionalData();
   }, [mode, user?.professional_id, professionalProfile, fetchProfessionalProfile]);
+
+  const refreshPendingChanges = useCallback(async () => {
+    try {
+      const changes = await getMyPendingChanges();
+      setPendingChanges(changes.filter(c => c.status === 'pending'));
+    } catch {
+      // silently ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshPendingChanges();
+  }, [refreshPendingChanges]);
+
+  const getPending = useCallback(
+    (entityType: PendingChange['entity_type'], fieldName: string) =>
+      pendingChanges.find(c => c.entity_type === entityType && c.field_name === fieldName),
+    [pendingChanges]
+  );
 
   // Handle profile image upload
   const handleProfileImageChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -203,6 +224,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
       await refreshUser();
     }
 
+    refreshPendingChanges();
     setEditDialogOpen(false);
     toast.success(getLocalizedText("Updated successfully", "सफलतापूर्वक अद्यावधिक गरियो"));
   } catch (error) {
@@ -217,7 +239,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
       });
     }
   }
-}, [currentEditField, user, refreshUser, patchProfessionalProfile, getLocalizedText]);
+}, [currentEditField, user, refreshUser, patchProfessionalProfile, getLocalizedText, refreshPendingChanges]);
   // Handle account deletion
   const handleDeleteAccount = useCallback(async () => {
     try {
@@ -466,15 +488,14 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                           title={getLocalizedText('Full Name', 'पूरा नाम')}
                           value={user.full_name}
                           isEditable
+                          pendingValue={getPending('user', 'full_name')?.new_value ?? null}
                           onEdit={() =>
                             openEditDialog(
                               'full_name',
                               getLocalizedText('Full Name', 'पूरा नाम'),
                               user.full_name,
                               'text'
-                          
                             )
-                            
                           }
                         />
 
@@ -542,6 +563,9 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                           title={getLocalizedText('Gender', 'लिङ्ग')}
                           value={GENDERS.find(g => g.value === user.gender)?.label || user.gender || getLocalizedText('Not set', 'सेट गरिएको छैन')}
                           isEditable
+                          pendingValue={getPending('user', 'gender')?.new_value
+                            ? (GENDERS.find(g => g.value === getPending('user', 'gender')?.new_value)?.label ?? getPending('user', 'gender')?.new_value ?? null)
+                            : null}
                           onEdit={() =>
                             openEditDialog(
                               'gender',
@@ -558,6 +582,9 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                           title={getLocalizedText('Age Group', 'उमेर समूह')}
                           value={AGE_GROUPS.find(a => a.value === user.age_group)?.label || user.age_group || getLocalizedText('Not set', 'सेट गरिएको छैन')}
                           isEditable
+                          pendingValue={getPending('user', 'age_group')?.new_value
+                            ? (AGE_GROUPS.find(a => a.value === getPending('user', 'age_group')?.new_value)?.label ?? getPending('user', 'age_group')?.new_value ?? null)
+                            : null}
                           onEdit={() =>
                             openEditDialog(
                               'age_group',
@@ -579,7 +606,10 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                     </CardContent>
                   </Card>
                   
-                  <AddressSection />
+                  <AddressSection
+                    pendingChanges={pendingChanges}
+                    onAddressChange={refreshPendingChanges}
+                  />
 
                   {/* Professional Section - Always show for professional users */}
                   {getUserTypeDisplay() === getLocalizedText('Professional', 'प्रोफेशनल') && user.professional_id && (
@@ -649,7 +679,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                               icon={Award}
                               title={getLocalizedText('Years of Experience', 'अनुभव वर्ष')}
                               value={
-                                professionalProfile?.experience 
+                                professionalProfile?.experience
                                   ? getLocalizedText(
                                       `${professionalProfile.experience} ${professionalProfile.experience === 1 ? 'year' : 'years'}`,
                                       `${professionalProfile.experience} वर्ष`
@@ -657,6 +687,12 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                                   : getLocalizedText('Not set', 'सेट गरिएको छैन')
                               }
                               isEditable={true}
+                              pendingValue={getPending('professional', 'experience')?.new_value
+                                ? getLocalizedText(
+                                    `${getPending('professional', 'experience')?.new_value} years`,
+                                    `${getPending('professional', 'experience')?.new_value} वर्ष`
+                                  )
+                                : null}
                               onEdit={() =>
                                 openEditDialog(
                                   'experience',
@@ -675,6 +711,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
                               title={getLocalizedText('Bio', 'बायो')}
                               value={professionalProfile?.bio || getLocalizedText('No bio added yet', 'अहिलेसम्म बायो थपिएको छैन')}
                               isEditable={true}
+                              pendingValue={getPending('professional', 'bio')?.new_value ?? null}
                               onEdit={() =>
                                 openEditDialog(
                                   'bio',

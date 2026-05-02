@@ -7,15 +7,16 @@ import { Address, AddressType } from '@/lib/data/address';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  MapPin, 
-  Home, 
-  Building, 
-  Navigation, 
-  Edit, 
+import {
+  MapPin,
+  Home,
+  Building,
+  Navigation,
+  Edit,
   Trash2,
-  AlertCircle, 
-  Loader2
+  AlertCircle,
+  Loader2,
+  Clock,
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -33,13 +34,15 @@ interface AddressCardProps {
   onEdit: (address: Address) => void;
   onDelete: (addressId: number) => Promise<void>;
   isDeleting?: boolean;
+  pendingValue?: string | null;
 }
 
-export function AddressCard({ 
-  address, 
-  onEdit, 
-  onDelete, 
-  isDeleting = false 
+export function AddressCard({
+  address,
+  onEdit,
+  onDelete,
+  isDeleting = false,
+  pendingValue,
 }: AddressCardProps) {
   const { locale } = useI18n();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -66,7 +69,15 @@ export function AddressCard({
 
   return (
     <>
-      <Card className="border hover:shadow-md transition-shadow">
+      <Card className="border hover:shadow-md transition-shadow overflow-hidden">
+        {pendingValue && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 dark:bg-amber-950/30 border-b border-amber-200 dark:border-amber-800">
+            <Clock className="h-3.5 w-3.5 text-amber-500 flex-shrink-0" />
+            <span className="text-xs text-amber-700 dark:text-amber-400">
+              Pending update: {pendingValue}
+            </span>
+          </div>
+        )}
         <CardContent className="p-4">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">

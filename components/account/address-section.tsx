@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n/context';
 import { useAddressStore, useAddresses, useAddressLoading, useAddressUpdating } from '@/stores/address-store';
 import { Address, CreateAddressRequest, AddressType } from '@/lib/data/address';
+import { PendingChange, formatPendingAddress } from '@/lib/api/pending-changes';
 import { AddressCard } from './address-card';
 import { AddressDialog } from './address-dialog';
 import { Button } from '@/components/ui/button';
@@ -21,11 +22,13 @@ import {
 
 interface AddressSectionProps {
   userId?: number;
+  pendingChanges?: PendingChange[];
+  onAddressChange?: () => void | Promise<void>;
 }
 
-export function AddressSection({ userId }: AddressSectionProps) {
+export function AddressSection({ userId, pendingChanges = [], onAddressChange }: AddressSectionProps) {
   const { locale } = useI18n();
-  
+
   // Zustand store
   const addresses = useAddresses();
   const isLoading = useAddressLoading();
@@ -43,6 +46,13 @@ export function AddressSection({ userId }: AddressSectionProps) {
   const permanentAddress = addresses.find(addr => addr.type === 'permanent');
   const temporaryAddress = addresses.find(addr => addr.type === 'temporary');
 
+  const pendingPermanent = pendingChanges.find(
+    c => c.status === 'pending' && c.entity_type === 'address' && c.field_name === 'permanent'
+  );
+  const pendingTemporary = pendingChanges.find(
+    c => c.status === 'pending' && c.entity_type === 'address' && c.field_name === 'temporary'
+  );
+
   const handleAddAddress = async (data: CreateAddressRequest) => {
     try {
       await createAddress(data);
@@ -52,6 +62,7 @@ export function AddressSection({ userId }: AddressSectionProps) {
           : 'Address added successfully'
       );
       setShowAddressDialog(false);
+      await onAddressChange?.();
     } catch (error) {
       toast.error(
         locale === 'ne'
@@ -71,6 +82,7 @@ export function AddressSection({ userId }: AddressSectionProps) {
       );
       setEditingAddress(null);
       setShowAddressDialog(false);
+      await onAddressChange?.();
     } catch (error) {
       toast.error(
         locale === 'ne'
@@ -199,6 +211,7 @@ export function AddressSection({ userId }: AddressSectionProps) {
                 onEdit={handleEditClick}
                 onDelete={handleDeleteAddress}
                 isDeleting={isUpdating}
+                pendingValue={pendingPermanent ? formatPendingAddress(pendingPermanent.new_value) : null}
               />
             ) : (
               <div className="border-2 border-dashed rounded-lg p-6 text-center">
@@ -249,6 +262,7 @@ export function AddressSection({ userId }: AddressSectionProps) {
                 onEdit={handleEditClick}
                 onDelete={handleDeleteAddress}
                 isDeleting={isUpdating}
+                pendingValue={pendingTemporary ? formatPendingAddress(pendingTemporary.new_value) : null}
               />
             ) : (
               <div className="border-2 border-dashed rounded-lg p-6 text-center">

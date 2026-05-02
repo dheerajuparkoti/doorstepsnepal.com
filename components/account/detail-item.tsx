@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { LucideIcon, Edit } from 'lucide-react';
+import { LucideIcon, Edit, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -13,17 +13,19 @@ interface DetailItemProps {
   className?: string;
   description?: string;
   status?: 'default' | 'success' | 'warning' | 'error' | 'info';
+  pendingValue?: string | null;
 }
 
-export function DetailItem({ 
-  icon: Icon, 
-  title, 
-  value, 
-  isEditable = false, 
+export function DetailItem({
+  icon: Icon,
+  title,
+  value,
+  isEditable = false,
   onEdit,
   className,
   description,
-  status = 'default'
+  status = 'default',
+  pendingValue,
 }: DetailItemProps) {
   const statusColors = {
     default: 'border-border hover:border-primary/50 dark:hover:border-primary/70',
@@ -80,6 +82,14 @@ export function DetailItem({
                   </span>
                 )}
               </div>
+              {pendingValue && (
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <Clock className="h-3 w-3 text-amber-500 flex-shrink-0" />
+                  <span className="text-xs text-amber-600 dark:text-amber-400 truncate">
+                    Pending: {pendingValue}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

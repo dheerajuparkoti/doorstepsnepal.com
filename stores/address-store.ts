@@ -102,16 +102,15 @@ export const useAddressStore = create<AddressState>((set, get) => ({
     set({ isUpdating: true, error: null });
 
     try {
-      const updatedAddress = await addressApi.updateAddress(addressId, data);
-      
-      set((state) => ({
-        addresses: state.addresses.map(addr =>
-          addr.id === addressId ? updatedAddress : addr
-        ),
-        isUpdating: false,
-      }));
+      const result = await addressApi.updateAddress(addressId, data);
 
-      return updatedAddress;
+      // Re-fetch to get the true current state — the backend may create a
+      // pending change instead of directly updating the address, in which case
+      // the original address remains unchanged.
+      const addresses = await addressApi.getAddresses();
+      set({ addresses, isUpdating: false, lastFetched: Date.now() });
+
+      return result;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to update address';
       set({
