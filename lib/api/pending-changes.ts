@@ -3,7 +3,7 @@ import { api } from '@/config/api-client';
 export interface PendingChange {
   id: number;
   user_id: number;
-  entity_type: 'user' | 'professional' | 'address' | 'service_price';
+  entity_type: 'user' | 'professional' | 'address' | 'service_price' | 'bank_details' | 'skill' | 'service_area' | 'service_availability';
   entity_id: number | null;
   field_name: string;
   old_value: string | null;

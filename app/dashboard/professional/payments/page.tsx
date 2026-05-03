@@ -54,6 +54,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { useAuth } from '@/lib/context/auth-context';
 import { getPaymentSchema, PaymentFormValues } from '@/lib/schemas/payment-schema';
+import { getMyPendingChanges, PendingChange } from '@/lib/api/pending-changes';
+import { PendingApprovalBanner } from '@/components/dashboard/pending-approval-banner';
 
 
 
@@ -78,6 +80,7 @@ export default function ProfessionalPaymentsPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [showBankSearch, setShowBankSearch] = useState(false);
   const [bankSearchQuery, setBankSearchQuery] = useState('');
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
 // Mock professional ID get from auth or params
  const currentProfessionalIdFromAuth = user?.professional_id;
   const currentProfessionalId =currentProfessionalIdFromAuth||0;
@@ -134,11 +137,19 @@ export default function ProfessionalPaymentsPage() {
 
   const loadProfile = async () => {
     try {
-      await fetchProfile(currentProfessionalId);
+      const [, changes] = await Promise.all([
+        fetchProfile(currentProfessionalId),
+        getMyPendingChanges(),
+      ]);
+      setPendingChanges(changes);
     } catch (err) {
       // Error handled by store
     }
   };
+
+  const hasBankPending = pendingChanges.some(
+    (c) => c.entity_type === 'bank_details' && c.status === 'pending',
+  );
 
   const handleSubmit = async (data: PaymentFormValues) => {
     try {
@@ -293,6 +304,15 @@ export default function ProfessionalPaymentsPage() {
       {!isEditing ? (
         // READ-ONLY VIEW
         <div className="space-y-6">
+          {hasBankPending && (
+            <PendingApprovalBanner
+              label={
+                locale === 'ne'
+                  ? 'भुक्तानी विवरण परिवर्तन प्रशासक अनुमोदनको प्रतीक्षामा छ — समीक्षा नभएसम्म सम्पादन बन्द छ।'
+                  : 'Payment details change is pending admin approval — editing is locked until reviewed.'
+              }
+            />
+          )}
           {/* Payment Information Card */}
           <Card>
             <CardHeader>
@@ -494,6 +514,7 @@ export default function ProfessionalPaymentsPage() {
             <Button
               onClick={() => setIsEditing(true)}
               className="gap-2"
+              disabled={hasBankPending}
             >
               <Edit className="w-4 h-4" />
               {locale === 'ne' ? 'सम्पादन गर्नुहोस्' : 'Edit Information'}

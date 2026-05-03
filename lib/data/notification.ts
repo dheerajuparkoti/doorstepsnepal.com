@@ -21,6 +21,7 @@ export interface NotificationRequest {
   type: string;
   title: string;
   body: string;
+  mode_channel?: boolean;
   action_route?: string;
   custom_data?: Record<string, any>;
 }

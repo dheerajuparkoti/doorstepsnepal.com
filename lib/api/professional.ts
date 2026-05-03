@@ -118,10 +118,13 @@ async getTopProfessionals(limit: number = 50): Promise<TopProfessionalsResponse>
   // Add service areas to professional
   async addProfessionalServiceAreas(
     professionalId: number,
-    serviceAreaIds: number[]
+    serviceAreaIds: number[],
+    bypassPending = false
   ): Promise<string> {
     try {
-      const endpoint = `/professionals/${professionalId}/service_areas`;
+      const endpoint = bypassPending
+        ? `/professionals/${professionalId}/service_areas?bypass_pending=true`
+        : `/professionals/${professionalId}/service_areas`;
       const response = await api.post<string>(endpoint, serviceAreaIds);
       return response;
     } catch (error) {

@@ -113,7 +113,7 @@ export async function setupProfile(
 ): Promise<User> {
   try {
     const requests: Promise<User>[] = [
-      api.patch<User>('/users/fullname', { full_name: profileData.full_name }),
+      api.patch<User>('/users/fullname', { full_name: profileData.full_name, bypass_pending: true }),
       api.patch<User>('/users/gender', { gender: profileData.gender }),
       api.patch<User>('/users/age-group', { age_group: profileData.age_group }),
       api.patch<User>('/users/email', { email: profileData.email }),

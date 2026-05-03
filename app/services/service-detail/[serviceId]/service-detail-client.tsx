@@ -264,6 +264,7 @@ const handleBookNow = (priceItem: any) => {
         type: 'New Order',
         title: 'New Service Request Available',
         body: 'A new service request is ready for your attention. Tap to view the service details and accept or reject the assignment.',
+        mode_channel: true,
         action_route: 'order',
         custom_data: { orderId, total_price: totalPrice }
       });
@@ -273,6 +274,7 @@ const handleBookNow = (priceItem: any) => {
         type: 'Order Confirmation',
         title: 'Order Successfully Placed!',
         body: 'Thank you! Your booking has been successfully placed and is now awaiting confirmation from a professional.',
+        mode_channel: false,
         action_route: 'order',
         custom_data: { orderId, total_price: totalPrice }
       });

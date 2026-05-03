@@ -53,6 +53,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/lib/context/auth-context';
+import { getMyPendingChanges, PendingChange } from '@/lib/api/pending-changes';
+import { PendingApprovalBanner } from '@/components/dashboard/pending-approval-banner';
 
 
 
@@ -281,6 +283,7 @@ export default function ProfessionalSkillsPage() {
   const [showSkillPicker, setShowSkillPicker] = useState(false);
   const [skillSearchQuery, setSkillSearchQuery] = useState('');
   const [filteredSkills, setFilteredSkills] = useState<string[]>(ALL_SKILLS);
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
  const currentProfessionalIdFromAuth = user?.professional_id;
   const currentProfessionalId =currentProfessionalIdFromAuth||0;
   // Initialize form
@@ -343,11 +346,19 @@ useEffect(() => {
 
   const loadProfile = async () => {
     try {
-      await fetchProfile(currentProfessionalId);
+      const [, changes] = await Promise.all([
+        fetchProfile(currentProfessionalId),
+        getMyPendingChanges(),
+      ]);
+      setPendingChanges(changes);
     } catch (err) {
       // Error handled by store
     }
   };
+
+  const hasSkillPending = pendingChanges.some(
+    (c) => c.entity_type === 'skill' && c.status === 'pending',
+  );
 
   const handleAddSkill = (skill: string) => {
     if (skills.length >= MAX_SKILLS) {
@@ -519,6 +530,16 @@ useEffect(() => {
         </div>
       </div>
 
+      {hasSkillPending && (
+        <PendingApprovalBanner
+          className="mb-6"
+          label={
+            locale === 'ne'
+              ? 'कौशल परिवर्तन प्रशासक अनुमोदनको प्रतीक्षामा छ — समीक्षा नभएसम्म सम्पादन बन्द छ।'
+              : 'Skill change is pending admin approval — editing is locked until reviewed.'
+          }
+        />
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column - Current Skills */}
         <div className="lg:col-span-2 space-y-6">
@@ -574,8 +595,9 @@ useEffect(() => {
                           >
                             <span className="mr-2">{skill}</span>
                             <button
-                              onClick={() => handleRemoveSkill(skill)}
-                              className="ml-1 hover:bg-black/10 rounded-full p-0.5"
+                              onClick={() => !hasSkillPending && handleRemoveSkill(skill)}
+                              disabled={hasSkillPending}
+                              className="ml-1 hover:bg-black/10 rounded-full p-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <X className="w-3 h-3" />
                             </button>
@@ -655,7 +677,7 @@ useEffect(() => {
                             onChange={(e) => setSkillSearchQuery(e.target.value)}
                             onClick={() => setShowSkillPicker(true)}
                             readOnly
-                            disabled={skills.length >= MAX_SKILLS}
+                            disabled={skills.length >= MAX_SKILLS || hasSkillPending}
                             className="cursor-pointer"
                           />
                           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -724,7 +746,7 @@ useEffect(() => {
                   <Button
                     type="button"
                     onClick={() => setShowSkillPicker(true)}
-                    disabled={skills.length >= MAX_SKILLS}
+                    disabled={skills.length >= MAX_SKILLS || hasSkillPending}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     {locale === 'ne' ? 'थप्नुहोस्' : 'Add'}
@@ -847,7 +869,7 @@ useEffect(() => {
             <CardContent className="space-y-4">
               <Button
                 onClick={handleSaveSkills}
-                disabled={isUpdating || JSON.stringify(skills) === JSON.stringify(originalSkills)}
+                disabled={isUpdating || hasSkillPending || JSON.stringify(skills) === JSON.stringify(originalSkills)}
                 className="w-full gap-2"
               >
                 {isUpdating ? (
@@ -874,7 +896,7 @@ useEffect(() => {
                       : 'Changes cancelled',
                   });
                 }}
-                disabled={JSON.stringify(skills) === JSON.stringify(originalSkills)}
+                disabled={hasSkillPending || JSON.stringify(skills) === JSON.stringify(originalSkills)}
                 className="w-full gap-2"
               >
                 <X className="w-4 h-4" />
@@ -893,6 +915,7 @@ useEffect(() => {
                       setSkills([]);
                     }
                   }}
+                  disabled={hasSkillPending}
                   className="w-full gap-2"
                 >
                   <Trash2 className="w-4 h-4" />

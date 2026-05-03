@@ -279,6 +279,7 @@ const handleSubmit = async () => {
     const professionalData = {
       ...(professionalId && { id: professionalId }),
       user_id: userId,
+      bypass_pending: true,
       experience: 1,
       skill: skillsPaymentData.skills?.join(', ') || '',
       refered_by: currentFormData.emergency.referred_by === 'Friend' 

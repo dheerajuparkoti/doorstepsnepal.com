@@ -55,6 +55,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/lib/context/auth-context';
+import { getMyPendingChanges, PendingChange } from '@/lib/api/pending-changes';
+import { PendingApprovalBanner } from '@/components/dashboard/pending-approval-banner';
 
 
 
@@ -82,10 +84,11 @@ interface TimeSlotProps {
   onEdit: (availability: any) => void;
   onDelete: (availabilityId: number) => void;
   isProcessing: boolean;
+  isPending: boolean;
   locale: string;
 }
 
-const TimeSlotCard = ({ availability, onEdit, onDelete, isProcessing, locale }: TimeSlotProps) => {
+const TimeSlotCard = ({ availability, onEdit, onDelete, isProcessing, isPending, locale }: TimeSlotProps) => {
   const { day_of_week, start_time, end_time, id } = availability;
   const dayName = locale === 'ne' ? getDayNameInNepali(day_of_week) : day_of_week;
   const startTime = formatTimeForDisplay(start_time);
@@ -93,6 +96,14 @@ const TimeSlotCard = ({ availability, onEdit, onDelete, isProcessing, locale }: 
 
   return (
     <div className="group relative border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+      {isPending && (
+        <div className="flex items-center gap-2 mb-3 p-2 bg-amber-50 border border-amber-200 rounded-md text-xs">
+          <Clock className="w-3 h-3 text-amber-600 flex-shrink-0" />
+          <span className="text-amber-800 font-medium">
+            {locale === 'ne' ? 'प्रशासक अनुमोदनको प्रतीक्षामा' : 'Pending admin approval'}
+          </span>
+        </div>
+      )}
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
@@ -111,24 +122,30 @@ const TimeSlotCard = ({ availability, onEdit, onDelete, isProcessing, locale }: 
           </div>
         </div>
         <div className="flex items-center gap-1">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(availability)}
-            disabled={isProcessing}
-            className="h-8 w-8"
-          >
-            <Edit className="w-4 h-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onDelete(id)}
-            disabled={isProcessing}
-            className="h-8 w-8 text-red-500 hover:text-red-700"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          {isPending ? (
+            <Clock className="w-4 h-4 text-amber-500 mx-2" />
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(availability)}
+                disabled={isProcessing}
+                className="h-8 w-8"
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDelete(id)}
+                disabled={isProcessing}
+                className="h-8 w-8 text-red-500 hover:text-red-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -172,6 +189,7 @@ export default function ProfessionalServiceAvailabilityPage() {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editingAvailability, setEditingAvailability] = useState<any>(null);
   const [timeError, setTimeError] = useState<string | null>(null);
+  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
 
   
   const currentProfessionalIdFromAuth = user?.professional_id;
@@ -208,11 +226,25 @@ export default function ProfessionalServiceAvailabilityPage() {
 
   const loadAvailabilities = async () => {
     try {
-      await fetchAvailabilities(currentProfessionalId);
+      const [, changes] = await Promise.all([
+        fetchAvailabilities(currentProfessionalId),
+        getMyPendingChanges(),
+      ]);
+      setPendingChanges(changes);
     } catch (err) {
       // Error handled by store
     }
   };
+
+  const pendingSlotIds = new Set(
+    pendingChanges
+      .filter((c) => c.entity_type === 'service_availability' && c.status === 'pending' && c.entity_id != null)
+      .map((c) => c.entity_id!),
+  );
+  const hasPendingCreate = pendingChanges.some(
+    (c) => c.entity_type === 'service_availability' && c.status === 'pending' && c.entity_id == null,
+  );
+  const hasAnyAvailabilityPending = pendingSlotIds.size > 0 || hasPendingCreate;
 
   const handleCreateAvailability = async (data: AvailabilityFormValues) => {
     try {
@@ -477,6 +509,17 @@ export default function ProfessionalServiceAvailabilityPage() {
 
               <Separator className="my-4" />
 
+              {hasPendingCreate && (
+                <PendingApprovalBanner
+                  className="mb-4"
+                  label={
+                    locale === 'ne'
+                      ? 'नयाँ समय स्लट प्रशासक अनुमोदनको प्रतीक्षामा छ — समीक्षा नभएसम्म थप्न बन्द छ।'
+                      : 'New time slot is pending admin approval — adding is locked until reviewed.'
+                  }
+                />
+              )}
+
               {/* Availability Slots List */}
               {availabilities.length === 0 ? (
                 <div className="text-center py-8">
@@ -491,7 +534,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                   </p>
                   <Button
                     onClick={() => setShowAddDialog(true)}
-                    disabled={isLimitReached}
+                    disabled={isLimitReached || hasAnyAvailabilityPending}
                     className="gap-2"
                   >
                     <Plus className="w-4 h-4" />
@@ -507,6 +550,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                       onEdit={handleEditClick}
                       onDelete={handleDeleteAvailability}
                       isProcessing={isUpdating || isDeleting}
+                      isPending={pendingSlotIds.has(availability.id)}
                       locale={locale}
                     />
                   ))}
@@ -544,13 +588,17 @@ export default function ProfessionalServiceAvailabilityPage() {
                           ? locale === 'ne'
                             ? 'स्लट सीमा पुग्यो'
                             : 'Slot limit reached'
+                          : hasAnyAvailabilityPending
+                          ? locale === 'ne'
+                            ? 'अनुमोदनको प्रतीक्षामा...'
+                            : 'Pending approval...'
                           : locale === 'ne'
                           ? 'नयाँ समय स्लट थप्न क्लिक गर्नुहोस्...'
                           : 'Click to add new time slot...'
                       }
                       readOnly
-                      disabled={isLimitReached}
-                      onClick={() => setShowAddDialog(true)}
+                      disabled={isLimitReached || hasAnyAvailabilityPending}
+                      onClick={() => !hasAnyAvailabilityPending && setShowAddDialog(true)}
                       className="cursor-pointer"
                     />
                     <Plus className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -559,7 +607,7 @@ export default function ProfessionalServiceAvailabilityPage() {
 
                 <Button
                   onClick={() => setShowAddDialog(true)}
-                  disabled={isLimitReached}
+                  disabled={isLimitReached || hasAnyAvailabilityPending}
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" />
@@ -683,12 +731,12 @@ export default function ProfessionalServiceAvailabilityPage() {
                 variant="outline"
                 className="w-full justify-start gap-2"
                 onClick={() => setShowAddDialog(true)}
-                disabled={isLimitReached}
+                disabled={isLimitReached || hasAnyAvailabilityPending}
               >
                 <Plus className="w-4 h-4" />
                 {locale === 'ne' ? 'नयाँ स्लट थप्नुहोस्' : 'Add New Slot'}
               </Button>
-              
+
               <Button
                 variant="outline"
                 className="w-full justify-start gap-2"
@@ -717,7 +765,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                       });
                     }
                   }}
-                  disabled={isUpdating || isDeleting}
+                  disabled={isUpdating || isDeleting || hasAnyAvailabilityPending}
                 >
                   <Trash2 className="w-4 h-4" />
                   {locale === 'ne' ? 'सबै स्लट हटाउनुहोस्' : 'Remove All Slots'}
@@ -785,7 +833,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                     form.setValue('end_time', '17:00:00');
                     setShowAddDialog(true);
                   }}
-                  disabled={isLimitReached}
+                  disabled={isLimitReached || hasAnyAvailabilityPending}
                 >
                   <div className="flex-1">
                     <div className="font-medium">{getDayDisplayName(day)}</div>

@@ -182,10 +182,11 @@ interface ProfessionalStore {
   // Service Areas CRUD
   fetchServiceAreas: (professionalId: number) => Promise<void>;
   addServiceArea: (
-    professionalId: number, 
-    district: string, 
-    municipality: string, 
-    ward?: number
+    professionalId: number,
+    district: string,
+    municipality: string,
+    ward?: number,
+    bypassPending?: boolean
   ) => Promise<ServiceArea>;
   removeServiceArea: (professionalId: number, serviceAreaId: number) => Promise<void>;
   saveServiceAreas: (professionalId: number, serviceAreaIds: number[]) => Promise<void>;
@@ -338,31 +339,32 @@ export const useProfessionalStore = create<ProfessionalStore>((set, get) => ({
 
   // Add service area to professional
   addServiceArea: async (
-    professionalId: number, 
-    district: string, 
-    municipality: string, 
-    ward?: number
+    professionalId: number,
+    district: string,
+    municipality: string,
+    ward?: number,
+    bypassPending = false
   ) => {
     set({ isUpdatingServiceAreas: true, error: null });
-    
+
     try {
       // Format the service area name
       const formattedMunicipality = municipality.replace(/\s+/g, '_').replace(/[^\w]/g, '');
-      const serviceAreaName = ward 
+      const serviceAreaName = ward
         ? `${district}-${formattedMunicipality}-${ward}`
         : `${district}-${formattedMunicipality}`;
-      
+
       // First, create or get the service area
       let serviceArea: ServiceArea;
-      
+
       // Check if service area already exists in the system
       // For now, we'll create a new one. In a real app, you might want to search first
       serviceArea = await professionalApi.createServiceArea({
         name: serviceAreaName,
       });
-      
+
       // Then add it to the professional
-      await professionalApi.addProfessionalServiceAreas(professionalId, [serviceArea.id]);
+      await professionalApi.addProfessionalServiceAreas(professionalId, [serviceArea.id], bypassPending);
       
       // Update local state
       set(state => ({

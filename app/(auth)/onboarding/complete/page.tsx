@@ -261,7 +261,8 @@ export default function ProfessionalServiceAreasOnboarding({
         professionalId,
         data.district,
         data.municipality,
-        data.ward
+        data.ward,
+        true
       );
 
       toast.success(

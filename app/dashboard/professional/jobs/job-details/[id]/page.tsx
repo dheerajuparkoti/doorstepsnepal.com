@@ -797,6 +797,7 @@ export default function OrderDetailsPage() {
         type: 'Order Update',
         title: notificationTitle,
         body: notificationBody,
+        mode_channel: false,
         action_route: 'order',
         custom_data: {
           orderId: order.id,
