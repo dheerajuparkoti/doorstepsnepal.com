@@ -141,13 +141,14 @@ useEffect(() => {
     if (currentStep === 0) {
       if (!userId) {
         toast.error(
-          locale === 'ne' 
-            ? 'प्रयोगकर्ता प्रमाणित गर्न सकिएन' 
+          locale === 'ne'
+            ? 'प्रयोगकर्ता प्रमाणित गर्न सकिएन'
             : 'User not authenticated'
         );
         return;
       }
       try {
+        // Step 1: Register professional with addresses
         const partialData = {
           user_id: userId,
           addresses: addresses.map(addr => ({
@@ -160,21 +161,22 @@ useEffect(() => {
           })),
         };
 
+        console.log("PARTIAL registration data being sent:", partialData);
         const professional = await registerProfessional(partialData);
-        
+
         if (professional?.id) {
           setProfessionalId(professional.id);
           toast.success(
-            locale === 'ne' 
-              ? 'प्रारम्भिक जानकारी सफलतापूर्वक दर्ता भयो' 
+            locale === 'ne'
+              ? 'प्रारम्भिक जानकारी सफलतापूर्वक दर्ता भयो'
               : 'Initial information registered successfully'
           );
         }
       } catch (error) {
         console.error('Partial registration failed:', error);
         toast.error(
-          locale === 'ne' 
-            ? 'प्रारम्भिक जानकारी दर्ता गर्न असफल' 
+          locale === 'ne'
+            ? 'प्रारम्भिक जानकारी दर्ता गर्न असफल'
             : 'Failed to register initial information'
         );
         return;
@@ -279,7 +281,6 @@ const handleSubmit = async () => {
     const professionalData = {
       ...(professionalId && { id: professionalId }),
       user_id: userId,
-      bypass_pending: true,
       experience: 1,
       skill: skillsPaymentData.skills?.join(', ') || '',
       refered_by: currentFormData.emergency.referred_by === 'Friend' 
@@ -310,7 +311,7 @@ const handleSubmit = async () => {
       })),
     };
 
-    //console.log("FINAL professionalData being sent:", professionalData);
+    console.log("FINAL professionalData being sent:", professionalData);
 
     let professional;
     

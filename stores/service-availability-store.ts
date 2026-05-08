@@ -136,22 +136,27 @@ export const useServiceAvailabilityStore = create<ServiceAvailabilityStore>((set
         throw new Error('Time slot already exists for this day');
       }
       
-      const newAvailability = await serviceAvailabilityApi.createServiceAvailability(data);
-      
-      // Update state
-      const updatedAvailabilities = [...get().availabilities, newAvailability];
-      const usedDays = new Set(updatedAvailabilities.map(item => item.day_of_week));
+      const newAvailability = await serviceAvailabilityApi.createServiceAvailability(data, true);
+
+      // Refetch availabilities to ensure we have the correct data from database
+      const professionalId = data.professional_id;
+      const response = await serviceAvailabilityApi.getServiceAvailabilities(professionalId, {
+        limit: 100,
+      });
+
+      // Update available days (days not already used)
+      const usedDays = new Set(response.items.map(item => item.day_of_week));
       const availableDays = DAYS_OF_WEEK.filter(day => !usedDays.has(day));
-      
+
       set(state => ({
-        availabilities: updatedAvailabilities,
+        availabilities: response.items,
         availableDays,
         isUpdating: false,
         selectedDay: availableDays[0] || state.selectedDay,
         startTime: null,
         endTime: null,
       }));
-      
+
       return newAvailability;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || 'Failed to create availability';
@@ -168,7 +173,7 @@ export const useServiceAvailabilityStore = create<ServiceAvailabilityStore>((set
     set({ isUpdating: true, error: null });
     
     try {
-      const updatedAvailability = await serviceAvailabilityApi.updateServiceAvailability(availabilityId, data);
+      const updatedAvailability = await serviceAvailabilityApi.updateServiceAvailability(availabilityId, data, true);
       
       // Update state
       set(state => ({
@@ -194,7 +199,7 @@ export const useServiceAvailabilityStore = create<ServiceAvailabilityStore>((set
     set({ isDeleting: true, error: null });
     
     try {
-      await serviceAvailabilityApi.deleteServiceAvailability(availabilityId);
+      await serviceAvailabilityApi.deleteServiceAvailability(availabilityId, true);
       
       // Update state
       const updatedAvailabilities = get().availabilities.filter(item => item.id !== availabilityId);

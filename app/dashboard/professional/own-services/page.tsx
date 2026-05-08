@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import {
   fetchServicesByProfessionalId,
   fetchPriceUnits,
@@ -79,6 +79,7 @@ export default function ProfessionalServicesChoosePage() {
   const { t, language } = useI18n();
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const {user} = useAuth();
 
@@ -88,6 +89,7 @@ export default function ProfessionalServicesChoosePage() {
   const [priceUnits, setPriceUnits] = useState<PriceUnit[]>([]);
   const [qualityTypes, setQualityTypes] = useState<QualityType[]>([]);
   const [pricePendingChanges, setPricePendingChanges] = useState<PendingChange[]>([]);
+  const [dropdownsError, setDropdownsError] = useState<string | null>(null);
 
   // Modal states
   const [priceModalOpen, setPriceModalOpen] = useState(false);
@@ -119,6 +121,14 @@ export default function ProfessionalServicesChoosePage() {
       loadPendingChanges();
     }
   }, [professionalId]);
+
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh');
+    if (professionalId && refreshParam === 'true') {
+      loadData();
+      loadPendingChanges();
+    }
+  }, [searchParams, professionalId]);
 
   const loadData = async () => {
     setLoading(true);
@@ -153,15 +163,16 @@ export default function ProfessionalServicesChoosePage() {
         fetchPriceUnits(),
         fetchQualityTypes()
       ]);
+      if (units.length === 0 || types.length === 0) {
+        setDropdownsError(getLocalizedText('Unable to load price units or quality types. Please refresh the page.', 'मूल्य एकाइ वा गुणस्तर प्रकार लोड गर्न असक्षम। कृपया पृष्ठ पुनः लोड गर्नुहोस्।'));
+        return;
+      }
       setPriceUnits(units);
       setQualityTypes(types);
+      setDropdownsError(null);
     } catch (error) {
       console.error('Error loading dropdowns:', error);
-      toast({
-        title: getLocalizedText('Error', 'त्रुटि'),
-        description: getLocalizedText('Failed to load dropdown data', 'ड्रपडाउन डाटा लोड गर्न असफल'),
-        variant: 'destructive',
-      });
+      setDropdownsError(getLocalizedText('Failed to load dropdown data. Please refresh the page.', 'ड्रपडाउन डाटा लोड गर्न असफल। कृपया पृष्ठ पुनः लोड गर्नुहोस्।'));
     }
   };
 
@@ -239,6 +250,7 @@ export default function ProfessionalServicesChoosePage() {
       };
 
       if (selectedPrice) {
+        // Update: requires admin approval
         await updatePrice(selectedPrice.id, priceData);
         toast({
           title: getLocalizedText('Submitted for Approval', 'अनुमोदनको लागि पेश गरियो'),
@@ -248,18 +260,20 @@ export default function ProfessionalServicesChoosePage() {
           ),
         });
       } else {
-        await createPrice(priceData);
+        // Create: bypass admin approval
+        await createPrice(priceData, true);
         toast({
-          title: getLocalizedText('Submitted for Approval', 'अनुमोदनको लागि पेश गरियो'),
+          title: getLocalizedText('Success', 'सफलता'),
           description: getLocalizedText(
-            'New price submitted for admin approval',
-            'नयाँ मूल्य प्रशासक अनुमोदनको लागि पेश गरियो'
+            'New price created successfully',
+            'नयाँ मूल्य सफलतापूर्वक सर्जना गरियो'
           ),
         });
       }
 
       setPriceModalOpen(false);
       resetForm();
+      await loadData();
       await loadPendingChanges();
     } catch (error: any) {
       const detail = error?.response?.data?.detail || error?.message;
@@ -290,6 +304,7 @@ export default function ProfessionalServicesChoosePage() {
           'मूल्य मेटाउने अनुरोध प्रशासक अनुमोदनको लागि पेश गरियो'
         ),
       });
+      await loadData();
       await loadPendingChanges();
     } catch (error: any) {
       const detail = error?.response?.data?.detail || error?.message;
@@ -557,13 +572,25 @@ export default function ProfessionalServicesChoosePage() {
                 : selectedService.service.name_en
               )}
               <span className="block text-xs text-amber-600 mt-1">
-                {getLocalizedText(
-                  'Changes require admin approval before taking effect.',
-                  'परिवर्तनहरू लागू हुनु अघि प्रशासक अनुमोदन आवश्यक छ।'
-                )}
+                {selectedPrice
+                  ? getLocalizedText(
+                      'Updates require admin approval before taking effect.',
+                      'अद्यावधिनहरू लागू हुनु अघि प्रशासक अनुमोदन आवश्यक छ।'
+                    )
+                  : getLocalizedText(
+                      'New prices are added immediately.',
+                      'नयाँ मूल्यहरू तुरुन्त थपिन्छन्।'
+                    )
+                }
               </span>
             </DialogDescription>
           </DialogHeader>
+
+          {dropdownsError && (
+            <div className="rounded-md bg-red-50 p-3 border border-red-200">
+              <p className="text-sm text-red-700">{dropdownsError}</p>
+            </div>
+          )}
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
@@ -752,11 +779,11 @@ export default function ProfessionalServicesChoosePage() {
             >
               {getLocalizedText('Cancel', 'रद्द गर्नुहोस्')}
             </Button>
-            <Button onClick={handleSavePrice} disabled={submitting}>
+            <Button onClick={handleSavePrice} disabled={submitting || !!dropdownsError}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {selectedPrice
                 ? getLocalizedText('Submit for Approval', 'अनुमोदनको लागि पेश गर्नुहोस्')
-                : getLocalizedText('Submit for Approval', 'अनुमोदनको लागि पेश गर्नुहोस्')
+                : getLocalizedText('Add Price', 'मूल्य थप्नुहोस्')
               }
             </Button>
           </DialogFooter>

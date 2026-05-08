@@ -132,13 +132,13 @@ export async function getUserProfile(): Promise<User> {
   }
 }
 // Update full name
-export async function updateFullName(full_name: string): Promise<User> {
-  const response = await api.patch<User>('/users/fullname', { full_name });
-  
+export async function updateFullName(full_name: string, bypassPending = false): Promise<User> {
+  const response = await api.patch<User>('/users/fullname', { full_name, bypass_pending: bypassPending });
+
   if (useUserStore) {
     useUserStore.getState().updateUser(response);
   }
-  
+
   return response;
 }
 
@@ -165,24 +165,24 @@ export async function updateAgeGroup(age_group: string): Promise<User> {
 }
 
 // Update email
-export async function updateEmail(email: string): Promise<User> {
-  const response = await api.patch<User>('/users/email', { email });
-  
+export async function updateEmail(email: string, bypassPending = false): Promise<User> {
+  const response = await api.patch<User>('/users/email', { email, bypass_pending: bypassPending });
+
   if (useUserStore) {
     useUserStore.getState().updateUser(response);
   }
-  
+
   return response;
 }
 
 // Update phone
-export async function updatePhone(phone_number: string): Promise<User> {
-  const response = await api.patch<User>('/users/phone', { phone_number });
-  
+export async function updatePhone(phone_number: string, bypassPending = false): Promise<User> {
+  const response = await api.patch<User>('/users/phone', { phone_number, bypass_pending: bypassPending });
+
   if (useUserStore) {
     useUserStore.getState().updateUser(response);
   }
-  
+
   return response;
 }
 
