@@ -185,16 +185,16 @@ const handleFieldUpdate = useCallback(async (value: string) => {
   const schema = getProfileSchema(getLocalizedText);
 
   try {
-    
+
     if (currentEditField.field === 'full_name') {
       schema.pick({ full_name: true }).parse({ full_name: value });
-      await updateFullName(value);
+      await updateFullName(value, true);
     } else if (currentEditField.field === 'email') {
       schema.pick({ email: true }).parse({ email: value });
-      await updateEmail(value);
+      await updateEmail(value, true);
     } else if (currentEditField.field === 'phone_number') {
       schema.pick({ phone_number: true }).parse({ phone_number: value });
-      await updatePhone(value);
+      await updatePhone(value, true);
     } else if (currentEditField.field === 'gender') {
       schema.pick({ gender: true }).parse({ gender: value });
       await updateGender(value);
@@ -204,7 +204,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
     } else if (currentEditField.field === 'bio') {
       schema.pick({ bio: true }).parse({ bio: value });
       if (user.professional_id) {
-        await patchProfessionalProfile(user.professional_id, { bio: value });
+        await patchProfessionalProfile(user.professional_id, { bio: value }, false);
       }
     } else if (currentEditField.field === 'experience' && user.professional_id) {
       const exp = parseInt(value, 10);
@@ -215,7 +215,7 @@ const handleFieldUpdate = useCallback(async (value: string) => {
         ));
         return;
       }
-      await patchProfessionalProfile(user.professional_id, { experience: exp });
+      await patchProfessionalProfile(user.professional_id, { experience: exp }, false);
       toast.success(getLocalizedText('Experience updated successfully', 'अनुभव सफलतापूर्वक अद्यावधिक गरियो'));
     }
 

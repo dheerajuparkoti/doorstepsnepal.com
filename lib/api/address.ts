@@ -30,9 +30,10 @@ export const addressApi = {
   },
 
   // Create new address
-  async createAddress(data: CreateAddressRequest): Promise<Address> {
+  async createAddress(data: CreateAddressRequest, bypassPending = false): Promise<Address> {
     try {
-      return await api.post<Address>('/address/', data);
+      const payload = { ...data, ...(bypassPending && { bypass_pending: true }) };
+      return await api.post<Address>('/address/', payload);
     } catch (error) {
       console.error('Error creating address:', error);
       throw error;
@@ -40,9 +41,10 @@ export const addressApi = {
   },
 
   // Update address (PATCH)
-  async updateAddress(addressId: number, data: UpdateAddressRequest): Promise<Address> {
+  async updateAddress(addressId: number, data: UpdateAddressRequest, bypassPending = false): Promise<Address> {
     try {
-      return await api.patch<Address>(`/address/${addressId}`, data);
+      const payload = { ...data, bypass_pending: bypassPending };
+      return await api.patch<Address>(`/address/${addressId}`, payload);
     } catch (error) {
       console.error(`Error updating address ${addressId}:`, error);
       throw error;

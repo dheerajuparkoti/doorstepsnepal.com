@@ -29,8 +29,8 @@ export function AddressStep({ onUpdate }: AddressStepProps) {
         </div>
       </div>
 
-      {/* AddressSection component */}
-      <AddressSection />
+      {/* AddressSection component - bypass pending approval during onboarding */}
+      <AddressSection bypassPending={true} />
 
       {/* Address tips */}
       <div className="grid grid-cols-2 gap-4 mt-4">

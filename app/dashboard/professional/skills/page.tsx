@@ -388,7 +388,7 @@ useEffect(() => {
     try {
       // Check if skills have changed
       const hasChanges = JSON.stringify(skills) !== JSON.stringify(originalSkills);
-      
+
       if (!hasChanges) {
         toast({
           title: locale === 'ne' ? 'जानकारी' : 'Info',
@@ -410,10 +410,10 @@ useEffect(() => {
         return;
       }
 
-      // Update profile with new skills
+      // Update profile with new skills - bypass admin approval by default
       await patchProfile(currentProfessionalId, {
         skill: skills.join(', '),
-      });
+      }, true);
 
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
@@ -595,8 +595,7 @@ useEffect(() => {
                           >
                             <span className="mr-2">{skill}</span>
                             <button
-                              onClick={() => !hasSkillPending && handleRemoveSkill(skill)}
-                              disabled={hasSkillPending}
+                              onClick={() => handleRemoveSkill(skill)}
                               className="ml-1 hover:bg-black/10 rounded-full p-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <X className="w-3 h-3" />
@@ -677,7 +676,7 @@ useEffect(() => {
                             onChange={(e) => setSkillSearchQuery(e.target.value)}
                             onClick={() => setShowSkillPicker(true)}
                             readOnly
-                            disabled={skills.length >= MAX_SKILLS || hasSkillPending}
+                            disabled={skills.length >= MAX_SKILLS}
                             className="cursor-pointer"
                           />
                           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -746,7 +745,7 @@ useEffect(() => {
                   <Button
                     type="button"
                     onClick={() => setShowSkillPicker(true)}
-                    disabled={skills.length >= MAX_SKILLS || hasSkillPending}
+                    disabled={skills.length >= MAX_SKILLS}
                   >
                     <Plus className="w-4 h-4 mr-2" />
                     {locale === 'ne' ? 'थप्नुहोस्' : 'Add'}
@@ -869,7 +868,7 @@ useEffect(() => {
             <CardContent className="space-y-4">
               <Button
                 onClick={handleSaveSkills}
-                disabled={isUpdating || hasSkillPending || JSON.stringify(skills) === JSON.stringify(originalSkills)}
+                disabled={isUpdating || JSON.stringify(skills) === JSON.stringify(originalSkills)}
                 className="w-full gap-2"
               >
                 {isUpdating ? (
@@ -896,7 +895,7 @@ useEffect(() => {
                       : 'Changes cancelled',
                   });
                 }}
-                disabled={hasSkillPending || JSON.stringify(skills) === JSON.stringify(originalSkills)}
+                disabled={JSON.stringify(skills) === JSON.stringify(originalSkills)}
                 className="w-full gap-2"
               >
                 <X className="w-4 h-4" />
@@ -915,7 +914,7 @@ useEffect(() => {
                       setSkills([]);
                     }
                   }}
-                  disabled={hasSkillPending}
+                  disabled={false}
                   className="w-full gap-2"
                 >
                   <Trash2 className="w-4 h-4" />

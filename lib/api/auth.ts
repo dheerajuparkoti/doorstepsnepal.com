@@ -114,12 +114,12 @@ export async function setupProfile(
   try {
     const requests: Promise<User>[] = [
       api.patch<User>('/users/fullname', { full_name: profileData.full_name, bypass_pending: true }),
-      api.patch<User>('/users/gender', { gender: profileData.gender }),
-      api.patch<User>('/users/age-group', { age_group: profileData.age_group }),
-      api.patch<User>('/users/email', { email: profileData.email }),
+      api.patch<User>('/users/gender', { gender: profileData.gender, bypass_pending: true }),
+      api.patch<User>('/users/age-group', { age_group: profileData.age_group, bypass_pending: true }),
+      api.patch<User>('/users/email', { email: profileData.email, bypass_pending: true }),
     ];
     if (profileData.phone_number) {
-      requests.push(api.patch<User>('/users/phone', { phone_number: profileData.phone_number }));
+      requests.push(api.patch<User>('/users/phone', { phone_number: profileData.phone_number, bypass_pending: true }));
     }
     const results = await Promise.allSettled(requests);
     

@@ -57,8 +57,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/lib/context/auth-context';
-import { getMyPendingChanges, PendingChange } from '@/lib/api/pending-changes';
-import { PendingApprovalBanner } from '@/components/dashboard/pending-approval-banner';
 
 
 // Maximum number of service areas allowed
@@ -156,7 +154,6 @@ export default function ProfessionalServiceAreasPage() {
   const [municipalitySearch, setMunicipalitySearch] = useState('');
   const [selectedWards, setSelectedWards] = useState<number[]>([]);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
   
  const currentProfessionalIdFromAuth = user?.professional_id;
   const currentProfessionalId =currentProfessionalIdFromAuth||0;
@@ -176,12 +173,10 @@ export default function ProfessionalServiceAreasPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [, , changes] = await Promise.all([
+        await Promise.all([
           fetchProfile(currentProfessionalId),
           fetchServiceAreas(currentProfessionalId),
-          getMyPendingChanges(),
         ]);
-        setPendingChanges(changes);
       } catch (err) {
         // Error handled by store
       } finally {
@@ -192,13 +187,6 @@ export default function ProfessionalServiceAreasPage() {
     loadData();
   }, []);
 
-  const pendingAreaIds = new Set(
-    pendingChanges
-      .filter((c) => c.entity_type === 'service_area' && c.status === 'pending' && c.entity_id != null)
-      .map((c) => c.entity_id!),
-  );
-  const hasAnyAreaPending = pendingAreaIds.size > 0 ||
-    pendingChanges.some((c) => c.entity_type === 'service_area' && c.status === 'pending' && c.entity_id == null);
 
   useEffect(() => {
     if (error) {
@@ -245,8 +233,8 @@ export default function ProfessionalServiceAreasPage() {
             : `You can only add up to ${MAX_SERVICE_AREAS} service areas`,
 
         }
-   
-         
+
+
         );
         return;
       }
@@ -261,7 +249,7 @@ export default function ProfessionalServiceAreasPage() {
             ? 'यो सेवा क्षेत्र पहिले नै थपिएको छ'
             : 'This service area already exists',
       }
-         
+
 
         );
         return;
@@ -271,7 +259,8 @@ export default function ProfessionalServiceAreasPage() {
         currentProfessionalId,
         data.district,
         data.municipality,
-        data.ward
+        data.ward,
+        true
       );
 
       toast.success(
@@ -296,7 +285,7 @@ export default function ProfessionalServiceAreasPage() {
 
   const handleRemoveServiceArea = async (serviceAreaId: number) => {
     try {
-      await removeServiceArea(currentProfessionalId, serviceAreaId);
+      await removeServiceArea(currentProfessionalId, serviceAreaId, true);
       
       toast.success(
      locale === 'ne' ? 'सफलता' : 'Success',{
@@ -452,16 +441,6 @@ export default function ProfessionalServiceAreasPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {hasAnyAreaPending && (
-                <PendingApprovalBanner
-                  className="mb-4"
-                  label={
-                    locale === 'ne'
-                      ? 'सेवा क्षेत्र परिवर्तन प्रशासक अनुमोदनको प्रतीक्षामा छ — समीक्षा नभएसम्म थप/हटाउन बन्द छ।'
-                      : 'Service area change is pending admin approval — adding and removing is locked until reviewed.'
-                  }
-                />
-              )}
               {/* Instructions */}
               <div className="mb-6 p-4 bg-blue-50 rounded-lg">
                 <div className="flex items-start gap-3">
@@ -559,23 +538,19 @@ export default function ProfessionalServiceAreasPage() {
                                 )}
                               </div>
                             </div>
-                            {pendingAreaIds.has(area.id) ? (
-                              <Clock className="w-4 h-4 text-amber-500 opacity-70" />
-                            ) : (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleRemoveServiceArea(area.id)}
-                                disabled={isUpdatingServiceAreas || hasAnyAreaPending}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                {isUpdatingServiceAreas ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
-                                )}
-                              </Button>
-                            )}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveServiceArea(area.id)}
+                              disabled={isUpdatingServiceAreas}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              {isUpdatingServiceAreas ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
+                              )}
+                            </Button>
                           </div>
                         </div>
                       );
@@ -620,8 +595,8 @@ export default function ProfessionalServiceAreasPage() {
                           : 'Click to add service area...'
                       }
                       readOnly
-                      disabled={serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
-                      onClick={() => !hasAnyAreaPending && setShowAddDialog(true)}
+                      disabled={serviceAreas.length >= MAX_SERVICE_AREAS}
+                      onClick={() => setShowAddDialog(true)}
                       className="cursor-pointer"
                     />
                     <Plus className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -630,7 +605,7 @@ export default function ProfessionalServiceAreasPage() {
 
                 <Button
                   onClick={() => setShowAddDialog(true)}
-                  disabled={serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
+                  disabled={serviceAreas.length >= MAX_SERVICE_AREAS}
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" />
@@ -778,7 +753,7 @@ export default function ProfessionalServiceAreasPage() {
                 variant="outline"
                 className="w-full justify-start gap-2"
                 onClick={() => setShowAddDialog(true)}
-                disabled={serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
+                disabled={serviceAreas.length >= MAX_SERVICE_AREAS}
               >
                 <Plus className="w-4 h-4" />
                 {locale === 'ne' ? 'नयाँ क्षेत्र थप्नुहोस्' : 'Add New Area'}
@@ -879,7 +854,7 @@ export default function ProfessionalServiceAreasPage() {
                   form.setValue('municipality', 'Kathmandu Met.');
                   setShowAddDialog(true);
                 }}
-                disabled={serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
+                disabled={serviceAreas.length >= MAX_SERVICE_AREAS}
               >
                 <div className="flex-1">
                   <div className="font-medium">Kathmandu Metropolitan</div>
@@ -897,7 +872,7 @@ export default function ProfessionalServiceAreasPage() {
                   form.setValue('municipality', 'Lalitpur Met.');
                   setShowAddDialog(true);
                 }}
-                disabled={serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
+                disabled={serviceAreas.length >= MAX_SERVICE_AREAS}
               >
                 <div className="flex-1">
                   <div className="font-medium">Lalitpur Metropolitan</div>
@@ -915,7 +890,7 @@ export default function ProfessionalServiceAreasPage() {
                   form.setValue('municipality', 'Bhaktapur Mun.');
                   setShowAddDialog(true);
                 }}
-                disabled={serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
+                disabled={serviceAreas.length >= MAX_SERVICE_AREAS}
               >
                 <div className="flex-1">
                   <div className="font-medium">Bhaktapur Municipality</div>
@@ -1121,7 +1096,7 @@ export default function ProfessionalServiceAreasPage() {
           </Button>
           <Button
             type="submit"
-            disabled={isUpdatingServiceAreas || serviceAreas.length >= MAX_SERVICE_AREAS || hasAnyAreaPending}
+            disabled={isUpdatingServiceAreas || serviceAreas.length >= MAX_SERVICE_AREAS}
           >
             {isUpdatingServiceAreas ? (
               <>

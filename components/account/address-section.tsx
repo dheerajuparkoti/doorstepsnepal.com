@@ -24,9 +24,10 @@ interface AddressSectionProps {
   userId?: number;
   pendingChanges?: PendingChange[];
   onAddressChange?: () => void | Promise<void>;
+  bypassPending?: boolean;
 }
 
-export function AddressSection({ userId, pendingChanges = [], onAddressChange }: AddressSectionProps) {
+export function AddressSection({ userId, pendingChanges = [], onAddressChange, bypassPending = false }: AddressSectionProps) {
   const { locale } = useI18n();
 
   // Zustand store
@@ -55,7 +56,7 @@ export function AddressSection({ userId, pendingChanges = [], onAddressChange }:
 
   const handleAddAddress = async (data: CreateAddressRequest) => {
     try {
-      await createAddress(data);
+      await createAddress(data, bypassPending);
       toast.success(
         locale === 'ne'
           ? 'ठेगाना सफलतापूर्वक थपियो'
@@ -74,7 +75,9 @@ export function AddressSection({ userId, pendingChanges = [], onAddressChange }:
 
   const handleUpdateAddress = async (addressId: number, data: CreateAddressRequest) => {
     try {
-      await updateAddress(addressId, data);
+      const addressType = editingAddress?.type || dialogType;
+      const bypassPending = addressType === 'temporary';
+      await updateAddress(addressId, data, bypassPending);
       toast.success(
         locale === 'ne'
           ? 'ठेगाना सफलतापूर्वक अद्यावधिक गरियो'
