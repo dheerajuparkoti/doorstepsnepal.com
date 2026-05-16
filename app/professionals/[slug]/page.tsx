@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ProfessionalScreenSSR } from '@/components/professional/ssr/professional-screen-ssr';

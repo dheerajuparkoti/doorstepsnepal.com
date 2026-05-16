@@ -2,6 +2,8 @@ import { Suspense } from 'react';
 import { ProfessionalsSection } from './ssr/professionals-section-ssr';
 import { ProfessionalsSkeleton } from './skeleton/professionals-skeleton';
 
+export const revalidate = 60;
+
 export const metadata = {
   title: 'Professionals | DoorStep',
   description: 'Browse all professional service providers',

@@ -1,5 +1,7 @@
 
 
+export const revalidate = 60;
+
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { HeroCarousel } from "@/components/home/hero-carousel";

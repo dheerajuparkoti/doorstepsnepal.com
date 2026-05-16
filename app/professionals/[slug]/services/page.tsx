@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { fetchServicesByProfessionalId } from '@/lib/api/professional-services';

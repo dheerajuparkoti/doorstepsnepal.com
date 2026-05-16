@@ -1,4 +1,6 @@
 
+export const revalidate = 60;
+
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { fetchProfessionalServiceById } from "@/lib/api/professional-services";
