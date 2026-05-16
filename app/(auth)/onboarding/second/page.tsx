@@ -62,7 +62,7 @@ export default function ProfessionalVerificationPage({
   const { user } = useAuth();
   const userId = user?.id;
   const professionalIdFromAuth = user?.professional_id;
-  const currentProfessionalId = professionalId || professionalIdFromAuth||24;
+  const currentProfessionalId = professionalId || professionalIdFromAuth;
 
   const {
     documents,
@@ -103,6 +103,7 @@ export default function ProfessionalVerificationPage({
   }, [error]);
 
   const loadDocuments = async () => {
+    if (!currentProfessionalId) return;
     try {
       await fetchDocuments(currentProfessionalId);
     } catch (err) {
@@ -163,6 +164,17 @@ export default function ProfessionalVerificationPage({
         description: locale === 'ne' 
           ? 'कृपया विवरण प्रदान गर्नुहोस्' 
           : 'Please provide a description',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!currentProfessionalId) {
+      toast({
+        title: locale === 'ne' ? 'त्रुटि' : 'Error',
+        description: locale === 'ne'
+          ? 'व्यावसायिक ID फेला परेन। कृपया फेरि लग इन गर्नुहोस्।'
+          : 'Professional ID not found. Please log in again.',
         variant: 'destructive',
       });
       return;
@@ -236,6 +248,7 @@ export default function ProfessionalVerificationPage({
       return;
     }
     
+    if (!currentProfessionalId) return;
     try {
       await deleteDocument(currentProfessionalId, documentId);
       toast({
