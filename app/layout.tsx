@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   verification: {
     google: "bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4",
   },
+  // <meta name="google-site-verification" content="bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4" />
   title: "Doorsteps Nepal | Trusted Home Services at Your Doorstep",
   description:
     "Connect with verified professionals for plumbing, electrical, cleaning, beauty, repairs and more. Quality home services in Nepal.",
@@ -47,7 +48,6 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
-    generator: 'v0.app'
 };
 
 export const viewport: Viewport = {
