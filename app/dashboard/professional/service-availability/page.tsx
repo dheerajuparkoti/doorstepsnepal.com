@@ -34,6 +34,16 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -122,30 +132,24 @@ const TimeSlotCard = ({ availability, onEdit, onDelete, isProcessing, isPending,
           </div>
         </div>
         <div className="flex items-center gap-1">
-          {isPending ? (
-            <Clock className="w-4 h-4 text-amber-500 mx-2" />
-          ) : (
-            <>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(availability)}
-                disabled={isProcessing}
-                className="h-8 w-8"
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onDelete(id)}
-                disabled={isProcessing}
-                className="h-8 w-8 text-red-500 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onEdit(availability)}
+            disabled={isProcessing}
+            className="h-8 w-8"
+          >
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => onDelete(id)}
+            disabled={isProcessing}
+            className="h-8 w-8 text-red-500 hover:text-red-700"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
         </div>
       </div>
     </div>
@@ -190,6 +194,7 @@ export default function ProfessionalServiceAvailabilityPage() {
   const [editingAvailability, setEditingAvailability] = useState<any>(null);
   const [timeError, setTimeError] = useState<string | null>(null);
   const [pendingChanges, setPendingChanges] = useState<PendingChange[]>([]);
+  const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{ open: boolean; id: number | null }>({ open: false, id: null });
 
   
   const currentProfessionalIdFromAuth = user?.professional_id;
@@ -253,6 +258,17 @@ export default function ProfessionalServiceAvailabilityPage() {
         return;
       }
 
+      if (!currentProfessionalId) {
+        toast({
+          title: locale === 'ne' ? 'त्रुटि' : 'Error',
+          description: locale === 'ne'
+            ? 'पेशेवर आईडी फेला परेन'
+            : 'Professional ID not found. Please log out and log back in.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       await createAvailability({
         professional_id: currentProfessionalId,
         day_of_week: data.day_of_week,
@@ -269,8 +285,9 @@ export default function ProfessionalServiceAvailabilityPage() {
 
       form.reset();
       setShowAddDialog(false);
-    } catch (err) {
-      // Error handled by store
+    } catch (err: any) {
+      console.error('Create availability error:', err);
+      // Error is already shown by store's error state
     }
   };
 
@@ -304,22 +321,21 @@ export default function ProfessionalServiceAvailabilityPage() {
   };
 
   const handleDeleteAvailability = async (availabilityId: number) => {
-    if (!confirm(
-      locale === 'ne'
-        ? 'के तपाईं यो समय स्लट हटाउन चाहनुहुन्छ?'
-        : 'Are you sure you want to delete this time slot?'
-    )) {
-      return;
-    }
+    setDeleteConfirmDialog({ open: true, id: availabilityId });
+  };
+
+  const confirmDeleteAvailability = async () => {
+    if (!deleteConfirmDialog.id) return;
 
     try {
-      await deleteAvailability(availabilityId);
+      await deleteAvailability(deleteConfirmDialog.id);
       toast({
         title: locale === 'ne' ? 'सफलता' : 'Success',
         description: locale === 'ne'
           ? 'समय स्लट हटाइयो'
           : 'Time slot deleted successfully',
       });
+      setDeleteConfirmDialog({ open: false, id: null });
     } catch (err) {
       // Error handled by store
     }
@@ -534,7 +550,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                   </p>
                   <Button
                     onClick={() => setShowAddDialog(true)}
-                    disabled={isLimitReached || hasAnyAvailabilityPending}
+                    disabled={isLimitReached}
                     className="gap-2"
                   >
                     <Plus className="w-4 h-4" />
@@ -597,8 +613,8 @@ export default function ProfessionalServiceAvailabilityPage() {
                           : 'Click to add new time slot...'
                       }
                       readOnly
-                      disabled={isLimitReached || hasAnyAvailabilityPending}
-                      onClick={() => !hasAnyAvailabilityPending && setShowAddDialog(true)}
+                      disabled={isLimitReached}
+                      onClick={() => setShowAddDialog(true)}
                       className="cursor-pointer"
                     />
                     <Plus className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -607,7 +623,7 @@ export default function ProfessionalServiceAvailabilityPage() {
 
                 <Button
                   onClick={() => setShowAddDialog(true)}
-                  disabled={isLimitReached || hasAnyAvailabilityPending}
+                  disabled={isLimitReached}
                   className="gap-2"
                 >
                   <Plus className="w-4 h-4" />
@@ -731,7 +747,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                 variant="outline"
                 className="w-full justify-start gap-2"
                 onClick={() => setShowAddDialog(true)}
-                disabled={isLimitReached || hasAnyAvailabilityPending}
+                disabled={isLimitReached}
               >
                 <Plus className="w-4 h-4" />
                 {locale === 'ne' ? 'नयाँ स्लट थप्नुहोस्' : 'Add New Slot'}
@@ -765,7 +781,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                       });
                     }
                   }}
-                  disabled={isUpdating || isDeleting || hasAnyAvailabilityPending}
+                  disabled={isUpdating || isDeleting}
                 >
                   <Trash2 className="w-4 h-4" />
                   {locale === 'ne' ? 'सबै स्लट हटाउनुहोस्' : 'Remove All Slots'}
@@ -833,7 +849,7 @@ export default function ProfessionalServiceAvailabilityPage() {
                     form.setValue('end_time', '17:00:00');
                     setShowAddDialog(true);
                   }}
-                  disabled={isLimitReached || hasAnyAvailabilityPending}
+                  disabled={isLimitReached}
                 >
                   <div className="flex-1">
                     <div className="font-medium">{getDayDisplayName(day)}</div>
@@ -1150,6 +1166,33 @@ export default function ProfessionalServiceAvailabilityPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteConfirmDialog.open} onOpenChange={(open) => setDeleteConfirmDialog({ ...deleteConfirmDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {locale === 'ne' ? 'समय स्लट हटाउन्छु?' : 'Delete Time Slot?'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {locale === 'ne'
+                ? 'यो समय स्लट हटाइएपछि यसलाई पुनर्स्थापन गर्न सकिनेछैन। के तपाई निश्चित हुनुहुन्छ?'
+                : 'This time slot will be permanently deleted. Are you sure you want to continue?'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmDialog({ open: false, id: null })}>
+              {locale === 'ne' ? 'रद्द गर्नुहोस्' : 'Cancel'}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteAvailability}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {locale === 'ne' ? 'हटाउनुहोस्' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

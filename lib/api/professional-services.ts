@@ -250,16 +250,20 @@ export async function fetchPrices(
 }
 
 export async function createPrice(
-  data: CreatePriceRequest
+  data: CreatePriceRequest,
+  bypassPending = false
 ): Promise<{ message: string; pending_change_id: number }> {
-  return api.post<{ message: string; pending_change_id: number }>('/professional-service-prices/', data);
+  const payload = { ...data, ...(bypassPending && { bypass_pending: bypassPending }) };
+  return api.post<{ message: string; pending_change_id: number }>('/professional-service-prices/', payload);
 }
 
 export async function updatePrice(
   priceId: number,
-  data: UpdatePriceRequest
+  data: UpdatePriceRequest,
+  bypassPending = false
 ): Promise<{ message: string; pending_change_id: number }> {
-  return api.put<{ message: string; pending_change_id: number }>(`/professional-service-prices/${priceId}`, data);
+  const payload = { ...data, ...(bypassPending && { bypass_pending: bypassPending }) };
+  return api.put<{ message: string; pending_change_id: number }>(`/professional-service-prices/${priceId}`, payload);
 }
 
 export async function deletePrice(
@@ -271,7 +275,7 @@ export async function deletePrice(
 export async function fetchPriceUnits(): Promise<PriceUnit[]> {
   try {
     // You might need to create this endpoint or get it from another API
-    return await api.get<PriceUnit[]>('/service-price-units/', { cache: 'force-cache' });
+    return await api.get<PriceUnit[]>('/service-price-units/', { cache: 'no-store' });
   } catch (error) {
     console.error('Error fetching price units:', error);
     return [];
@@ -283,7 +287,7 @@ export async function fetchQualityTypes(): Promise<QualityType[]> {
     // You might need to create this endpoint or get it from another API
 
     //console.log("SERVICE QUALITY TYPES",    await api.get<QualityType[]>('/service-quality-types/', { cache: 'force-cache' }));
-    return await api.get<QualityType[]>('/service-quality-types/', { cache: 'force-cache' });
+    return await api.get<QualityType[]>('/service-quality-types/', { cache: 'no-store' });
   } catch (error) {
     console.error('Error fetching quality types:', error);
     return [];

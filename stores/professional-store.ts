@@ -177,8 +177,8 @@ interface ProfessionalStore {
   fetchProfile: (professionalId: number) => Promise<void>;
   fetchProfileByPhone: (phoneNumber: string) => Promise<void>;
   updateProfile: (professionalId: number, data: ProfessionalUpdateData) => Promise<ProfessionalProfile>;
-  patchProfile: (professionalId: number, data: Partial<ProfessionalUpdateData>) => Promise<ProfessionalProfile>;
-  
+  patchProfile: (professionalId: number, data: Partial<ProfessionalUpdateData>, bypassPending?: boolean) => Promise<ProfessionalProfile>;
+
   // Service Areas CRUD
   fetchServiceAreas: (professionalId: number) => Promise<void>;
   addServiceArea: (
@@ -188,7 +188,7 @@ interface ProfessionalStore {
     ward?: number,
     bypassPending?: boolean
   ) => Promise<ServiceArea>;
-  removeServiceArea: (professionalId: number, serviceAreaId: number) => Promise<void>;
+  removeServiceArea: (professionalId: number, serviceAreaId: number, bypassPending?: boolean) => Promise<void>;
   saveServiceAreas: (professionalId: number, serviceAreaIds: number[]) => Promise<void>;
   
   // Utility
@@ -296,22 +296,22 @@ export const useProfessionalStore = create<ProfessionalStore>((set, get) => ({
   },
 
   // Patch professional profile (partial update)
-  patchProfile: async (professionalId: number, data: Partial<ProfessionalUpdateData>) => {
+  patchProfile: async (professionalId: number, data: Partial<ProfessionalUpdateData>, bypassPending = false) => {
     set({ isUpdating: true, error: null });
     try {
-      const updatedProfile = await professionalApi.patchProfessional(professionalId, data);
-      
+      const updatedProfile = await professionalApi.patchProfessional(professionalId, data, bypassPending);
+
       set({
         profile: updatedProfile,
         isUpdating: false,
       });
-      
+
       return updatedProfile;
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Failed to update profile';
-      set({ 
-        error: errorMessage, 
-        isUpdating: false 
+      set({
+        error: errorMessage,
+        isUpdating: false
       });
       throw error;
     }
@@ -384,11 +384,11 @@ export const useProfessionalStore = create<ProfessionalStore>((set, get) => ({
   },
 
   // Remove service area from professional
-  removeServiceArea: async (professionalId: number, serviceAreaId: number) => {
+  removeServiceArea: async (professionalId: number, serviceAreaId: number, bypassPending = false) => {
     set({ isUpdatingServiceAreas: true, error: null });
-    
+
     try {
-      await professionalApi.removeProfessionalServiceArea(professionalId, serviceAreaId);
+      await professionalApi.removeProfessionalServiceArea(professionalId, serviceAreaId, bypassPending);
       
       // Update local state
       set(state => ({

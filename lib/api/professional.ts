@@ -89,12 +89,13 @@ async getTopProfessionals(limit: number = 50): Promise<TopProfessionalsResponse>
 
   // Patch professional profile (PATCH - partial update)
   async patchProfessional(
-    professionalId: number, 
-    data: Partial<ProfessionalUpdateData>
+    professionalId: number,
+    data: Partial<ProfessionalUpdateData>,
+    bypassPending = false
   ): Promise<ProfessionalProfile> {
     try {
-      const endpoint = `/professionals/${professionalId}`;
-      const response = await api.patch<ProfessionalProfile>(endpoint, data);
+      const payload = { ...data, bypass_pending: bypassPending };
+      const response = await api.patch<ProfessionalProfile>(`/professionals/${professionalId}`, payload);
       return response;
     } catch (error) {
       throw error;
@@ -135,10 +136,13 @@ async getTopProfessionals(limit: number = 50): Promise<TopProfessionalsResponse>
   // Remove service area from professional
   async removeProfessionalServiceArea(
     professionalId: number,
-    serviceAreaId: number
+    serviceAreaId: number,
+    bypassPending = false
   ): Promise<string> {
     try {
-      const endpoint = `/professionals/${professionalId}/service_areas/${serviceAreaId}`;
+      const endpoint = bypassPending
+        ? `/professionals/${professionalId}/service_areas/${serviceAreaId}?bypass_pending=true`
+        : `/professionals/${professionalId}/service_areas/${serviceAreaId}`;
       const response = await api.delete<string>(endpoint);
       return response;
     } catch (error) {

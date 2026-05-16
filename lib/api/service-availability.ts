@@ -28,11 +28,13 @@ export const serviceAvailabilityApi = {
 
   // Create a new service availability
   async createServiceAvailability(
-    data: ServiceAvailabilityCreateData
+    data: ServiceAvailabilityCreateData,
+    bypassPending = false
   ): Promise<ServiceAvailability> {
     try {
-      const endpoint = `/service_availability`;
-      const response = await api.post<ServiceAvailability>(endpoint, data);
+      const payload = { ...data, bypass_pending: bypassPending };
+      const endpoint = `/service_availability/`;
+      const response = await api.post<ServiceAvailability>(endpoint, payload);
       return response;
     } catch (error) {
       throw error;
@@ -42,11 +44,13 @@ export const serviceAvailabilityApi = {
   // Update service availability
   async updateServiceAvailability(
     availabilityId: number,
-    data: ServiceAvailabilityUpdateData
+    data: ServiceAvailabilityUpdateData,
+    bypassPending = false
   ): Promise<ServiceAvailability> {
     try {
+      const payload = { ...data, bypass_pending: bypassPending };
       const endpoint = `/service_availability/${availabilityId}`;
-      const response = await api.put<ServiceAvailability>(endpoint, data);
+      const response = await api.put<ServiceAvailability>(endpoint, payload);
       return response;
     } catch (error) {
       throw error;
@@ -54,10 +58,11 @@ export const serviceAvailabilityApi = {
   },
 
   // Delete service availability
-  async deleteServiceAvailability(availabilityId: number): Promise<void> {
+  async deleteServiceAvailability(availabilityId: number, bypassPending = false): Promise<void> {
     try {
       const endpoint = `/service_availability/${availabilityId}`;
-      await api.delete<void>(endpoint);
+      const params = bypassPending ? { bypass_pending: bypassPending } : undefined;
+      await api.delete<void>(endpoint, params ? { params } : {});
     } catch (error) {
       throw error;
     }

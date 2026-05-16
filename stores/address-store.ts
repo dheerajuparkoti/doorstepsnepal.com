@@ -18,8 +18,8 @@ interface AddressState {
   
   // Actions
   fetchAddresses: (force?: boolean) => Promise<void>;
-  createAddress: (data: CreateAddressRequest) => Promise<Address>;
-  updateAddress: (addressId: number, data: UpdateAddressRequest) => Promise<Address>;
+  createAddress: (data: CreateAddressRequest, bypassPending?: boolean) => Promise<Address>;
+  updateAddress: (addressId: number, data: UpdateAddressRequest, bypassPending?: boolean) => Promise<Address>;
   deleteAddress: (addressId: number) => Promise<void>;
   clearAddresses: () => void;
   clearError: () => void;
@@ -75,11 +75,11 @@ export const useAddressStore = create<AddressState>((set, get) => ({
   },
 
   // Create new address
-  createAddress: async (data: CreateAddressRequest) => {
+  createAddress: async (data: CreateAddressRequest, bypassPending = false) => {
     set({ isUpdating: true, error: null });
 
     try {
-      const newAddress = await addressApi.createAddress(data);
+      const newAddress = await addressApi.createAddress(data, bypassPending);
       
       set((state) => ({
         addresses: [...state.addresses, newAddress],
@@ -98,11 +98,11 @@ export const useAddressStore = create<AddressState>((set, get) => ({
   },
 
   // Update address
-  updateAddress: async (addressId: number, data: UpdateAddressRequest) => {
+  updateAddress: async (addressId: number, data: UpdateAddressRequest, bypassPending = false) => {
     set({ isUpdating: true, error: null });
 
     try {
-      const result = await addressApi.updateAddress(addressId, data);
+      const result = await addressApi.updateAddress(addressId, data, bypassPending);
 
       // Re-fetch to get the true current state — the backend may create a
       // pending change instead of directly updating the address, in which case

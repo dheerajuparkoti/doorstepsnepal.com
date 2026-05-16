@@ -347,7 +347,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
       )}
     </p>
   </div>
-                    <div className="grid gap-1.5">
+                    <div className="grid gap-1.5"> 
                       {professional?.all_prices?.map((price: PriceItem) => {
                         const priceInfo = formatPrice(price);
                         const isSelected = bookingDetails.priceItem?.id === price.id;

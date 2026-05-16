@@ -44,7 +44,8 @@ export const timeToString = (time: Date): string => {
 };
 
 // Helper function to parse time string
-export const parseTimeString = (timeString: string): Date => {
+export const parseTimeString = (timeString: string | undefined): Date => {
+  if (!timeString) return new Date();
   const [hours, minutes, seconds] = timeString.split(':').map(Number);
   const date = new Date();
   date.setHours(hours, minutes, seconds || 0);
@@ -52,7 +53,8 @@ export const parseTimeString = (timeString: string): Date => {
 };
 
 // Helper function to format time for display
-export const formatTimeForDisplay = (timeString: string): string => {
+export const formatTimeForDisplay = (timeString: string | undefined): string => {
+  if (!timeString) return '--:--';
   const time = parseTimeString(timeString);
   return time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };

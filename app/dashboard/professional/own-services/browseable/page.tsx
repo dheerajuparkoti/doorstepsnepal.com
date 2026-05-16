@@ -221,7 +221,7 @@ export default function BrowseableServicesPage() {
         throw new Error('Failed to create service');
       }
 
-      // Then, create the price
+      // Then, create the price (bypass admin approval)
       await createPrice({
         professional_service_id: serviceResponse.id,
         price_unit_id: selectedPriceUnitId,
@@ -234,7 +234,7 @@ export default function BrowseableServicesPage() {
         has_warranty: hasWarranty,
         warranty_duration: hasWarranty && warrantyDuration ? Number(warrantyDuration) : null,
         warranty_unit: hasWarranty ? warrantyUnit : null,
-      });
+      }, true);
 
       toast({
         title: getLocalizedText('Success', 'सफल'),
@@ -246,7 +246,7 @@ export default function BrowseableServicesPage() {
       loadData(); // Refresh the list
       // Navigate back to choose page after a delay
       setTimeout(() => {
-        router.push(`/dashboard/professional/own-services`);
+        router.push(`/dashboard/professional/own-services?refresh=true`);
       }, 1500);
     } catch (error) {
       console.error('Error saving service:', error);
@@ -600,9 +600,17 @@ export default function BrowseableServicesPage() {
       <DialogTitle className="truncate" title={getLocalizedText(`Set Price for ${selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : ''}`, `${selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : ''} को मूल्य सेट गर्नुहोस्`)}>
         {getLocalizedText('Set Price', 'मूल्य सेट गर्नुहोस्')}
       </DialogTitle>
-      <DialogDescription className="truncate" title={selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : undefined}>
-        {selectedService && (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en)}
-      </DialogDescription>
+      <div>
+        <DialogDescription className="truncate mb-1" title={selectedService ? (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en) : undefined}>
+          {selectedService && (language === 'ne' ? selectedService.name_np || selectedService.name_en : selectedService.name_en)}
+        </DialogDescription>
+        <span className="text-xs text-amber-600">
+          {getLocalizedText(
+            'Prices are added immediately.',
+            'मूल्यहरू तुरुन्त थपिन्छन्।'
+          )}
+        </span>
+      </div>
     </DialogHeader>
           
           <div className="grid gap-4 py-4">
@@ -777,7 +785,7 @@ export default function BrowseableServicesPage() {
                   <Select
                     value={warrantyUnit ?? undefined}
                     onValueChange={setWarrantyUnit}
-                  >
+                    >
                     <SelectTrigger>
                       <SelectValue placeholder={getLocalizedText('Select unit', 'एकाइ चयन गर्नुहोस्')} />
                     </SelectTrigger>

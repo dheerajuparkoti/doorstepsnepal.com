@@ -93,10 +93,12 @@ async function baseRequest<T = any>(
   // Add Authorization header for authenticated requests
   if (!skipAuth) {
     const token = getToken();
-    if (token) {
+    if (token && token.trim()) {
       headers['Authorization'] = `Bearer ${token}`;
     } else {
-      console.warn(' No JWT token found for authenticated request to:', endpoint);
+      if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+        console.warn('❌ No valid JWT token found for authenticated request to:', endpoint);
+      }
     }
   }
   
