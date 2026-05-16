@@ -269,7 +269,7 @@ export function ProfessionalServicesClient({
 
   // Create a professional object for the BookNowButton
   const createProfessionalObject = (service: any) => ({
-    id: service.professional_id,
+    id: service.id,
     professional_id: service.professional_id,
     full_name: professionalName,
     service_name: language === 'ne' ? service.service?.name_np : service.service?.name_en,
