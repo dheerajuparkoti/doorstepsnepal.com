@@ -52,7 +52,7 @@ import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { useAddressStore } from '@/stores/address-store';
 import { ProperCaseFormatter } from '@/lib/utils/formatters';
 import { getProfileSchema, ProfileSchemaType } from '@/lib/schemas/profile-schema';
-
+// dheer
 // Types
 export interface PriceItem {
   id: number;
@@ -347,7 +347,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
       )}
     </p>
   </div>
-                    <div className="grid gap-1.5">
+                    <div className="grid gap-1.5"> 
                       {professional?.all_prices?.map((price: PriceItem) => {
                         const priceInfo = formatPrice(price);
                         const isSelected = bookingDetails.priceItem?.id === price.id;
