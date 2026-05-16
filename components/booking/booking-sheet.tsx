@@ -1,30 +1,31 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useI18n } from '@/lib/i18n/context';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { toast } from "sonner";
+import { useI18n } from "@/lib/i18n/context";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
-import { 
+} from "@/components/ui/select";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import {
   MapPin,
   User,
   Calendar,
@@ -41,17 +42,20 @@ import {
   Tag,
   Package,
   CreditCard,
-  ShieldCheck
-} from 'lucide-react';
-import { AddressDialog } from '@/components/booking/address-picker';
-import { cn } from '@/lib/utils';
+  ShieldCheck,
+} from "lucide-react";
+import { AddressDialog } from "@/components/booking/address-picker";
+import { cn } from "@/lib/utils";
 
-import { DatePicker } from 'hamro-nepali-patro';
-import 'hamro-nepali-patro/dist/styles.css';
-import { NepaliDateService } from '@/lib/utils/nepaliDate';
-import { useAddressStore } from '@/stores/address-store';
-import { ProperCaseFormatter } from '@/lib/utils/formatters';
-import { getProfileSchema, ProfileSchemaType } from '@/lib/schemas/profile-schema';
+import { DatePicker } from "hamro-nepali-patro";
+import "hamro-nepali-patro/dist/styles.css";
+import { NepaliDateService } from "@/lib/utils/nepaliDate";
+import { useAddressStore } from "@/stores/address-store";
+import { ProperCaseFormatter } from "@/lib/utils/formatters";
+import {
+  getProfileSchema,
+  ProfileSchemaType,
+} from "@/lib/schemas/profile-schema";
 
 // Types
 export interface PriceItem {
@@ -70,7 +74,7 @@ export interface PriceItem {
 }
 
 export interface AddressData {
-  type: 'temporary';
+  type: "temporary";
   province: string;
   district: string;
   municipality: string;
@@ -126,54 +130,64 @@ export function BookingSheet({
 
   const getCurrentDateString = (): string => {
     const now = NepaliDateService.now();
-    return now.format('YYYY-MM-DD');
+    return now.format("YYYY-MM-DD");
   };
-  
-  const getCurrentTime24Hour = (): string => {
+
+  const getMinBookingTime = (): string => {
     const now = new Date();
-    const hours = now.getHours().toString().padStart(2, '0');
-    const minutes = now.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
+    now.setMinutes(now.getMinutes() + 15);
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  };
+
+  const isTimeTooEarlyForToday = (timeStr: string): boolean => {
+    const [hours, minutes] = timeStr.split(":").map(Number);
+    const now = new Date();
+    const minTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 15);
+    const picked = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+    return picked < minTime;
   };
 
   const formatTimeTo12Hour = (time24: string): string => {
-    if (!time24) return '';
-    
-    const [hours, minutes] = time24.split(':');
+    if (!time24) return "";
+
+    const [hours, minutes] = time24.split(":");
     const hour = parseInt(hours, 10);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const ampm = hour >= 12 ? "PM" : "AM";
     const hour12 = hour % 12 || 12;
-    
+
     return `${hour12}:${minutes} ${ampm}`;
   };
-  
+
   const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
     priceItem: null,
     quantity: 1,
     scheduledDate: getCurrentDateString(),
-    scheduledTime: getCurrentTime24Hour(),
+    scheduledTime: getMinBookingTime(),
     address: null,
-    notes: '',
+    notes: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [addressDialogOpen, setAddressDialogOpen] = useState(false);
-  const [selectedAddressForEdit, setSelectedAddressForEdit] = useState<AddressData | null>(null);
+  const [selectedAddressForEdit, setSelectedAddressForEdit] =
+    useState<AddressData | null>(null);
   const [isAddressSaving, setIsAddressSaving] = useState(false);
-  const [step, setStep] = useState<'details' | 'address' | 'confirm'>('details');
+  const [step, setStep] = useState<"details" | "address" | "confirm">(
+    "details",
+  );
   const isLoadingAddresses = useAddressStore((state) => state.isLoading);
-const [notesError, setNotesError] = useState('');
+  const [notesError, setNotesError] = useState("");
   const getLocalizedText = (en: string, np: string) => {
-    return language === 'ne' ? np : en;
+    return language === "ne" ? np : en;
   };
 
   // Initialize schema with your localized text function
-const profileSchema = getProfileSchema(getLocalizedText);
+  const profileSchema = getProfileSchema(getLocalizedText);
 
-// Extract only ordernotes schema
-const orderNotesSchema = profileSchema.shape.ordernotes;
+  // Extract only ordernotes schema
+  const orderNotesSchema = profileSchema.shape.ordernotes;
 
   const formatAddressDisplay = (address: AddressData): string => {
-    if (language === 'ne') {
+    if (language === "ne") {
       return `${address.street_address}, ${address.municipality}, ${address.district}, ${address.province} - ${address.ward_no}`;
     }
     return `${address.street_address}, ${address.municipality}, ${address.district}, ${address.province} - ${address.ward_no}`;
@@ -184,34 +198,34 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
       setIsAddressSaving(true);
       const address: AddressData = {
         ...addressData,
-        type: 'temporary',
+        type: "temporary",
         id: selectedAddressForEdit?.id || Date.now(),
       };
 
       if (selectedAddressForEdit && onUpdateAddress) {
         const addressId = selectedAddressForEdit.id;
-        
-        if (typeof addressId === 'number') {
+
+        if (typeof addressId === "number") {
           await onUpdateAddress(addressId, address);
-        } else if (typeof addressId === 'string') {
+        } else if (typeof addressId === "string") {
           const parsedId = parseInt(addressId, 10);
           if (!isNaN(parsedId)) {
             await onUpdateAddress(parsedId, address);
           } else {
-            throw new Error('Invalid address ID');
+            throw new Error("Invalid address ID");
           }
         } else {
-          throw new Error('Address ID is required for update');
+          throw new Error("Address ID is required for update");
         }
       } else if (onAddAddress) {
         await onAddAddress(address);
       }
-      
-      setBookingDetails(prev => ({ ...prev, address }));
+
+      setBookingDetails((prev) => ({ ...prev, address }));
       setAddressDialogOpen(false);
       setSelectedAddressForEdit(null);
     } catch (error) {
-      console.error('Error saving address:', error);
+      console.error("Error saving address:", error);
     } finally {
       setIsAddressSaving(false);
     }
@@ -219,7 +233,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
 
   const handleConfirmBooking = async () => {
     if (!bookingDetails.priceItem || !bookingDetails.address) return;
-    
+
     setIsSubmitting(true);
     try {
       await onConfirm(bookingDetails);
@@ -228,13 +242,13 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
         priceItem: null,
         quantity: 1,
         scheduledDate: getCurrentDateString(),
-        scheduledTime: getCurrentTime24Hour(),
+        scheduledTime: getMinBookingTime(),
         address: null,
-        notes: '',
+        notes: "",
       });
-      setStep('details');
+      setStep("details");
     } catch (error) {
-      console.error('Error confirming booking:', error);
+      console.error("Error confirming booking:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -246,12 +260,12 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
     confirm: true,
   };
 
-  const selectedPriceInfo = bookingDetails.priceItem 
+  const selectedPriceInfo = bookingDetails.priceItem
     ? formatPrice(bookingDetails.priceItem)
     : null;
 
-  const totalPrice = selectedPriceInfo 
-    ? selectedPriceInfo.discountedPrice * bookingDetails.quantity 
+  const totalPrice = selectedPriceInfo
+    ? selectedPriceInfo.discountedPrice * bookingDetails.quantity
     : 0;
 
   return (
@@ -260,12 +274,15 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
         <SheetContent className="sm:max-w-md p-0 flex flex-col h-full max-h-screen">
           <SheetHeader className="p-4 pb-1 flex-shrink-0">
             <SheetTitle className="text-xl">
-              {getLocalizedText('Book Service', 'सेवा बुक गर्नुहोस्')}
+              {getLocalizedText("Book Service", "सेवा बुक गर्नुहोस्")}
             </SheetTitle>
             <SheetDescription>
               {professional && (
                 <span>
-                  {getLocalizedText('with', 'संग')} <span className="font-medium text-foreground">{professional.full_name}</span>
+                  {getLocalizedText("with", "संग")}{" "}
+                  <span className="font-medium text-foreground">
+                    {professional.full_name}
+                  </span>
                 </span>
               )}
             </SheetDescription>
@@ -275,27 +292,38 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
           <div className="px-4 py-1 flex-shrink-0">
             <div className="flex items-center justify-between">
               {[
-                { key: 'details', label: getLocalizedText('Details', 'विवरण') },
-                { key: 'address', label: getLocalizedText('Address', 'ठेगाना') },
-                { key: 'confirm', label: getLocalizedText('Confirm', 'पुष्टि') },
+                { key: "details", label: getLocalizedText("Details", "विवरण") },
+                {
+                  key: "address",
+                  label: getLocalizedText("Address", "ठेगाना"),
+                },
+                {
+                  key: "confirm",
+                  label: getLocalizedText("Confirm", "पुष्टि"),
+                },
               ].map((s, index) => (
                 <div key={s.key} className="flex items-center">
                   <div className="flex flex-col items-center">
-                    <div className={cn(
-                      "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
-                      step === s.key 
-                        ? "bg-primary text-primary-foreground" 
-                        : canProceed[s.key as keyof typeof canProceed]
-                        ? "bg-primary/20 text-primary"
-                        : "bg-muted text-muted-foreground"
-                    )}>
-                      {canProceed[s.key as keyof typeof canProceed] && step !== s.key ? (
+                    <div
+                      className={cn(
+                        "w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-colors",
+                        step === s.key
+                          ? "bg-primary text-primary-foreground"
+                          : canProceed[s.key as keyof typeof canProceed]
+                            ? "bg-primary/20 text-primary"
+                            : "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {canProceed[s.key as keyof typeof canProceed] &&
+                      step !== s.key ? (
                         <Check className="h-3 w-3" />
                       ) : (
                         index + 1
                       )}
                     </div>
-                    <span className="text-[10px] mt-0.5 text-muted-foreground">{s.label}</span>
+                    <span className="text-[10px] mt-0.5 text-muted-foreground">
+                      {s.label}
+                    </span>
                   </div>
                   {index < 2 && (
                     <ChevronRight className="h-3 w-3 mx-1 text-muted-foreground" />
@@ -315,13 +343,17 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                     <User className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-base truncate">{professional?.service_name}</h3>
-                    <p className="text-xs text-muted-foreground truncate">{professional?.full_name}</p>
+                    <h3 className="font-semibold text-base truncate">
+                      {professional?.service_name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {professional?.full_name}
+                    </p>
                     {professional?.experience_years && (
                       <p className="text-[10px] text-muted-foreground mt-0.5">
                         {getLocalizedText(
                           `${professional.experience_years}+ years experience`,
-                          `${professional.experience_years}+ वर्ष अनुभव`
+                          `${professional.experience_years}+ वर्ष अनुभव`,
                         )}
                       </p>
                     )}
@@ -329,57 +361,76 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                 </div>
               </Card>
 
-              {step === 'details' && (
+              {step === "details" && (
                 <div className="space-y-3">
                   {/* Price Selection */}
                   <div className="space-y-1.5">
                     <Label className="text-sm font-semibold flex items-center gap-1">
                       <Tag className="h-3.5 w-3.5" />
-                      {getLocalizedText('Select Service Type', 'सेवा प्रकार छान्नुहोस्')}
+                      {getLocalizedText(
+                        "Select Service Type",
+                        "सेवा प्रकार छान्नुहोस्",
+                      )}
                     </Label>
-                   {/* Highlighted Price Hint */}
-  <div className="flex items-start gap-2 rounded-md bg-blue-50/50 p-2.5 text-blue-800 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-200 dark:border-blue-900/30">
-    <CreditCard className="h-3.5 w-3.5 mt-0.5 shrink-0" />
-    <p className="text-[11px] leading-relaxed italic">
-      {getLocalizedText(
-        'Prices displayed are either fixed or starting from amounts. Final prices may vary based on service complexity or additional requirements.', 
-        'देखाइएका मूल्यहरू निर्धारित वा सुरुवाती दरहरू हुन्। सेवाको जटिलता वा थप आवश्यकताका आधारमा अन्तिम मूल्य फरक पर्न सक्छ।'
-      )}
-    </p>
-  </div>
-                    <div className="grid gap-1.5"> 
+                    {/* Highlighted Price Hint */}
+                    <div className="flex items-start gap-2 rounded-md bg-blue-50/50 p-2.5 text-blue-800 border border-blue-100 dark:bg-blue-900/20 dark:text-blue-200 dark:border-blue-900/30">
+                      <CreditCard className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                      <p className="text-[11px] leading-relaxed italic">
+                        {getLocalizedText(
+                          "Prices displayed are either fixed or starting from amounts. Final prices may vary based on service complexity or additional requirements.",
+                          "देखाइएका मूल्यहरू निर्धारित वा सुरुवाती दरहरू हुन्। सेवाको जटिलता वा थप आवश्यकताका आधारमा अन्तिम मूल्य फरक पर्न सक्छ।",
+                        )}
+                      </p>
+                    </div>
+                    <div className="grid gap-1.5">
                       {professional?.all_prices?.map((price: PriceItem) => {
                         const priceInfo = formatPrice(price);
-                        const isSelected = bookingDetails.priceItem?.id === price.id;
+                        const isSelected =
+                          bookingDetails.priceItem?.id === price.id;
                         return (
                           <Card
                             key={price.id}
                             className={cn(
                               "p-2.5 cursor-pointer transition-all hover:border-primary",
-                              isSelected && "border-primary bg-primary/5"
+                              isSelected && "border-primary bg-primary/5",
                             )}
-                            onClick={() => setBookingDetails(prev => ({ ...prev, priceItem: price }))}
+                            onClick={() =>
+                              setBookingDetails((prev) => ({
+                                ...prev,
+                                priceItem: price,
+                              }))
+                            }
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="space-y-0.5 min-w-0 flex-1">
                                 <div className="font-medium text-sm truncate">
-                                  {language === 'ne' ? priceInfo.quality_ne : priceInfo.quality}
+                                  {language === "ne"
+                                    ? priceInfo.quality_ne
+                                    : priceInfo.quality}
                                 </div>
                                 <div className="text-xs text-muted-foreground">
-                                  {getLocalizedText('Unit', 'एकाइ')}: {language === 'ne' ? priceInfo.unit_ne : priceInfo.unit}
+                                  {getLocalizedText("Unit", "एकाइ")}:{" "}
+                                  {language === "ne"
+                                    ? priceInfo.unit_ne
+                                    : priceInfo.unit}
                                 </div>
                                 {priceInfo.hasDiscount && (
-                                  <Badge variant="secondary" className="mt-0.5 text-[10px] px-1 py-0">
+                                  <Badge
+                                    variant="secondary"
+                                    className="mt-0.5 text-[10px] px-1 py-0"
+                                  >
                                     {getLocalizedText(
                                       `${price.discount_percentage}% OFF`,
-                                      `${price.discount_percentage}% छुट`
+                                      `${price.discount_percentage}% छुट`,
                                     )}
                                   </Badge>
                                 )}
                                 {price.has_warranty && (
                                   <div className="flex items-center gap-1 mt-0.5 text-[10px] text-emerald-600 font-medium">
                                     <ShieldCheck className="h-3 w-3" />
-                                    {price.warranty_duration} {price.warranty_unit} {getLocalizedText('warranty', 'वारेन्टी')}
+                                    {price.warranty_duration}{" "}
+                                    {price.warranty_unit}{" "}
+                                    {getLocalizedText("warranty", "वारेन्टी")}
                                   </div>
                                 )}
                               </div>
@@ -446,40 +497,48 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                   <div className="space-y-1.5">
                     <Label className="text-sm font-semibold flex items-center gap-1">
                       <Calendar className="h-3.5 w-3.5" />
-                      {getLocalizedText('Schedule', 'मिति र समय')}
+                      {getLocalizedText("Schedule", "मिति र समय")}
                     </Label>
-                    
+
                     <div className="grid grid-cols-2 gap-2">
                       {/* Date */}
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">
-                          {getLocalizedText('Date', 'मिति')}
+                          {getLocalizedText("Date", "मिति")}
                         </Label>
                         <div className="relative">
                           <DatePicker
                             value={bookingDetails.scheduledDate}
                             onChange={(value: string) => {
-                              setBookingDetails(prev => ({
-                                ...prev,
-                                scheduledDate: value
-                              }));
+                              setBookingDetails((prev) => {
+                                const today = getCurrentDateString();
+                                const isToday = value === today;
+                                const newTime =
+                                  isToday && isTimeTooEarlyForToday(prev.scheduledTime)
+                                    ? getMinBookingTime()
+                                    : prev.scheduledTime;
+                                return { ...prev, scheduledDate: value, scheduledTime: newTime };
+                              });
                             }}
-                            calendarType="BS" 
+                            calendarType="BS"
                             dateFormat="YYYY-MM-DD"
                             showMonthDropdown
                             showYearDropdown
                             isClearable={false}
                             className="w-full border rounded-md !h-9 [&>input]:!h-9 [&>input]:!min-h-0 [&>input]:!py-0 [&>input]:!px-2 [&>input]:pl-8 text-sm"
                             inputClassName="h-9 pl-8 pr-2 text-sm text-foreground"
-                            placeholder={getLocalizedText('Select date', 'मिति चयन गर्नुहोस्')}
+                            placeholder={getLocalizedText(
+                              "Select date",
+                              "मिति चयन गर्नुहोस्",
+                            )}
                           />
                         </div>
                       </div>
-                     
+
                       {/* Time */}
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">
-                          {getLocalizedText('Time', 'समय')}
+                          {getLocalizedText("Time", "समय")}
                         </Label>
                         <div className="relative">
                           <Input
@@ -487,9 +546,25 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                             className="w-full h-9 px-2 border rounded-md text-sm"
                             value={bookingDetails.scheduledTime}
                             onChange={(e) => {
-                              setBookingDetails(prev => ({
+                              const newTime = e.target.value;
+                              if (
+                                bookingDetails.scheduledDate === getCurrentDateString() &&
+                                isTimeTooEarlyForToday(newTime)
+                              ) {
+                                toast.warning(
+                                  getLocalizedText("Invalid Time", "अमान्य समय"),
+                                  {
+                                    description: getLocalizedText(
+                                      "Please select a time at least 15 minutes from now.",
+                                      "कृपया कम्तीमा १५ मिनेट पछिको समय छान्नुहोस्।",
+                                    ),
+                                  },
+                                );
+                                return;
+                              }
+                              setBookingDetails((prev) => ({
                                 ...prev,
-                                scheduledTime: e.target.value
+                                scheduledTime: newTime,
                               }));
                             }}
                           />
@@ -499,78 +574,91 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                   </div>
 
                   {/* Order Notes */}
-<div className="space-y-1.5">
-  <Label className="text-sm font-semibold flex items-center gap-1">
-    <FileText className="h-3.5 w-3.5" />
-    {getLocalizedText('Order Notes (Optional)', 'अर्डर नोट (वैकल्पिक)')}
-  </Label>
-  <div className="relative">
-    <Textarea
-     placeholder={getLocalizedText(
-    'Add any special instructions...',
-    'कुनै विशेष निर्देशन थप्नुहोस्...'
-  )}
-  value={bookingDetails.notes}
-  onChange={(e) => {
-    const text = ProperCaseFormatter.format(e.target.value);
-
-    // Validate with Zod
-    const result = orderNotesSchema.safeParse(text);
-
-    if (result.success) {
-      setBookingDetails(prev => ({ ...prev, notes: text }));
-      setNotesError(''); // optional state for showing errors
-    } else {
-      // Show first error message
-      setNotesError(result.error.errors[0].message);
-    }
-  }}
-  className="min-h-[70px] resize-y text-sm pr-16"
-  maxLength={200}
-    />
-
-{notesError && (
-  <p className="text-[10px] text-red-600 mt-1">{notesError}</p>
-)}
-    <div className="absolute bottom-2 right-2 text-xs text-muted-foreground bg-background/80 px-1 rounded">
-      {bookingDetails.notes.length}/200
-    </div>
-  </div>
-     <p className="text-[10px] text-muted-foreground">
+                  <div className="space-y-1.5">
+                    <Label className="text-sm font-semibold flex items-center gap-1">
+                      <FileText className="h-3.5 w-3.5" />
                       {getLocalizedText(
-                        'e.g., Please call before arriving',
-                        'जस्तै, आउनु अघि कल गर्नुहोस्'
+                        "Order Notes (Optional)",
+                        "अर्डर नोट (वैकल्पिक)",
+                      )}
+                    </Label>
+                    <div className="relative">
+                      <Textarea
+                        placeholder={getLocalizedText(
+                          "Add any special instructions...",
+                          "कुनै विशेष निर्देशन थप्नुहोस्...",
+                        )}
+                        value={bookingDetails.notes}
+                        onChange={(e) => {
+                          const text = ProperCaseFormatter.format(
+                            e.target.value,
+                          );
+
+                          // Validate with Zod
+                          const result = orderNotesSchema.safeParse(text);
+
+                          if (result.success) {
+                            setBookingDetails((prev) => ({
+                              ...prev,
+                              notes: text,
+                            }));
+                            setNotesError(""); // optional state for showing errors
+                          } else {
+                            // Show first error message
+                            setNotesError(result.error.errors[0].message);
+                          }
+                        }}
+                        className="min-h-[70px] resize-y text-sm pr-16"
+                        maxLength={200}
+                      />
+
+                      {notesError && (
+                        <p className="text-[10px] text-red-600 mt-1">
+                          {notesError}
+                        </p>
+                      )}
+                      <div className="absolute bottom-2 right-2 text-xs text-muted-foreground bg-background/80 px-1 rounded">
+                        {bookingDetails.notes.length}/200
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {getLocalizedText(
+                        "e.g., Please call before arriving",
+                        "जस्तै, आउनु अघि कल गर्नुहोस्",
                       )}
                     </p>
-  <p className="text-[10px] text-muted-foreground">
-    {getLocalizedText(
-      'Maximum 200 characters',
-      'अधिकतम २०० क्यारेक्टर'
-    )}
-  </p>
-</div>
+                    <p className="text-[10px] text-muted-foreground">
+                      {getLocalizedText(
+                        "Maximum 200 characters",
+                        "अधिकतम २०० क्यारेक्टर",
+                      )}
+                    </p>
+                  </div>
 
                   {/* Next Button */}
-                  <Button 
-                    className="w-full h-9 text-sm" 
-                    onClick={() => setStep('address')}
+                  <Button
+                    className="w-full h-9 text-sm"
+                    onClick={() => setStep("address")}
                     disabled={!canProceed.details}
                   >
-                    {getLocalizedText('Continue to Address', 'ठेगानामा जानुहोस्')}
+                    {getLocalizedText(
+                      "Continue to Address",
+                      "ठेगानामा जानुहोस्",
+                    )}
                     <ChevronRight className="ml-1 h-3.5 w-3.5" />
                   </Button>
                 </div>
               )}
 
-              {step === 'address' && (
+              {step === "address" && (
                 <div className="space-y-3">
                   {/* Address Selection */}
                   <div className="space-y-1.5">
                     <Label className="text-sm font-semibold flex items-center gap-1">
                       <MapPin className="h-3.5 w-3.5" />
-                      {getLocalizedText('Delivery Address', 'डेलिभरी ठेगाना')}
+                      {getLocalizedText("Delivery Address", "डेलिभरी ठेगाना")}
                     </Label>
-               
+
                     {/* Saved Addresses */}
                     {savedAddresses.length > 0 && (
                       <div className="space-y-1.5">
@@ -588,18 +676,29 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                               key={addr.id}
                               className={cn(
                                 "p-3 cursor-pointer transition-all hover:border-primary",
-                                bookingDetails.address?.id === addr.id && "border-primary bg-primary/5"
+                                bookingDetails.address?.id === addr.id &&
+                                  "border-primary bg-primary/5",
                               )}
-                              onClick={() => setBookingDetails(prev => ({ ...prev, address: addr }))}
+                              onClick={() =>
+                                setBookingDetails((prev) => ({
+                                  ...prev,
+                                  address: addr,
+                                }))
+                              }
                             >
                               <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1 mb-1">
-                                    <Badge variant="outline" className="bg-primary/5 text-[10px] px-1 py-0">
-                                      {getLocalizedText('Temporary', 'अस्थायी')}
+                                    <Badge
+                                      variant="outline"
+                                      className="bg-primary/5 text-[10px] px-1 py-0"
+                                    >
+                                      {getLocalizedText("Temporary", "अस्थायी")}
                                     </Badge>
                                   </div>
-                                  <p className="text-xs truncate">{formatAddressDisplay(addr)}</p>
+                                  <p className="text-xs truncate">
+                                    {formatAddressDisplay(addr)}
+                                  </p>
                                 </div>
                                 <Button
                                   variant="ghost"
@@ -619,7 +718,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                         )}
                       </div>
                     )}
-                    
+
                     {/* Add New Address Button */}
                     <Button
                       variant="outline"
@@ -630,7 +729,10 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                       }}
                     >
                       <Plus className="h-3.5 w-3.5" />
-                      {getLocalizedText('Add New Address', 'नयाँ ठेगाना थप्नुहोस्')}
+                      {getLocalizedText(
+                        "Add New Address",
+                        "नयाँ ठेगाना थप्नुहोस्",
+                      )}
                     </Button>
                   </div>
 
@@ -639,51 +741,55 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                     <Button
                       variant="outline"
                       className="flex-1 h-9 text-sm"
-                      onClick={() => setStep('details')}
+                      onClick={() => setStep("details")}
                     >
-                      {getLocalizedText('Back', 'पछाडि')}
+                      {getLocalizedText("Back", "पछाडि")}
                     </Button>
-                    <Button 
+                    <Button
                       className="flex-1 h-9 text-sm"
-                      onClick={() => setStep('confirm')}
+                      onClick={() => setStep("confirm")}
                       disabled={!canProceed.address}
                     >
-                      {getLocalizedText('Continue', 'अगाडि बढ्नुहोस्')}
+                      {getLocalizedText("Continue", "अगाडि बढ्नुहोस्")}
                     </Button>
                   </div>
                 </div>
               )}
 
-              {step === 'confirm' && (
+              {step === "confirm" && (
                 <div className="space-y-3">
                   {/* Booking Summary */}
                   <div className="space-y-2">
                     <h3 className="font-semibold text-sm">
-                      {getLocalizedText('Booking Summary', 'बुकिङ सारांश')}
+                      {getLocalizedText("Booking Summary", "बुकिङ सारांश")}
                     </h3>
-                    
+
                     {/* Service Details */}
                     <Card className="p-3 space-y-2">
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {getLocalizedText('Service', 'सेवा')}
+                          {getLocalizedText("Service", "सेवा")}
                         </span>
-                        <span className="font-medium truncate ml-2">{professional?.service_name}</span>
+                        <span className="font-medium truncate ml-2">
+                          {professional?.service_name}
+                        </span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {getLocalizedText('Provider', 'प्रदायक')}
+                          {getLocalizedText("Provider", "प्रदायक")}
                         </span>
-                        <span className="font-medium">{professional?.full_name}</span>
+                        <span className="font-medium">
+                          {professional?.full_name}
+                        </span>
                       </div>
                       <Separator className="my-1" />
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {getLocalizedText('Type', 'प्रकार')}
+                          {getLocalizedText("Type", "प्रकार")}
                         </span>
                         <span className="font-medium">
-                          {language === 'ne' 
-                            ? selectedPriceInfo?.quality_ne 
+                          {language === "ne"
+                            ? selectedPriceInfo?.quality_ne
                             : selectedPriceInfo?.quality}
                         </span>
                       </div>
@@ -695,7 +801,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                       </div> */}
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {getLocalizedText('Unit Price', 'एकाइ मूल्य')}
+                          {getLocalizedText("Unit Price", "एकाइ मूल्य")}
                         </span>
                         <span className="font-medium">
                           Rs. {selectedPriceInfo?.discountedPrice}
@@ -704,11 +810,12 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                       {bookingDetails.priceItem?.has_warranty && (
                         <div className="flex justify-between text-xs">
                           <span className="text-muted-foreground">
-                            {getLocalizedText('Warranty', 'वारेन्टी')}
+                            {getLocalizedText("Warranty", "वारेन्टी")}
                           </span>
                           <span className="flex items-center gap-1 text-emerald-600 font-medium">
                             <ShieldCheck className="h-3 w-3" />
-                            {bookingDetails.priceItem.warranty_duration} {bookingDetails.priceItem.warranty_unit}
+                            {bookingDetails.priceItem.warranty_duration}{" "}
+                            {bookingDetails.priceItem.warranty_unit}
                           </span>
                         </div>
                       )}
@@ -718,31 +825,34 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                     <Card className="p-3 space-y-1.5">
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {getLocalizedText('Date', 'मिति')}
+                          {getLocalizedText("Date", "मिति")}
                         </span>
                         <span className="font-medium">
-                          {typeof bookingDetails.scheduledDate === 'string' 
-                            ? bookingDetails.scheduledDate 
-                            : String(bookingDetails.scheduledDate) || 'N/A'}
+                          {typeof bookingDetails.scheduledDate === "string"
+                            ? bookingDetails.scheduledDate
+                            : String(bookingDetails.scheduledDate) || "N/A"}
                         </span>
                       </div>
                       <div className="flex justify-between text-xs">
                         <span className="text-muted-foreground">
-                          {getLocalizedText('Time', 'समय')}
+                          {getLocalizedText("Time", "समय")}
                         </span>
                         <span className="font-medium">
-                          {formatTimeTo12Hour(bookingDetails.scheduledTime) || 'N/A'}
+                          {formatTimeTo12Hour(bookingDetails.scheduledTime) ||
+                            "N/A"}
                         </span>
                       </div>
                     </Card>
-                    
+
                     {/* Address */}
                     {bookingDetails.address && (
                       <Card className="p-3">
                         <div className="flex items-start gap-1.5">
                           <MapPin className="h-3.5 w-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs">{formatAddressDisplay(bookingDetails.address)}</p>
+                            <p className="text-xs">
+                              {formatAddressDisplay(bookingDetails.address)}
+                            </p>
                           </div>
                         </div>
                       </Card>
@@ -755,9 +865,11 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                           <FileText className="h-3.5 w-3.5 mt-0.5 text-muted-foreground flex-shrink-0" />
                           <div className="flex-1 min-w-0">
                             <p className="text-[10px] text-muted-foreground">
-                              {getLocalizedText('Notes', 'नोट')}
+                              {getLocalizedText("Notes", "नोट")}
                             </p>
-                            <p className="text-xs mt-0.5 break-words">{bookingDetails.notes}</p>
+                            <p className="text-xs mt-0.5 break-words">
+                              {bookingDetails.notes}
+                            </p>
                           </div>
                         </div>
                       </Card>
@@ -767,7 +879,7 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                     <Card className="p-3 bg-primary/5 border-primary">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-sm">
-                          {getLocalizedText('Total', 'जम्मा')}
+                          {getLocalizedText("Total", "जम्मा")}
                         </span>
                         <span className="text-lg font-bold text-primary">
                           Rs. {totalPrice.toLocaleString()}
@@ -781,12 +893,12 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                     <Button
                       variant="outline"
                       className="flex-1 h-9 text-sm"
-                      onClick={() => setStep('address')}
+                      onClick={() => setStep("address")}
                       disabled={isSubmitting}
                     >
-                      {getLocalizedText('Back', 'पछाडि')}
+                      {getLocalizedText("Back", "पछाडि")}
                     </Button>
-                    <Button 
+                    <Button
                       className="flex-1 h-9 text-sm"
                       onClick={handleConfirmBooking}
                       disabled={isSubmitting || !canProceed.confirm}
@@ -794,12 +906,12 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
                       {isSubmitting ? (
                         <>
                           <div className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-current border-t-transparent mr-1" />
-                          {getLocalizedText('Booking...', 'बुक गर्दै...')}
+                          {getLocalizedText("Booking...", "बुक गर्दै...")}
                         </>
                       ) : (
                         <>
                           <Check className="mr-1 h-3.5 w-3.5" />
-                          {getLocalizedText('Confirm', 'पुष्टि गर्नुहोस्')}
+                          {getLocalizedText("Confirm", "पुष्टि गर्नुहोस्")}
                         </>
                       )}
                     </Button>
@@ -816,17 +928,22 @@ const orderNotesSchema = profileSchema.shape.ordernotes;
         open={addressDialogOpen}
         onOpenChange={setAddressDialogOpen}
         onSubmit={handleAddressSave}
-        initialData={selectedAddressForEdit ? {
-          ...selectedAddressForEdit,
-          type: 'temporary'
-        } : null}
-        title={selectedAddressForEdit 
-          ? getLocalizedText('Edit Address', 'ठेगाना सम्पादन गर्नुहोस्')
-          : getLocalizedText('Add New Address', 'नयाँ ठेगाना थप्नुहोस्')
+        initialData={
+          selectedAddressForEdit
+            ? {
+                ...selectedAddressForEdit,
+                type: "temporary",
+              }
+            : null
+        }
+        title={
+          selectedAddressForEdit
+            ? getLocalizedText("Edit Address", "ठेगाना सम्पादन गर्नुहोस्")
+            : getLocalizedText("Add New Address", "नयाँ ठेगाना थप्नुहोस्")
         }
         description={getLocalizedText(
-          'Enter your temporary delivery address details',
-          'आफ्नो अस्थायी डेलिभरी ठेगाना विवरणहरू प्रविष्ट गर्नुहोस्'
+          "Enter your temporary delivery address details",
+          "आफ्नो अस्थायी डेलिभरी ठेगाना विवरणहरू प्रविष्ट गर्नुहोस्",
         )}
         isLoading={isAddressSaving}
         addressType="temporary"

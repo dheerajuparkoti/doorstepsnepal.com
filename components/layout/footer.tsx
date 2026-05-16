@@ -1,9 +1,17 @@
-
 "use client";
 
 import { useRouter, usePathname } from "next/navigation";
 import { useI18n } from "@/lib/i18n/context";
-import { Home, Facebook, Instagram, Twitter,  Youtube, Mail, Phone, MapPin } from "lucide-react";
+import {
+  Home,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 import { SiTiktok } from "react-icons/si";
 
 export function Footer() {
@@ -25,30 +33,33 @@ export function Footer() {
     }
   };
 
-
-
   const scrollTofaqSection = (sectionId: string) => {
-  const currentPath = pathname;
-  const element = document.getElementById(sectionId);
+    const currentPath = pathname;
+    const element = document.getElementById(sectionId);
 
-  if (element) {
-    // If the section exists on the current page
-    element.scrollIntoView({ behavior: "smooth" });
-  } else {
-    // Navigate to downloads page with hash
-    router.push(`/downloads-app#${sectionId}`);
-  }
-};
-
+    if (element) {
+      // If the section exists on the current page
+      element.scrollIntoView({ behavior: "smooth" });
+    } else {
+      // Navigate to downloads page with hash
+      router.push(`/downloads-app#${sectionId}`);
+    }
+  };
 
   // Function to handle contact info click
-  const handleContactClick = (e: React.MouseEvent, sectionId: string = "contact") => {
+  const handleContactClick = (
+    e: React.MouseEvent,
+    sectionId: string = "contact",
+  ) => {
     e.preventDefault();
     scrollToSection(sectionId);
   };
 
-    // Function to handle contact info click
-  const handleLocationClick = (e: React.MouseEvent, sectionId: string = "ourLocation") => {
+  // Function to handle contact info click
+  const handleLocationClick = (
+    e: React.MouseEvent,
+    sectionId: string = "ourLocation",
+  ) => {
     e.preventDefault();
     scrollToSection(sectionId);
   };
@@ -68,31 +79,39 @@ export function Footer() {
               {t.footer.aboutText}
             </p>
             <div className="flex gap-4">
-            <a 
-  href="https://www.facebook.com/people/Doorsteps-Nepal-official/61577089614271/" 
-  target="_blank" 
-  rel="noopener noreferrer"
-  className="text-muted-foreground transition-colors hover:text-primary"
->
-
+              <a
+                href="https://www.facebook.com/doorstepsnepal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
                 <Facebook className="h-5 w-5" />
                 <span className="sr-only">Facebook</span>
               </a>
-              <a href="https://www.instagram.com/doorstepsnepal?igsh=dnBnM2NmYWx6eGYx"    target="_blank" 
-  rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-primary">
+              <a
+                href="https://www.instagram.com/doorstepsnepal?igsh=dnBnM2NmYWx6eGYx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
                 <Instagram className="h-5 w-5" />
                 <span className="sr-only">Instagram</span>
               </a>
-            <a 
-  href="https://www.tiktok.com/@doorsteps.nepal" 
-  target="_blank" 
-  rel="noopener noreferrer" 
-  className="text-muted-foreground transition-colors hover:text-primary"
->
-  <SiTiktok className="h-5 w-5" />
-  <span className="sr-only">TikTok</span>
-</a>
-              <a href="https://www.youtube.com/@DoorstepsNepal" target="_blank"   rel="noopener noreferrer" className="text-muted-foreground transition-colors hover:text-primary">
+              <a
+                href="https://www.tiktok.com/@doorsteps.nepal"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
+                <SiTiktok className="h-5 w-5" />
+                <span className="sr-only">TikTok</span>
+              </a>
+              <a
+                href="https://www.youtube.com/@doorstepsnepalofficial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-muted-foreground transition-colors hover:text-primary"
+              >
                 <Youtube className="h-5 w-5" />
                 <span className="sr-only">YouTube</span>
               </a>
@@ -111,7 +130,7 @@ export function Footer() {
                   {t.footer.location}
                 </button>
               </li>
-            
+
               <li>
                 <a
                   href="/privacy-policy"
@@ -129,7 +148,7 @@ export function Footer() {
                   {t.footer.termsConditions}
                 </a>
               </li>
-{/* <li>
+              {/* <li>
   <button
     onClick={() => scrollTofaqSection("faq")}
     className="text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -137,19 +156,17 @@ export function Footer() {
     {t.footer.faqs}
   </button>
 </li> */}
-             
-                <li>
+
+              <li>
                 <a
-                 
                   href="/safety-policy"
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t.footer.safetyPolicy}
                 </a>
               </li>
-                <li>
+              <li>
                 <a
-                 
                   href="/cancellation-refund-policy"
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
@@ -188,17 +205,13 @@ export function Footer() {
                 </a>
               </li>
 
-                  <li>
-              
-              </li>
+              <li></li>
             </ul>
 
-
-               <h3 className="font-semibold">{t.footer.support}</h3>
-              <ul className="space-y-2">
+            <h3 className="font-semibold">{t.footer.support}</h3>
+            <ul className="space-y-2">
               <li>
                 <a
-                
                   href="/faqs"
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
@@ -206,7 +219,7 @@ export function Footer() {
                 </a>
               </li>
 
-                <li>
+              <li>
                 <button
                   onClick={() => scrollToSection("contact")}
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
@@ -214,26 +227,16 @@ export function Footer() {
                   {t.footer.contactUs}
                 </button>
               </li>
-            
-                  <li>
+
+              <li>
                 <a
                   href="/tutorials-guides"
                   className="text-sm text-muted-foreground transition-colors hover:text-primary"
                 >
                   {t.hero.tutorialsGuide}
                 </a>
-                
               </li>
             </ul>
-
-
-
-
-
-
-        
-
-         
           </div>
 
           {/* Contact Info -  scroll functionality */}
@@ -251,30 +254,22 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Phone className="h-4 w-4 shrink-0" />
-        
 
-               <span>+977-9851407706</span> 
-             
-
-
+                <span>+977-9851407706</span>
               </li>
-               <li className="flex items-center gap-3 text-sm text-muted-foreground">
-       
-                 <Phone className="h-4 w-4 shrink-0" />
-                   <span>+977-9851407707</span> 
-        
-
-
+              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                <Phone className="h-4 w-4 shrink-0" />
+                <span>+977-9851407707</span>
               </li>
-            
+
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 shrink-0" />
                 <span>info@doorstepsnepal.com</span>
               </li>
             </ul>
 
-    <h3 className="font-semibold">{t.footer.download}</h3>
-              <ul className="space-y-2">
+            <h3 className="font-semibold">{t.footer.download}</h3>
+            <ul className="space-y-2">
               <li>
                 <a
                   href="/downloads-app"
@@ -284,7 +279,6 @@ export function Footer() {
                 </a>
               </li>
             </ul>
-            
           </div>
         </div>
 
