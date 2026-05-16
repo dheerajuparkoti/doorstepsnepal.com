@@ -47,8 +47,7 @@ export const metadata: Metadata = {
   verification: {
     google: "bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4",
   },
-  // <meta name="google-site-verification" content="bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4" />
-  // <meta name="google-site-verification" content="bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4" />
+
     generator: 'v0.app'
 };
 
