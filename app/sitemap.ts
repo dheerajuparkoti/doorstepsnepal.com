@@ -4,7 +4,7 @@ import { fetchServices } from "@/lib/api/services";
 import { fetchProfessionalServices } from "@/lib/api/professional-services";
 import { createProfessionalSlug } from "@/lib/utils/slug";
 
-const BASE_URL = "https://doorstepsnepal.com";
+const BASE_URL = "https://www.doorstepsnepal.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();

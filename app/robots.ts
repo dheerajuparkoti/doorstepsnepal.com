@@ -13,6 +13,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: "https://doorstepsnepal.com/sitemap.xml",
+    sitemap: "https://www.doorstepsnepal.com/sitemap.xml",
   };
 }
