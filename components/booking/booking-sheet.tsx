@@ -52,7 +52,7 @@ import { NepaliDateService } from '@/lib/utils/nepaliDate';
 import { useAddressStore } from '@/stores/address-store';
 import { ProperCaseFormatter } from '@/lib/utils/formatters';
 import { getProfileSchema, ProfileSchemaType } from '@/lib/schemas/profile-schema';
-// dheer
+
 // Types
 export interface PriceItem {
   id: number;
