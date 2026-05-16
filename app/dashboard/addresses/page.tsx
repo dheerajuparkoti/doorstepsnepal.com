@@ -52,81 +52,107 @@ const addresses = [
 ];
 
 export default function AddressesPage() {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
+  const ne = locale === "ne";
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const txt = {
+    savedAddresses: ne ? "बचत गरिएका ठेगानाहरू" : "Saved Addresses",
+    manageYourAddresses: ne ? "आफ्नो डेलिभरी ठेगानाहरू व्यवस्थापन गर्नुहोस्" : "Manage your delivery addresses",
+    addNew: ne ? "नयाँ थप्नुहोस्" : "Add New",
+    addNewAddress: ne ? "नयाँ ठेगाना थप्नुहोस्" : "Add New Address",
+    addressLabel: ne ? "ठेगाना लेबल" : "Address Label",
+    addressType: ne ? "ठेगाना प्रकार" : "Address Type",
+    selectType: ne ? "प्रकार छान्नुहोस्" : "Select type",
+    home: ne ? "घर" : "Home",
+    office: ne ? "कार्यालय" : "Office",
+    other: ne ? "अन्य" : "Other",
+    fullAddress: ne ? "पूरा ठेगाना" : "Full Address",
+    enterFullAddress: ne ? "पूरा ठेगाना प्रविष्ट गर्नुहोस्" : "Enter full address",
+    province: ne ? "प्रदेश" : "Province",
+    selectProvince: ne ? "प्रदेश छान्नुहोस्" : "Select province",
+    district: ne ? "जिल्ला" : "District",
+    selectDistrict: ne ? "जिल्ला छान्नुहोस्" : "Select district",
+    landmark: ne ? "स्थलचिह्न" : "Landmark",
+    nearbyLandmark: ne ? "नजिकको स्थलचिह्न" : "Nearby landmark",
+    contactPhone: ne ? "सम्पर्क फोन" : "Contact Phone",
+    saveAddress: ne ? "ठेगाना बचत गर्नुहोस्" : "Save Address",
+    default: ne ? "पूर्वनिर्धारित" : "Default",
+    setAsDefault: ne ? "पूर्वनिर्धारित बनाउनुहोस्" : "Set as Default",
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">
-            {t("savedAddresses")}
+            {txt.savedAddresses}
           </h1>
-          <p className="text-muted-foreground">{t("manageYourAddresses")}</p>
+          <p className="text-muted-foreground">{txt.manageYourAddresses}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
               <Plus className="w-4 h-4" />
-              {t("addNew")}
+              {txt.addNew}
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>{t("addNewAddress")}</DialogTitle>
+              <DialogTitle>{txt.addNewAddress}</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>{t("addressLabel")}</Label>
+                  <Label>{txt.addressLabel}</Label>
                   <Input placeholder="Home, Office, etc." />
                 </div>
                 <div>
-                  <Label>{t("addressType")}</Label>
+                  <Label>{txt.addressType}</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("selectType")} />
+                      <SelectValue placeholder={txt.selectType} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="home">{t("home")}</SelectItem>
-                      <SelectItem value="office">{t("office")}</SelectItem>
-                      <SelectItem value="other">{t("other")}</SelectItem>
+                      <SelectItem value="home">{txt.home}</SelectItem>
+                      <SelectItem value="office">{txt.office}</SelectItem>
+                      <SelectItem value="other">{txt.other}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
               <div>
-                <Label>{t("fullAddress")}</Label>
-                <Input placeholder={t("enterFullAddress")} />
+                <Label>{txt.fullAddress}</Label>
+                <Input placeholder={txt.enterFullAddress} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>{t("province")}</Label>
+                  <Label>{txt.province}</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("selectProvince")} />
+                      <SelectValue placeholder={txt.selectProvince} />
                     </SelectTrigger>
                     <SelectContent>
                       {nepalLocations.provinces.map((province) => (
                         <SelectItem key={province.name} value={province.name}>
-                          {locale === "ne" ? province.nameNp : province.name}
+                          {ne ? province.nameNp : province.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label>{t("district")}</Label>
+                  <Label>{txt.district}</Label>
                   <Select>
                     <SelectTrigger>
-                      <SelectValue placeholder={t("selectDistrict")} />
+                      <SelectValue placeholder={txt.selectDistrict} />
                     </SelectTrigger>
                     <SelectContent>
                       {nepalLocations.provinces[0].districts.map((district) => (
                         <SelectItem key={district.name} value={district.name}>
-                          {locale === "ne" ? district.nameNp : district.name}
+                          {ne ? district.nameNp : district.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -135,16 +161,16 @@ export default function AddressesPage() {
               </div>
 
               <div>
-                <Label>{t("landmark")}</Label>
-                <Input placeholder={t("nearbyLandmark")} />
+                <Label>{txt.landmark}</Label>
+                <Input placeholder={txt.nearbyLandmark} />
               </div>
 
               <div>
-                <Label>{t("contactPhone")}</Label>
+                <Label>{txt.contactPhone}</Label>
                 <Input placeholder="+977 98XXXXXXXX" />
               </div>
 
-              <Button className="w-full">{t("saveAddress")}</Button>
+              <Button className="w-full">{txt.saveAddress}</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -170,11 +196,11 @@ export default function AddressesPage() {
                   )}
                   <div>
                     <h3 className="font-semibold text-foreground">
-                      {locale === "ne" ? address.labelNp : address.label}
+                      {ne ? address.labelNp : address.label}
                     </h3>
                     {address.isDefault && (
                       <Badge variant="secondary" className="text-xs">
-                        {t("default")}
+                        {txt.default}
                       </Badge>
                     )}
                   </div>
@@ -197,7 +223,7 @@ export default function AddressesPage() {
                 <p className="text-foreground">{address.address}</p>
                 <p className="text-muted-foreground flex items-center gap-1">
                   <MapPin className="w-4 h-4" />
-                  {locale === "ne" ? address.cityNp : address.city}
+                  {ne ? address.cityNp : address.city}
                 </p>
                 <p className="text-muted-foreground">{address.landmark}</p>
                 <p className="text-muted-foreground">{address.phone}</p>
@@ -205,7 +231,7 @@ export default function AddressesPage() {
 
               {!address.isDefault && (
                 <Button variant="outline" size="sm" className="w-full mt-4 bg-transparent">
-                  {t("setAsDefault")}
+                  {txt.setAsDefault}
                 </Button>
               )}
             </CardContent>

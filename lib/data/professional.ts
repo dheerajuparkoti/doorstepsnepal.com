@@ -2,10 +2,11 @@
 
 export enum PaymentMethod {
   CASH = 'cash',
-  // ESEWA = 'esewa',
-  // KHALTI = 'khalti',
-  // IMEPAY = 'imepay',
-  QR_PAYMENT = 'qr_payment'
+  ESEWA = 'esewa',
+  KHALTI = 'khalti',
+  IMEPAY = 'imepay',
+  BANK_TRANSFER = 'bank_transfer',
+  QR_PAYMENT = 'qr_payment',
 }
 
 export interface Address {

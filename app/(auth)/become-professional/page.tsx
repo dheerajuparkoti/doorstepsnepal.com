@@ -18,7 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useI18n } from "@/lib/i18n/context";
-import { CategoriesResponse } from "@/lib/data/categories";
 import { nepalLocations } from "@/lib/data/nepal-locations";
 import {
   ArrowLeft,
@@ -63,7 +62,42 @@ const benefits = [
 ];
 
 export default function BecomeProfessionalPage() {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
+  const ne = locale === "ne";
+
+  const txt = {
+    back: ne ? "पछि" : "Back",
+    personalInformation: ne ? "व्यक्तिगत जानकारी" : "Personal Information",
+    fullName: ne ? "पूरा नाम" : "Full Name",
+    enterFullName: ne ? "पूरा नाम प्रविष्ट गर्नुहोस्" : "Enter full name",
+    phoneNumber: ne ? "फोन नम्बर" : "Phone Number",
+    email: ne ? "इमेल" : "Email",
+    address: ne ? "ठेगाना" : "Address",
+    enterAddress: ne ? "ठेगाना प्रविष्ट गर्नुहोस्" : "Enter your address",
+    province: ne ? "प्रदेश" : "Province",
+    selectProvince: ne ? "प्रदेश छान्नुहोस्" : "Select province",
+    district: ne ? "जिल्ला" : "District",
+    selectDistrict: ne ? "जिल्ला छान्नुहोस्" : "Select district",
+    uploadPhoto: ne ? "फोटो अपलोड गर्नुहोस्" : "Upload Photo",
+    uploadProfilePhoto: ne ? "प्रोफाइल फोटो अपलोड गर्नुहोस्" : "Upload your profile photo",
+    browseFiles: ne ? "फाइलहरू हेर्नुहोस्" : "Browse Files",
+    continue: ne ? "जारी राख्नुहोस्" : "Continue",
+    professionalDetails: ne ? "व्यावसायिक विवरण" : "Professional Details",
+    serviceCategory: ne ? "सेवा श्रेणी" : "Service Category",
+    selectCategory: ne ? "श्रेणी छान्नुहोस्" : "Select category",
+    yearsOfExperience: ne ? "अनुभवका वर्षहरू" : "Years of Experience",
+    hourlyRate: ne ? "प्रति घण्टा दर" : "Hourly Rate",
+    aboutYou: ne ? "तपाईंको बारेमा" : "About You",
+    describeProfessionalExperience: ne ? "आफ्नो व्यावसायिक अनुभव वर्णन गर्नुहोस्" : "Describe your professional experience",
+    uploadDocuments: ne ? "कागजातहरू अपलोड गर्नुहोस्" : "Upload Documents",
+    uploadCertificates: ne ? "प्रमाणपत्रहरू अपलोड गर्नुहोस्" : "Upload your certificates",
+    citizenshipTrainingCerts: ne ? "नागरिकता, तालिम प्रमाणपत्र" : "Citizenship, training certificates",
+    agreeTermsConditions: ne ? "नियम र सर्तहरूसँग सहमत छु" : "I agree to the Terms and Conditions",
+    submitApplication: ne ? "आवेदन पेश गर्नुहोस्" : "Submit Application",
+    backToHome: ne ? "गृह पृष्ठमा फर्कनुहोस्" : "Back to Home",
+    login: ne ? "लगिन" : "Login",
+  };
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: "",
@@ -97,12 +131,12 @@ export default function BecomeProfessionalPage() {
         <div className="bg-primary text-primary-foreground py-20">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-              {locale === "ne"
+              {ne
                 ? "Doorsteps Nepal मा प्रोफेशनल बन्नुहोस्"
                 : "Become a Professional on Doorsteps Nepal"}
             </h1>
             <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
-              {locale === "ne"
+              {ne
                 ? "हजारौं ग्राहकहरूसँग जोडिनुहोस् र आफ्नो सीप प्रयोग गरेर कमाउनुहोस्"
                 : "Connect with thousands of customers and earn using your skills"}
             </p>
@@ -112,7 +146,7 @@ export default function BecomeProfessionalPage() {
               onClick={() => setStep(2)}
               className="gap-2"
             >
-              {t("startRegistration")}
+              {ne ? "दर्ता सुरु गर्नुहोस्" : "Start Registration"}
               <ArrowRight className="w-5 h-5" />
             </Button>
           </div>
@@ -125,7 +159,7 @@ export default function BecomeProfessionalPage() {
             {/* Benefits */}
             <div className="mb-16">
               <h2 className="text-2xl font-bold text-center text-foreground mb-8">
-                {locale === "ne" ? "किन हामीसँग जोडिनुहोस्?" : "Why Join Us?"}
+                {ne ? "किन हामीसँग जोडिनुहोस्?" : "Why Join Us?"}
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {benefits.map((benefit) => (
@@ -135,12 +169,10 @@ export default function BecomeProfessionalPage() {
                         <benefit.icon className="w-7 h-7 text-primary" />
                       </div>
                       <h3 className="font-semibold text-foreground mb-2">
-                        {locale === "ne" ? benefit.titleNp : benefit.title}
+                        {ne ? benefit.titleNp : benefit.title}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        {locale === "ne"
-                          ? benefit.descriptionNp
-                          : benefit.description}
+                        {ne ? benefit.descriptionNp : benefit.description}
                       </p>
                     </CardContent>
                   </Card>
@@ -151,7 +183,7 @@ export default function BecomeProfessionalPage() {
             {/* How it works */}
             <div>
               <h2 className="text-2xl font-bold text-center text-foreground mb-8">
-                {locale === "ne" ? "यसले कसरी काम गर्छ" : "How It Works"}
+                {ne ? "यसले कसरी काम गर्छ" : "How It Works"}
               </h2>
               <div className="max-w-3xl mx-auto">
                 <div className="flex flex-col gap-6">
@@ -184,10 +216,10 @@ export default function BecomeProfessionalPage() {
                       </div>
                       <div>
                         <h3 className="font-semibold text-foreground">
-                          {locale === "ne" ? item.titleNp : item.title}
+                          {ne ? item.titleNp : item.title}
                         </h3>
                         <p className="text-muted-foreground">
-                          {locale === "ne" ? item.descNp : item.desc}
+                          {ne ? item.descNp : item.desc}
                         </p>
                       </div>
                     </div>
@@ -210,7 +242,7 @@ export default function BecomeProfessionalPage() {
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
-              {t("back")}
+              {txt.back}
             </Link>
 
             {/* Progress */}
@@ -240,22 +272,22 @@ export default function BecomeProfessionalPage() {
             {step === 2 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{t("personalInformation")}</CardTitle>
+                  <CardTitle>{txt.personalInformation}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="fullName">{t("fullName")}</Label>
+                      <Label htmlFor="fullName">{txt.fullName}</Label>
                       <Input
                         id="fullName"
                         name="fullName"
                         value={formData.fullName}
                         onChange={handleInputChange}
-                        placeholder={t("enterFullName")}
+                        placeholder={txt.enterFullName}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">{t("phoneNumber")}</Label>
+                      <Label htmlFor="phone">{txt.phoneNumber}</Label>
                       <Input
                         id="phone"
                         name="phone"
@@ -267,7 +299,7 @@ export default function BecomeProfessionalPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="email">{t("email")}</Label>
+                    <Label htmlFor="email">{txt.email}</Label>
                     <Input
                       id="email"
                       name="email"
@@ -279,19 +311,19 @@ export default function BecomeProfessionalPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="address">{t("address")}</Label>
+                    <Label htmlFor="address">{txt.address}</Label>
                     <Input
                       id="address"
                       name="address"
                       value={formData.address}
                       onChange={handleInputChange}
-                      placeholder={t("enterAddress")}
+                      placeholder={txt.enterAddress}
                     />
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <Label>{t("province")}</Label>
+                      <Label>{txt.province}</Label>
                       <Select
                         value={formData.province}
                         onValueChange={(value) =>
@@ -299,19 +331,19 @@ export default function BecomeProfessionalPage() {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={t("selectProvince")} />
+                          <SelectValue placeholder={txt.selectProvince} />
                         </SelectTrigger>
                         <SelectContent>
                           {nepalLocations.provinces.map((province) => (
                             <SelectItem key={province.name} value={province.name}>
-                              {locale === "ne" ? province.nameNp : province.name}
+                              {ne ? province.nameNp : province.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
-                      <Label>{t("district")}</Label>
+                      <Label>{txt.district}</Label>
                       <Select
                         value={formData.district}
                         onValueChange={(value) =>
@@ -319,7 +351,7 @@ export default function BecomeProfessionalPage() {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={t("selectDistrict")} />
+                          <SelectValue placeholder={txt.selectDistrict} />
                         </SelectTrigger>
                         <SelectContent>
                           {formData.province &&
@@ -330,9 +362,7 @@ export default function BecomeProfessionalPage() {
                                   key={district.name}
                                   value={district.name}
                                 >
-                                  {locale === "ne"
-                                    ? district.nameNp
-                                    : district.name}
+                                  {ne ? district.nameNp : district.name}
                                 </SelectItem>
                               ))}
                         </SelectContent>
@@ -341,20 +371,20 @@ export default function BecomeProfessionalPage() {
                   </div>
 
                   <div>
-                    <Label>{t("uploadPhoto")}</Label>
+                    <Label>{txt.uploadPhoto}</Label>
                     <div className="border-2 border-dashed border-border rounded-lg p-6 text-center mt-2">
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        {t("uploadProfilePhoto")}
+                        {txt.uploadProfilePhoto}
                       </p>
                       <Button variant="outline" size="sm" className="mt-2 bg-transparent">
-                        {t("browseFiles")}
+                        {txt.browseFiles}
                       </Button>
                     </div>
                   </div>
 
                   <Button className="w-full" onClick={() => setStep(3)}>
-                    {t("continue")}
+                    {txt.continue}
                   </Button>
                 </CardContent>
               </Card>
@@ -363,11 +393,11 @@ export default function BecomeProfessionalPage() {
             {step === 3 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>{t("professionalDetails")}</CardTitle>
+                  <CardTitle>{txt.professionalDetails}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <Label>{t("serviceCategory")}</Label>
+                    <Label>{txt.serviceCategory}</Label>
                     <Select
                       value={formData.category}
                       onValueChange={(value) =>
@@ -375,21 +405,16 @@ export default function BecomeProfessionalPage() {
                       }
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder={t("selectCategory")} />
+                        <SelectValue placeholder={txt.selectCategory} />
                       </SelectTrigger>
                       <SelectContent>
-                        {serviceCategories.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.icon} {locale === "ne" ? cat.nameNp : cat.name}
-                          </SelectItem>
-                        ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="experience">{t("yearsOfExperience")}</Label>
+                      <Label htmlFor="experience">{txt.yearsOfExperience}</Label>
                       <Input
                         id="experience"
                         name="experience"
@@ -400,7 +425,7 @@ export default function BecomeProfessionalPage() {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="hourlyRate">{t("hourlyRate")} (NPR)</Label>
+                      <Label htmlFor="hourlyRate">{txt.hourlyRate} (NPR)</Label>
                       <Input
                         id="hourlyRate"
                         name="hourlyRate"
@@ -413,29 +438,29 @@ export default function BecomeProfessionalPage() {
                   </div>
 
                   <div>
-                    <Label htmlFor="bio">{t("aboutYou")}</Label>
+                    <Label htmlFor="bio">{txt.aboutYou}</Label>
                     <Textarea
                       id="bio"
                       name="bio"
                       value={formData.bio}
                       onChange={handleInputChange}
-                      placeholder={t("describeProfessionalExperience")}
+                      placeholder={txt.describeProfessionalExperience}
                       rows={4}
                     />
                   </div>
 
                   <div>
-                    <Label>{t("uploadDocuments")}</Label>
+                    <Label>{txt.uploadDocuments}</Label>
                     <p className="text-sm text-muted-foreground mb-2">
-                      {t("uploadCertificates")}
+                      {txt.uploadCertificates}
                     </p>
                     <div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
                       <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        {t("citizenshipTrainingCerts")}
+                        {txt.citizenshipTrainingCerts}
                       </p>
                       <Button variant="outline" size="sm" className="mt-2 bg-transparent">
-                        {t("browseFiles")}
+                        {txt.browseFiles}
                       </Button>
                     </div>
                   </div>
@@ -452,7 +477,7 @@ export default function BecomeProfessionalPage() {
                       }
                     />
                     <label htmlFor="terms" className="text-sm cursor-pointer">
-                      {t("agreeTermsConditions")}
+                      {txt.agreeTermsConditions}
                     </label>
                   </div>
 
@@ -461,7 +486,7 @@ export default function BecomeProfessionalPage() {
                     disabled={!formData.agreeTerms}
                     onClick={handleSubmit}
                   >
-                    {t("submitApplication")}
+                    {txt.submitApplication}
                   </Button>
                 </CardContent>
               </Card>
@@ -476,23 +501,21 @@ export default function BecomeProfessionalPage() {
               <Check className="w-10 h-10 text-primary" />
             </div>
             <h2 className="text-2xl font-bold text-foreground mb-4">
-              {locale === "ne"
-                ? "आवेदन पेश गरियो!"
-                : "Application Submitted!"}
+              {ne ? "आवेदन पेश गरियो!" : "Application Submitted!"}
             </h2>
             <p className="text-muted-foreground mb-8">
-              {locale === "ne"
+              {ne
                 ? "तपाईंको आवेदन समीक्षाको लागि पेश गरिएको छ। हामी २-३ कार्य दिन भित्र तपाईंलाई सम्पर्क गर्नेछौं।"
                 : "Your application has been submitted for review. We will contact you within 2-3 business days."}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link href="/" className="flex-1">
                 <Button variant="outline" className="w-full bg-transparent">
-                  {t("backToHome")}
+                  {txt.backToHome}
                 </Button>
               </Link>
               <Link href="/login" className="flex-1">
-                <Button className="w-full">{t("login")}</Button>
+                <Button className="w-full">{txt.login}</Button>
               </Link>
             </div>
           </div>

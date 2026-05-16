@@ -1,5 +1,4 @@
 
-import React from 'react';
 import Image from 'next/image';
 import { PaymentMethod } from '@/lib/data/professional/payment';
 import { QR_CODE_PATHS } from '@/lib/data/professional/constants';
@@ -14,25 +13,19 @@ interface QRCodeSectionProps {
 const methodColors: Record<PaymentMethod, string> = {
     [PaymentMethod.KHALTI]: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
     [PaymentMethod.ESEWA]: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
-    [PaymentMethod.FONEPAY]: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
     [PaymentMethod.IMEPAY]: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
-    [PaymentMethod.MOBILE_BANKING]: 'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800',
+    [PaymentMethod.QR_PAYMENT]: 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
     [PaymentMethod.BANK_TRANSFER]: '',
     [PaymentMethod.CASH]: '',
-    [PaymentMethod.CARD]: '',
-    [PaymentMethod.DIGITAL_WALLET]: ''
 };
 
 const textColors: Record<PaymentMethod, string> = {
     [PaymentMethod.KHALTI]: 'text-purple-700 dark:text-purple-300',
     [PaymentMethod.ESEWA]: 'text-green-700 dark:text-green-300',
-    [PaymentMethod.FONEPAY]: 'text-blue-700 dark:text-blue-300',
     [PaymentMethod.IMEPAY]: 'text-red-700 dark:text-red-300',
-    [PaymentMethod.MOBILE_BANKING]: 'text-teal-700 dark:text-teal-300',
+    [PaymentMethod.QR_PAYMENT]: 'text-indigo-700 dark:text-indigo-300',
     [PaymentMethod.BANK_TRANSFER]: '',
     [PaymentMethod.CASH]: '',
-    [PaymentMethod.CARD]: '',
-    [PaymentMethod.DIGITAL_WALLET]: ''
 };
 
 // Helper to convert enum to display name

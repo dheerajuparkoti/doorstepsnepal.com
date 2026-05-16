@@ -94,7 +94,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.cookie = `language=${lang}; path=/; max-age=31536000`;
   };
 
-  const t = translations[language];
+  const t = translations[language] as typeof translations.en;
 
   return (
     <I18nContext.Provider value={{ language, locale: language, setLanguage, t }}>

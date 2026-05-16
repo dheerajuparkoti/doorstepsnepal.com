@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useI18n } from "@/lib/i18n/context";
@@ -81,13 +81,23 @@ const reviews = [
 ];
 
 export default function ReviewsPage() {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
+  const ne = locale === "ne";
+
+  const txt = {
+    myReviews: ne ? "मेरा समीक्षाहरू" : "My Reviews",
+    customerFeedback: ne ? "ग्राहकहरूको प्रतिक्रिया" : "Customer feedback",
+    totalReviews: ne ? "कुल समीक्षाहरू" : "total reviews",
+    yourReply: ne ? "तपाईंको जवाफ" : "Your Reply",
+    helpful: ne ? "सहयोगी" : "helpful",
+    reply: ne ? "जवाफ दिनुहोस्" : "Reply",
+  };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t("myReviews")}</h1>
-        <p className="text-muted-foreground">{t("customerFeedback")}</p>
+        <h1 className="text-2xl font-bold text-foreground">{txt.myReviews}</h1>
+        <p className="text-muted-foreground">{txt.customerFeedback}</p>
       </div>
 
       {/* Rating Overview */}
@@ -111,7 +121,7 @@ export default function ReviewsPage() {
                 ))}
               </div>
               <p className="text-sm text-muted-foreground">
-                {reviewStats.total} {t("totalReviews")}
+                {reviewStats.total} {txt.totalReviews}
               </p>
             </div>
 
@@ -152,12 +162,12 @@ export default function ReviewsPage() {
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <h3 className="font-semibold text-foreground">
-                        {locale === "ne"
+                        {ne
                           ? review.customer.nameNp
                           : review.customer.name}
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        {locale === "ne" ? review.serviceNp : review.service}
+                        {ne ? review.serviceNp : review.service}
                       </p>
                     </div>
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -181,13 +191,13 @@ export default function ReviewsPage() {
               </div>
 
               <p className="text-foreground mb-4">
-                {locale === "ne" ? review.commentNp : review.comment}
+                {ne ? review.commentNp : review.comment}
               </p>
 
               {review.replied && review.reply && (
                 <div className="bg-muted/50 rounded-lg p-4 mb-4 ml-4 border-l-2 border-primary">
                   <p className="text-sm font-medium text-foreground mb-1">
-                    {t("yourReply")}:
+                    {txt.yourReply}:
                   </p>
                   <p className="text-sm text-muted-foreground">{review.reply}</p>
                 </div>
@@ -199,12 +209,12 @@ export default function ReviewsPage() {
                   className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                 >
                   <ThumbsUp className="w-4 h-4" />
-                  {review.helpful} {t("helpful")}
+                  {review.helpful} {txt.helpful}
                 </button>
                 {!review.replied && (
                   <Button variant="outline" size="sm" className="gap-2 bg-transparent">
                     <MessageSquare className="w-4 h-4" />
-                    {t("reply")}
+                    {txt.reply}
                   </Button>
                 )}
               </div>

@@ -681,6 +681,7 @@ emergencyDesc: '24/7 emergency service available for urgent needs',
         privacyCenter: "गोपनीयता केन्द्र",
         myOrders: "मेरो अर्डरहरू",
         manageYourOrders: "आफ्ना सेवा अर्डरहरू व्यवस्थापन गर्नुहोस्",
+        all: "सबै",
       },
       welcome: {
         subtitle: "विश्वसनीय घरेलु सेवाहरू सजिलै बुक गर्नुहोस्",
