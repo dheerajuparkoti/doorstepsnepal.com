@@ -45,7 +45,7 @@
 // }
 
 
-// lib/i18n/context.tsx (UPDATED)
+// lib/i18n/context.tsx 
 "use client";
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
