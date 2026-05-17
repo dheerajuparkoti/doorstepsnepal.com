@@ -11,8 +11,21 @@ import { Footer } from '@/components/layout/footer';
 import LocationSection from '@/components/about/location-section';
 
 export const metadata: Metadata = {
-  title: 'About Us - Doorstep Services',
-  description: 'Learn about our mission, vision, and why thousands trust us for their home service needs.',
+  title: 'About Us',
+  description: 'Learn about Doorsteps Nepal — our mission, vision, and why thousands trust us for home services in Kathmandu.',
+  openGraph: {
+    title: 'About Doorsteps Nepal',
+    description: 'Learn about Doorsteps Nepal — our mission, vision, and why thousands trust us for home services in Kathmandu.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'About Doorsteps Nepal',
+    description: 'Learn about Doorsteps Nepal — our mission, vision, and why thousands trust us for home services in Kathmandu.',
+  },
+  alternates: {
+    canonical: '/about',
+  },
 };
 
 

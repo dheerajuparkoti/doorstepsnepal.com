@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ServiceDetailClient } from "./service-client";
 import { fetchServiceById } from "@/lib/api/services";
+import { JsonLd, serviceJsonLd } from "@/components/seo/JsonLd";
 
 interface PageProps {
   params: Promise<{
@@ -29,13 +30,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const description = service.description_en?.substring(0, 160) ?? `Book ${service.name_en} in Nepal.`;
+
   return {
     title: service.name_en,
-    description: service.description_en?.substring(0, 160),
+    description,
     openGraph: {
-      title: service.name_en,
-      description: service.description_en?.substring(0, 160),
-      images: service.image ? [service.image] : [],
+      title: `${service.name_en} | Doorsteps Nepal`,
+      description,
+      type: "website",
+      images: service.image ? [{ url: service.image, alt: service.name_en }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${service.name_en} | Doorsteps Nepal`,
+      description,
+    },
+    alternates: {
+      canonical: `/service/detail/${id}`,
     },
   };
 }
@@ -54,5 +66,17 @@ export default async function ServiceDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  return <ServiceDetailClient service={service} />;
+  return (
+    <>
+      <JsonLd
+        data={serviceJsonLd({
+          name: service.name_en,
+          description: service.description_en ?? undefined,
+          image: service.image ?? undefined,
+          url: `https://www.doorstepsnepal.com/service/detail/${parsedId}`,
+        })}
+      />
+      <ServiceDetailClient service={service} />
+    </>
+  );
 }

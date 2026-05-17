@@ -46,14 +46,26 @@ export async function generateMetadata(props: CategorySubCategoriesPageProps) {
       };
     }
     
+    const description = `Browse all ${category.name_en.toLowerCase()} subcategories and services available in Nepal.`;
     return {
-      title: `${category.name_en} Subcategories | DoorStep`,
-      description: `Browse all ${category.name_en.toLowerCase()} subcategories and services`,
+      title: `${category.name_en} Subcategories`,
+      description,
+      openGraph: {
+        title: `${category.name_en} Subcategories | Doorsteps Nepal`,
+        description,
+        type: "website",
+        images: category.image ? [{ url: category.image, alt: category.name_en }] : [],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${category.name_en} Subcategories | Doorsteps Nepal`,
+        description,
+      },
     };
   } catch (error) {
     console.error('Error generating metadata:', error);
     return {
-      title: 'Subcategories | DoorStep',
+      title: 'Subcategories',
     };
   }
 }

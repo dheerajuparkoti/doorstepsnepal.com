@@ -1,5 +1,5 @@
-
-
+import type { Metadata } from "next";
+import { JsonLd, localBusinessJsonLd } from "@/components/seo/JsonLd";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { HeroCarousel } from "@/components/home/hero-carousel";
@@ -17,8 +17,6 @@ import { FeaturedServicesSkeleton } from "@/components/home/skeleton/feateured-s
 import { FeaturedServicesSectionSSR } from "@/components/home/ssr/featured-services-section-ssr";
 import { FeaturedServicesCarouselSkeleton } from "@/components/home/skeleton/featured-services-carousel-skeleton";
 import { FeaturedServicesCarouselSection } from "@/components/home/ssr/featured-services-carousel-ssr";
-
-
 import { SearchClient } from "@/components/home/client/search-client";
 import { PartnerBenefitProgramSkeleton } from "@/components/home/skeleton/partner-benefit-program-skeleton";
 import { PartnerBenefitProgramSSR } from "@/components/home/ssr/partner-benefit-program-ssr";
@@ -28,12 +26,26 @@ import { PromotionsCarouselSkeleton } from "@/components/home/skeleton/promotion
 import { PopularServicesSkeleton } from "@/components/home/skeleton/popular-services-skeleton";
 import { PopularServicesSectionSSR } from "@/components/home/ssr/popular-services-section-ssr";
 
+export const metadata: Metadata = {
+  title: "Doorsteps Nepal | Trusted Home Services at Your Doorstep",
+  description:
+    "Book verified plumbers, electricians, cleaners, beauty professionals and more in Nepal. Same-day service available in Kathmandu.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    url: "https://www.doorstepsnepal.com",
+    type: "website",
+  },
+};
+
 
   
 export default function HomePage() {
   
   return (
     <div className="flex min-h-screen flex-col">
+      <JsonLd data={localBusinessJsonLd()} />
           {/* <FCMInitializer /> */}
       <Navbar />
       <main className="flex-1">
