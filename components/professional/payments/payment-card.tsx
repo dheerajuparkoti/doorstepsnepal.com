@@ -1,5 +1,5 @@
 
-import React, { JSX, useState } from 'react';
+import { JSX, useState } from 'react';
 import { Payment, PaymentMethod, PaymentStatus } from '@/lib/data/professional/payment';
 import { CurrencyFormatter } from '@/lib/utils/formatters';
 import { NepaliDateService } from '@/lib/utils/nepaliDate';
@@ -12,14 +12,14 @@ interface PaymentCardProps {
   onDownloadReceipt: (payment: Payment) => Promise<void>;
 }
 
-const paymentMethodConfig: Record<PaymentMethod, { icon: JSX.Element; color: string }> = {
-  khalti: {
+const paymentMethodConfig: Partial<Record<PaymentMethod, { icon: JSX.Element; color: string }>> = {
+  cash: {
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
       </svg>
     ),
-    color: 'text-purple-600 dark:text-purple-400'
+    color: 'text-green-600 dark:text-green-400'
   },
   esewa: {
     icon: (
@@ -29,13 +29,21 @@ const paymentMethodConfig: Record<PaymentMethod, { icon: JSX.Element; color: str
     ),
     color: 'text-green-600 dark:text-green-400'
   },
-  fonepay: {
+  khalti: {
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
       </svg>
     ),
-    color: 'text-blue-600 dark:text-blue-400'
+    color: 'text-purple-600 dark:text-purple-400'
+  },
+  imepay: {
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
+      </svg>
+    ),
+    color: 'text-red-600 dark:text-red-400'
   },
   bank_transfer: {
     icon: (
@@ -45,46 +53,14 @@ const paymentMethodConfig: Record<PaymentMethod, { icon: JSX.Element; color: str
     ),
     color: 'text-blue-600 dark:text-blue-400'
   },
-  cash: {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-    color: 'text-green-600 dark:text-green-400'
-  },
-  card: {
+  qr_payment: {
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
       </svg>
     ),
-    color: 'text-blue-600 dark:text-blue-400'
+    color: 'text-indigo-600 dark:text-indigo-400'
   },
-  mobile_banking: {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>
-    ),
-    color: 'text-teal-600 dark:text-teal-400'
-  },
-  digital_wallet: {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-      </svg>
-    ),
-    color: 'text-orange-600 dark:text-orange-400'
-  },
-  imepay: {
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-      </svg>
-    ),
-    color: 'text-red-600 dark:text-red-400'
-  }
 };
 
 const statusConfig: Record<PaymentStatus, {
@@ -131,7 +107,7 @@ const statusConfig: Record<PaymentStatus, {
 
 export function PaymentCard({ payment, onDownloadReceipt }: PaymentCardProps) {
   const [showDetails, setShowDetails] = useState(false);
-  const methodConfig = paymentMethodConfig[payment.payment_method];
+  const methodConfig = paymentMethodConfig[payment.payment_method as PaymentMethod];
   const status = statusConfig[payment.payment_status];
 
   return (

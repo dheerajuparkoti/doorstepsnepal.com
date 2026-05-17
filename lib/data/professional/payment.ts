@@ -1,15 +1,6 @@
 
-export enum PaymentMethod {
-  // KHALTI = 'khalti',
-  // ESEWA = 'esewa',
-  // FONEPAY = 'fonepay',
-  QR_PAYMENT = 'qr_payment',
-  CASH = 'cash',
-  // CARD = 'card',
-  // MOBILE_BANKING = 'mobile_banking',
-  // DIGITAL_WALLET = 'digital_wallet',
-  // IMEPAY = 'imepay'
-}
+import { PaymentMethod } from '@/lib/data/professional';
+export { PaymentMethod };
 
 export enum PaymentStatus {
   PENDING = 'pending',

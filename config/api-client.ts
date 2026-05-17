@@ -1,5 +1,5 @@
 
-import { ApiConstants } from 'config/api-constants';
+import { ApiConstants } from '@/config/api-constants';
 
 // Token management utilities
 export const getToken = (): string | null => {

@@ -26,6 +26,8 @@ import { PromotionsCarouselSkeleton } from "@/components/home/skeleton/promotion
 import { PopularServicesSkeleton } from "@/components/home/skeleton/popular-services-skeleton";
 import { PopularServicesSectionSSR } from "@/components/home/ssr/popular-services-section-ssr";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Doorsteps Nepal | Trusted Home Services at Your Doorstep",
   description:

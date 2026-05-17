@@ -13,6 +13,8 @@
 // }
 
 
+export const revalidate = 60;
+
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { fetchCategoryById } from '@/lib/api/categories';

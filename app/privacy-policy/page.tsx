@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PrivacyPolicyClientPage from "./privacy-policy-client";
+import PrivacyPolicyPage from "./page-client";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -26,6 +26,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PrivacyPolicyPage() {
-  return <PrivacyPolicyClientPage />;
+export default function PrivacyPolicyServerPage() {
+  return <PrivacyPolicyPage />;
 }

@@ -32,21 +32,8 @@ export default function SearchWrapper() {
         }
 
         const services: Service[] = response.services;
-        //console.log(`Fetched ${services.length} services`);
 
-        // Transform services data 
-        const servicesData = services.map((service) => ({
-          id: service.id,
-          name_en: service.name_en,
-          name_np: service.name_np,
-          image: service.image,
-          description_en: service.description_en,
-          description_np: service.description_np,
-          category: service.category,
-          sub_category: service.sub_category,
-        }));
-
-        setData(servicesData);
+        setData(services);
 
       } catch (error) {
         console.error("Error in SearchWrapper:", error);

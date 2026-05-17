@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import TermsConditionsClientPage from "./terms-conditions-client";
+import TermsAndConditionsPage from "./page-client";
 
 export const metadata: Metadata = {
   title: "Terms & Conditions",
@@ -26,6 +26,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function TermsConditionsPage() {
-  return <TermsConditionsClientPage />;
+export default function TermsServerPage() {
+  return <TermsAndConditionsPage />;
 }

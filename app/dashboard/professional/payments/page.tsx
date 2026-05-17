@@ -122,7 +122,7 @@ export default function ProfessionalPaymentsPage() {
     if (profile && !isEditing) {
       // Populate form with profile data
       form.reset({
-        payment_method: profile.payment_method || 'cash',
+        payment_method: (profile.payment_method || 'cash') as PaymentFormValues['payment_method'],
         phone_number: profile.phone_number || '',
         bank_account_number: profile.bank_account_number || '',
         bank_branch_name: profile.bank_branch_name || '',
@@ -221,10 +221,15 @@ export default function ProfessionalPaymentsPage() {
         icon: Smartphone,
         color: 'bg-blue-100 text-blue-800' 
       },
-      [PaymentMethod.BANK_TRANSFER]: { 
-        label: locale === 'ne' ? 'बैंक हस्तान्तरण' : 'Bank Transfer', 
+      [PaymentMethod.BANK_TRANSFER]: {
+        label: locale === 'ne' ? 'बैंक हस्तान्तरण' : 'Bank Transfer',
         icon: PiggyBank,
-        color: 'bg-indigo-100 text-indigo-800' 
+        color: 'bg-indigo-100 text-indigo-800'
+      },
+      [PaymentMethod.QR_PAYMENT]: {
+        label: locale === 'ne' ? 'QR भुक्तानी' : 'QR Payment',
+        icon: Smartphone,
+        color: 'bg-gray-100 text-gray-800',
       },
     };
     

@@ -1,8 +1,6 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -31,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "app/(auth)/onboarding/page.jsx"  ],
+  ],
   "exclude": ["node_modules"]
 }

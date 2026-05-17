@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import FaqsClientPage from "./faqs-client";
+import FAQPage from "./page-client";
 import { JsonLd, faqPageJsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
@@ -36,11 +36,11 @@ const STATIC_FAQS = [
   { question: "How do I contact Doorsteps Nepal?", answer: "Email: doorstepnepal@gmail.com | Phone / WhatsApp: 9851407706, 9851407707 | Address: Kathmandu, Nepal" },
 ];
 
-export default function FaqsPage() {
+export default function FAQServerPage() {
   return (
     <>
       <JsonLd data={faqPageJsonLd(STATIC_FAQS)} />
-      <FaqsClientPage />
+      <FAQPage />
     </>
   );
 }

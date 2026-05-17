@@ -76,7 +76,29 @@ const transactions = [
 ];
 
 export default function EarningsPage() {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
+  const ne = locale === "ne";
+
+  const txt = {
+    earnings: ne ? "आम्दानी" : "Earnings",
+    trackYourEarnings: ne ? "आफ्नो आम्दानी ट्र्याक गर्नुहोस्" : "Track your earnings",
+    thisMonth: ne ? "यो महिना" : "This Month",
+    lastMonth: ne ? "गत महिना" : "Last Month",
+    last3Months: ne ? "अन्तिम ३ महिना" : "Last 3 Months",
+    thisYear: ne ? "यो वर्ष" : "This Year",
+    export: ne ? "निर्यात" : "Export",
+    totalEarnings: ne ? "कुल आम्दानी" : "Total Earnings",
+    allTime: ne ? "सबै समय" : "All time",
+    fromLastMonth: ne ? "गत महिनाबाट" : "from last month",
+    pendingPayout: ne ? "पेन्डिङ भुक्तानी" : "Pending Payout",
+    withdraw: ne ? "निकाल्नुहोस्" : "Withdraw",
+    avgPerJob: ne ? "प्रति काम औसत" : "Avg per Job",
+    jobsCompleted: ne ? "काम सम्पन्न" : "jobs completed",
+    recentTransactions: ne ? "हालका कारोबारहरू" : "Recent Transactions",
+    viewAll: ne ? "सबै हेर्नुहोस्" : "View All",
+    completed: ne ? "सम्पन्न" : "Completed",
+    pending: ne ? "पेन्डिङ" : "Pending",
+  };
 
   const growthPercent = (
     ((earningsData.thisMonth - earningsData.lastMonth) /
@@ -88,8 +110,8 @@ export default function EarningsPage() {
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{t("earnings")}</h1>
-          <p className="text-muted-foreground">{t("trackYourEarnings")}</p>
+          <h1 className="text-2xl font-bold text-foreground">{txt.earnings}</h1>
+          <p className="text-muted-foreground">{txt.trackYourEarnings}</p>
         </div>
         <div className="flex gap-2">
           <Select defaultValue="thisMonth">
@@ -97,15 +119,15 @@ export default function EarningsPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="thisMonth">{t("thisMonth")}</SelectItem>
-              <SelectItem value="lastMonth">{t("lastMonth")}</SelectItem>
-              <SelectItem value="last3Months">{t("last3Months")}</SelectItem>
-              <SelectItem value="thisYear">{t("thisYear")}</SelectItem>
+              <SelectItem value="thisMonth">{txt.thisMonth}</SelectItem>
+              <SelectItem value="lastMonth">{txt.lastMonth}</SelectItem>
+              <SelectItem value="last3Months">{txt.last3Months}</SelectItem>
+              <SelectItem value="thisYear">{txt.thisYear}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" className="gap-2 bg-transparent">
             <Download className="w-4 h-4" />
-            {t("export")}
+            {txt.export}
           </Button>
         </div>
       </div>
@@ -115,20 +137,20 @@ export default function EarningsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">{t("totalEarnings")}</p>
+              <p className="text-sm text-muted-foreground">{txt.totalEarnings}</p>
               <Wallet className="w-5 h-5 text-primary" />
             </div>
             <p className="text-2xl font-bold text-foreground">
               Rs. {earningsData.totalEarnings.toLocaleString()}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">{t("allTime")}</p>
+            <p className="text-xs text-muted-foreground mt-1">{txt.allTime}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">{t("thisMonth")}</p>
+              <p className="text-sm text-muted-foreground">{txt.thisMonth}</p>
               {Number(growthPercent) >= 0 ? (
                 <TrendingUp className="w-5 h-5 text-green-600" />
               ) : (
@@ -142,7 +164,7 @@ export default function EarningsPage() {
               className={`text-xs mt-1 ${Number(growthPercent) >= 0 ? "text-green-600" : "text-red-600"}`}
             >
               {Number(growthPercent) >= 0 ? "+" : ""}
-              {growthPercent}% {t("fromLastMonth")}
+              {growthPercent}% {txt.fromLastMonth}
             </p>
           </CardContent>
         </Card>
@@ -150,14 +172,14 @@ export default function EarningsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">{t("pendingPayout")}</p>
+              <p className="text-sm text-muted-foreground">{txt.pendingPayout}</p>
               <Clock className="w-5 h-5 text-yellow-600" />
             </div>
             <p className="text-2xl font-bold text-foreground">
               Rs. {earningsData.pendingPayout.toLocaleString()}
             </p>
             <Button size="sm" className="mt-2 w-full bg-transparent" variant="outline">
-              {t("withdraw")}
+              {txt.withdraw}
             </Button>
           </CardContent>
         </Card>
@@ -165,14 +187,14 @@ export default function EarningsPage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">{t("avgPerJob")}</p>
+              <p className="text-sm text-muted-foreground">{txt.avgPerJob}</p>
               <IndianRupee className="w-5 h-5 text-primary" />
             </div>
             <p className="text-2xl font-bold text-foreground">
               Rs. {earningsData.avgPerJob.toLocaleString()}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              {earningsData.completedJobs} {t("jobsCompleted")}
+              {earningsData.completedJobs} {txt.jobsCompleted}
             </p>
           </CardContent>
         </Card>
@@ -182,9 +204,9 @@ export default function EarningsPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>{t("recentTransactions")}</span>
+            <span>{txt.recentTransactions}</span>
             <Button variant="link" size="sm">
-              {t("viewAll")}
+              {txt.viewAll}
             </Button>
           </CardTitle>
         </CardHeader>
@@ -231,7 +253,7 @@ export default function EarningsPage() {
                     variant={txn.status === "completed" ? "default" : "secondary"}
                     className="text-xs"
                   >
-                    {txn.status === "completed" ? t("completed") : t("pending")}
+                    {txn.status === "completed" ? txt.completed : txt.pending}
                   </Badge>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import CareersClientPage from "./careers-client";
+import CareersPage from "./page-client";
 
 export const metadata: Metadata = {
   title: "Join as a Professional",
@@ -28,6 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function CareersJoinProfessionalPage() {
-  return <CareersClientPage />;
+export default function CareersServerPage() {
+  return <CareersPage />;
 }

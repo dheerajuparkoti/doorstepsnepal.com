@@ -46,7 +46,8 @@ const timeOptions = [
 ];
 
 export default function AvailabilityPage() {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
+  const ne = locale === "ne";
   const [isOnline, setIsOnline] = useState(true);
   const [acceptingEmergency, setAcceptingEmergency] = useState(true);
   const [schedule, setSchedule] = useState<
@@ -66,6 +67,27 @@ export default function AvailabilityPage() {
     "Lalitpur",
     "Bhaktapur",
   ]);
+
+  const txt = {
+    availability: ne ? "उपलब्धता" : "Availability",
+    manageAvailability: ne ? "आफ्नो उपलब्धता तालिका व्यवस्थापन गर्नुहोस्" : "Manage your availability schedule",
+    youAreOnline: ne ? "तपाईं अनलाइन हुनुहुन्छ" : "You are Online",
+    youAreOffline: ne ? "तपाईं अफलाइन हुनुहुन्छ" : "You are Offline",
+    acceptingNewRequests: ne ? "नयाँ अनुरोधहरू स्वीकार गर्दै" : "Accepting new requests",
+    notAcceptingRequests: ne ? "अहिले अनुरोधहरू स्वीकार गरिरहेको छैन" : "Not accepting requests right now",
+    emergencyServices: ne ? "आपतकालीन सेवाहरू" : "Emergency Services",
+    acceptEmergencyDesc: ne ? "आपतकालीन बुकिङहरू स्वीकार गर्नुहोस् (+Rs. 500 अतिरिक्त)" : "Accept emergency bookings (+Rs. 500 extra)",
+    emergencyAvailable: ne ? "आपतकालीन उपलब्ध" : "Emergency Available",
+    weeklySchedule: ne ? "साप्ताहिक तालिका" : "Weekly Schedule",
+    to: ne ? "देखि" : "to",
+    notAvailable: ne ? "उपलब्ध छैन" : "Not available",
+    serviceAreas: ne ? "सेवा क्षेत्रहरू" : "Service Areas",
+    addArea: ne ? "क्षेत्र थप्नुहोस्" : "Add Area",
+    vacationMode: ne ? "बिदा मोड" : "Vacation Mode",
+    vacationModeDesc: ne ? "बिदामा जाँदा अस्थायी रूपमा बुकिङहरू रोक्नुहोस्" : "Temporarily pause bookings when you go on vacation",
+    setVacationDates: ne ? "बिदा मिति सेट गर्नुहोस्" : "Set Vacation Dates",
+    saveChanges: ne ? "परिवर्तनहरू बचत गर्नुहोस्" : "Save Changes",
+  };
 
   const toggleDay = (dayId: string) => {
     setSchedule((prev) => ({
@@ -89,9 +111,9 @@ export default function AvailabilityPage() {
     <div className="p-4 sm:p-6 lg:p-8 max-w-4xl">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-foreground">
-          {t("availability")}
+          {txt.availability}
         </h1>
-        <p className="text-muted-foreground">{t("manageAvailability")}</p>
+        <p className="text-muted-foreground">{txt.manageAvailability}</p>
       </div>
 
       <div className="space-y-6">
@@ -113,12 +135,12 @@ export default function AvailabilityPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground">
-                    {isOnline ? t("youAreOnline") : t("youAreOffline")}
+                    {isOnline ? txt.youAreOnline : txt.youAreOffline}
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {isOnline
-                      ? t("acceptingNewRequests")
-                      : t("notAcceptingRequests")}
+                      ? txt.acceptingNewRequests
+                      : txt.notAcceptingRequests}
                   </p>
                 </div>
               </div>
@@ -133,10 +155,10 @@ export default function AvailabilityPage() {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold text-foreground">
-                  {t("emergencyServices")}
+                  {txt.emergencyServices}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {t("acceptEmergencyDesc")}
+                  {txt.acceptEmergencyDesc}
                 </p>
               </div>
               <Switch
@@ -146,7 +168,7 @@ export default function AvailabilityPage() {
             </div>
             {acceptingEmergency && (
               <Badge className="mt-3 bg-red-100 text-red-800">
-                {t("emergencyAvailable")} (+Rs. 500)
+                {txt.emergencyAvailable} (+Rs. 500)
               </Badge>
             )}
           </CardContent>
@@ -157,7 +179,7 @@ export default function AvailabilityPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Clock className="w-5 h-5" />
-              {t("weeklySchedule")}
+              {txt.weeklySchedule}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -178,7 +200,7 @@ export default function AvailabilityPage() {
                         : "text-muted-foreground"
                     }
                   >
-                    {locale === "ne" ? day.labelNp : day.label}
+                    {ne ? day.labelNp : day.label}
                   </Label>
                 </div>
 
@@ -201,7 +223,7 @@ export default function AvailabilityPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    <span className="text-muted-foreground">{t("to")}</span>
+                    <span className="text-muted-foreground">{txt.to}</span>
                     <Select
                       value={schedule[day.id].end}
                       onValueChange={(value) =>
@@ -222,7 +244,7 @@ export default function AvailabilityPage() {
                   </div>
                 ) : (
                   <span className="text-sm text-muted-foreground">
-                    {t("notAvailable")}
+                    {txt.notAvailable}
                   </span>
                 )}
               </div>
@@ -235,7 +257,7 @@ export default function AvailabilityPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MapPin className="w-5 h-5" />
-              {t("serviceAreas")}
+              {txt.serviceAreas}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -261,7 +283,7 @@ export default function AvailabilityPage() {
             </div>
             <Button variant="outline" size="sm" className="gap-2 bg-transparent">
               <Plus className="w-4 h-4" />
-              {t("addArea")}
+              {txt.addArea}
             </Button>
           </CardContent>
         </Card>
@@ -271,20 +293,20 @@ export default function AvailabilityPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="w-5 h-5" />
-              {t("vacationMode")}
+              {txt.vacationMode}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
-              {t("vacationModeDesc")}
+              {txt.vacationModeDesc}
             </p>
-            <Button variant="outline">{t("setVacationDates")}</Button>
+            <Button variant="outline">{txt.setVacationDates}</Button>
           </CardContent>
         </Card>
 
         <Button className="w-full sm:w-auto gap-2">
           <Save className="w-4 h-4" />
-          {t("saveChanges")}
+          {txt.saveChanges}
         </Button>
       </div>
     </div>

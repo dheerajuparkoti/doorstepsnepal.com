@@ -29,7 +29,7 @@ export async function fetchServices(
 
     return await api.get<ServicesResponse>('/services', {
       params,
-      cache: 'no-store',
+      next: { revalidate: 60 },
     });
   } catch (error) {
     console.error('API Error fetching services:', error);

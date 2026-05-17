@@ -5,7 +5,7 @@ import { ServicesSection } from './ssr/services-section-ssr';
 import { ServicesSkeleton } from './skeleton/services-skeleton';
 import Loading from '../loading';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: 'All Services',

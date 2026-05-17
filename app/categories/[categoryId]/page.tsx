@@ -1,4 +1,6 @@
 // app/categories/[categoryId]/page.tsx
+export const revalidate = 60;
+
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CategoryDetailClient } from "./category-detail-client";

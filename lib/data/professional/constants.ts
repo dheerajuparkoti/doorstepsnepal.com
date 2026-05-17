@@ -23,11 +23,8 @@ export const QUICK_FILTERS = [
 export const QR_CODE_PATHS: Record<PaymentMethod, string> = {
   [PaymentMethod.KHALTI]: '/images/qr/khalti_qr.png',
   [PaymentMethod.ESEWA]: '/images/qr/esewa_qr.png',
-  [PaymentMethod.FONEPAY]: '/images/qr/fonepay_qr.png',
   [PaymentMethod.IMEPAY]: '/images/qr/imepay_qr.png',
-  [PaymentMethod.MOBILE_BANKING]: '/images/qr/mobile_banking_qr.png',
+  [PaymentMethod.QR_PAYMENT]: '/images/qr/qr_payment.png',
   [PaymentMethod.BANK_TRANSFER]: '',
   [PaymentMethod.CASH]: '',
-  [PaymentMethod.CARD]: '',
-  [PaymentMethod.DIGITAL_WALLET]: ''
 };
