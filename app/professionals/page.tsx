@@ -1,12 +1,26 @@
+import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { ProfessionalsSection } from './ssr/professionals-section-ssr';
 import { ProfessionalsSkeleton } from './skeleton/professionals-skeleton';
 
 export const revalidate = 60;
 
-export const metadata = {
-  title: 'Professionals | DoorStep',
-  description: 'Browse all professional service providers',
+export const metadata: Metadata = {
+  title: 'Find Professionals',
+  description: 'Browse verified home service professionals in Nepal. Find plumbers, electricians, cleaners, beauty experts, and more near you.',
+  openGraph: {
+    title: 'Find Professionals | Doorsteps Nepal',
+    description: 'Browse verified home service professionals in Nepal.',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Find Professionals | Doorsteps Nepal',
+    description: 'Browse verified home service professionals in Nepal.',
+  },
+  alternates: {
+    canonical: '/professionals',
+  },
 };
 
 interface ProfessionalsPageProps {

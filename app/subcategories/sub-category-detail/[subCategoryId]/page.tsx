@@ -28,13 +28,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const description = subcategory.description_en?.substring(0, 160) ?? `Book ${subcategory.name_en} services in Nepal.`;
+
   return {
     title: subcategory.name_en,
-    description: subcategory.description_en?.substring(0, 160),
+    description,
     openGraph: {
       title: subcategory.name_en,
-      description: subcategory.description_en?.substring(0, 160),
-      images: subcategory.image ? [subcategory.image] : [],
+      description,
+      type: "website",
+      images: subcategory.image ? [{ url: subcategory.image, alt: subcategory.name_en }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${subcategory.name_en} | Doorsteps Nepal`,
+      description,
+    },
+    alternates: {
+      canonical: `/subcategories/sub-category-detail/${subCategoryId}`,
     },
   };
 }

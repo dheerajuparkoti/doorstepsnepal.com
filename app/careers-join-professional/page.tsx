@@ -2,14 +2,29 @@ import type { Metadata } from "next";
 import CareersPage from "./page-client";
 
 export const metadata: Metadata = {
-  title: "Careers & Join as Professional | DoorStep Nepal",
+  title: "Join as a Professional",
   description:
-    "Join DoorStep Nepal as a service professional. Earn more, manage your schedule, and grow your business with Nepal's leading home services platform.",
+    "Start earning with Doorsteps Nepal. Join our network of verified service professionals in Kathmandu and grow your business.",
+  keywords: [
+    "join as professional Nepal",
+    "service professional jobs",
+    "Doorsteps Nepal careers",
+    "freelance home services Nepal",
+  ],
   openGraph: {
-    title: "Careers & Join as Professional | DoorStep Nepal",
+    title: "Join as a Professional | Doorsteps Nepal",
     description:
-      "Grow your career by joining DoorStep Nepal as a verified service professional.",
+      "Start earning with Doorsteps Nepal. Join our network of verified service professionals in Kathmandu.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Join as a Professional | Doorsteps Nepal",
+    description:
+      "Start earning with Doorsteps Nepal. Join our network of verified service professionals in Kathmandu.",
+  },
+  alternates: {
+    canonical: "/careers-join-professional",
   },
 };
 

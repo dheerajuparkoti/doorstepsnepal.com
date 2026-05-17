@@ -2,14 +2,27 @@ import type { Metadata } from "next";
 import PrivacyPolicyPage from "./page-client";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | DoorStep Nepal",
+  title: "Privacy Policy",
   description:
-    "Learn how DoorStep Nepal collects, uses, and protects your personal data. Our privacy policy covers data collection, storage, and your rights.",
+    "Learn how Doorsteps Nepal collects, uses, and protects your personal data. Read our full privacy policy.",
   openGraph: {
-    title: "Privacy Policy | DoorStep Nepal",
+    title: "Privacy Policy | Doorsteps Nepal",
     description:
-      "Learn how DoorStep Nepal collects, uses, and protects your personal data.",
+      "Learn how Doorsteps Nepal collects, uses, and protects your personal data.",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy | Doorsteps Nepal",
+    description:
+      "Learn how Doorsteps Nepal collects, uses, and protects your personal data.",
+  },
+  alternates: {
+    canonical: "/privacy-policy",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 

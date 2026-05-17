@@ -10,6 +10,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import FCMInitializer from "./notifications/fcm-initializer";
 import { AnnouncementDialogWrapper } from "@/components/notifications/announcement-wrapper";
+import Script from "next/script";
+import { JsonLd, organizationJsonLd, websiteJsonLd } from "@/components/seo/JsonLd";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -24,11 +26,14 @@ const notoSansDevanagari = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.doorstepsnepal.com"),
   verification: {
     google: "bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4",
   },
-  // <meta name="google-site-verification" content="bhj2HK_Z6_kzVq5tjTiSr-qAW44w61QZoG28IM-aCU4" />
-  title: "Doorsteps Nepal | Trusted Home Services at Your Doorstep",
+  title: {
+    default: "Doorsteps Nepal | Trusted Home Services at Your Doorstep",
+    template: "%s | Doorsteps Nepal",
+  },
   description:
     "Connect with verified professionals for plumbing, electrical, cleaning, beauty, repairs and more. Quality home services in Nepal.",
   keywords: [
@@ -40,13 +45,28 @@ export const metadata: Metadata = {
     "beauty",
     "repairs",
     "Kathmandu",
+    "home services Nepal",
+    "professional services Kathmandu",
   ],
   authors: [{ name: "Doorsteps Nepal" }],
   openGraph: {
+    siteName: "Doorsteps Nepal",
     title: "Doorsteps Nepal | Trusted Home Services",
-    description: "Book verified professionals for all your home service needs",
+    description: "Book verified professionals for all your home service needs in Nepal.",
     type: "website",
     locale: "en_US",
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630, alt: "Doorsteps Nepal" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Doorsteps Nepal | Trusted Home Services",
+    description: "Book verified professionals for all your home service needs in Nepal.",
+    images: ["/og-default.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 
@@ -82,7 +102,24 @@ export default async function RootLayout({
             </AuthProvider>
           </I18nProvider>
         </ThemeProvider>
+        <JsonLd data={[organizationJsonLd(), websiteJsonLd()]} />
         <Analytics />
+        {process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

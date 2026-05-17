@@ -45,15 +45,24 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const serviceName = service.service.name_en;
-  const description = service.service.description_en?.substring(0, 160);
+  const description = service.service.description_en?.substring(0, 160) ?? `Book professional ${serviceName} services in Nepal.`;
 
   return {
     title: `${serviceName} | Professional Services`,
-    description: description,
+    description,
     openGraph: {
-      title: serviceName,
-      description: description,
-      images: service.service.image ? [service.service.image] : [],
+      title: `${serviceName} | Doorsteps Nepal`,
+      description,
+      type: "website",
+      images: service.service.image ? [{ url: service.service.image, alt: serviceName }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${serviceName} | Doorsteps Nepal`,
+      description,
+    },
+    alternates: {
+      canonical: `/services/service-detail/${serviceId}`,
     },
   };
 }
