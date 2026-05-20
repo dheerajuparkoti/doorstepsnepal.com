@@ -59,6 +59,7 @@ export interface Order {
   customer_address: CustomerAddress;
   total_paid_amount: number;
   payment_summary: PaymentSummary;
+  is_rated?: boolean;
 }
 
 // Order Status Enum

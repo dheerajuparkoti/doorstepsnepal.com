@@ -55,29 +55,26 @@ import { notFound } from 'next/navigation';
 
 
 
-import { fetchReviewsByProfessional } from "@/lib/api/reviews"; // Import your existing review API
+import { fetchServicesByProfessionalId } from "@/lib/api/professional-services";
 
-// Rating calculation function (same logic as Flutter)
-function calculateAverageRating(reviews: Array<{ rating: number }>): number {
-  if (!reviews || reviews.length === 0) return 3.0;
-  
-  const sum = reviews.reduce((total, review) => total + review.rating, 0);
-  const avg = sum / reviews.length;
-  
-  // If average is less than 3.0, return 3.0 as minimum
-  return avg < 3.0 ? 3.0 : avg;
+// Weighted average across all professional_services rows.
+// Each row has its own cached average_rating + review_count.
+function calculateWeightedRating(services: Array<{ average_rating: number; review_count: number }>): number | null {
+  const totalReviews = services.reduce((s, ps) => s + (ps.review_count || 0), 0);
+  if (totalReviews === 0) return null;
+  const weighted = services.reduce((s, ps) => s + (ps.average_rating || 0) * (ps.review_count || 0), 0);
+  return weighted / totalReviews;
 }
 
-export async function ProfessionalHeaderCarouselSSR({ 
-  professionalId 
-}: { 
-  professionalId: number 
+export async function ProfessionalHeaderCarouselSSR({
+  professionalId
+}: {
+  professionalId: number
 }) {
-  // Fetch profile, showcases, and reviews in parallel
-  const [profile, showcases, reviewsResponse] = await Promise.all([
+  const [profile, showcases, services] = await Promise.all([
     fetchProfessionalProfile(professionalId),
     showcaseApi.getShowcases(professionalId),
-    fetchReviewsByProfessional(professionalId, 1, 10000) // Use your existing API
+    fetchServicesByProfessionalId(professionalId),
   ]);
 
   if (!profile) {
@@ -85,22 +82,19 @@ export async function ProfessionalHeaderCarouselSSR({
   }
 
   const activeShowcases = showcases.filter(s => s.is_active === true && s.status !== 'PENDING');
-  
+
   const showcaseImages = [
     profile.user.profile_image,
     ...activeShowcases.map(s => s.image_url)
   ].filter(Boolean) as string[];
 
-  // If only 1 image, still show carousel but disable loop/autoplay
-  // If no images, use placeholder
   if (showcaseImages.length === 0) {
     showcaseImages.push('/carousel/home-services-2.jpg');
   }
 
-  // Calculate rating using the reviews from the response
-  const reviews = reviewsResponse?.reviews || [];
-  const avgRating = calculateAverageRating(reviews);
-  const ratingString = `${avgRating.toFixed(1)}+`; // Format as "4.5+", "3.0+", etc.
+  // Weighted average from cached per-service columns (no extra review fetch needed)
+  const avgRating = calculateWeightedRating(services);
+  const ratingString = avgRating !== null ? `${avgRating.toFixed(1)}+` : 'New';
 
   return (
     <ProfessionalHeaderCarousel

@@ -1,7 +1,8 @@
 // lib/api/reviews.ts
 import { api } from '@/config/api-client';
-import { 
-  ProfessionalServiceReviewResponse, 
+import {
+  ProfessionalServiceReview,
+  ProfessionalServiceReviewResponse,
   FetchReviewsParams,
   CreateReviewPayload,
   CreateReviewResponse
@@ -80,13 +81,16 @@ export async function createReview(
   customerId: number
 ): Promise<CreateReviewResponse> {
   try {
+    const body: Record<string, unknown> = {
+      rating: data.rating,
+      review: data.review,
+      professional_service_id: professionalServiceId,
+    };
+    if (data.order_id != null) body.order_id = data.order_id;
+
     const response = await api.post<CreateReviewResponse>(
       `/professional_services/${professionalServiceId}/reviews`,
-      {
-        rating: data.rating,
-        review: data.review,
-        professional_service_id: professionalServiceId
-      },
+      body,
       {
         params: {
           customer_id: customerId
@@ -99,6 +103,30 @@ export async function createReview(
     console.error('Error creating review:', error);
     throw error;
   }
+}
+
+// PUT method - Update an existing review
+export async function updateReview(
+  reviewId: number,
+  customerId: number,
+  data: { rating: number; review_text: string }
+): Promise<ProfessionalServiceReview> {
+  const response = await api.put<ProfessionalServiceReview>(
+    `/professional_services/reviews/${reviewId}`,
+    { rating: data.rating, review_text: data.review_text },
+    { params: { customer_id: customerId } }
+  );
+  return response;
+}
+
+// DELETE method - Delete a review
+export async function deleteReview(
+  reviewId: number,
+  customerId: number
+): Promise<void> {
+  await api.delete(`/professional_services/reviews/${reviewId}`, {
+    params: { customer_id: customerId },
+  });
 }
 
 // Alternative method if you want to pass all params together

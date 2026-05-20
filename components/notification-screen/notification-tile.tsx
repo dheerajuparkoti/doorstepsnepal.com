@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Bell, BellOff, Trash2, MoreVertical, Check } from "lucide-react";
+import { Bell, BellOff, Trash2, MoreVertical, Check, Megaphone } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Notification, getNotificationTitle, getNotificationBody } from "@/lib/data/notification";
 import { useNotificationStore } from "@/stores/notification-store";
+import { NotificationDetailDialog } from "./notification-detail-dialog";
 import { cn } from "@/lib/utils";
 import { NepaliDateService } from "@/lib/utils/nepaliDate";
 import { useAuth } from "@/lib/context/auth-context";
@@ -36,7 +37,10 @@ export function NotificationTile({ notification }: NotificationTileProps) {
   const router = useRouter();
    const { mode } = useAuth(); 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
   const { markAsRead, deleteNotification } = useNotificationStore();
+
+  const DIALOG_ROUTES = ['announcement', 'professional', 'customer', 'profile'];
 
  // Helper to determine if notification is for professional
 const isProfessionalNotification = () => {
@@ -158,27 +162,32 @@ const getRouteForNotification = () => {
 };
 
   const handleClick = async () => {
-    // Mark as read if unread
     if (!notification.is_read) {
-      await markAsRead(notification.id);
+      await markAsRead(notification.id, notification.isGlobal);
     }
 
-    // Get the appropriate route based on mode
+    // Show detail dialog for announcement/profile/customer/professional routes
+    if (notification.action_route && DIALOG_ROUTES.includes(notification.action_route)) {
+      setShowDetailDialog(true);
+      return;
+    }
+
+    if (notification.isGlobal) {
+      setShowDetailDialog(true);
+      return;
+    }
+
     const route = getRouteForNotification();
-    
-    // Navigate to the route
     if (route) {
       router.push(route);
     } else {
-      // Fallback to notification detail
       router.push(`/dashboard/notifications/${notification.id}`);
     }
   };
 
-
   const handleMarkAsRead = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    await markAsRead(notification.id);
+    await markAsRead(notification.id, notification.isGlobal);
   };
 
   const handleDelete = async (e: React.MouseEvent) => {
@@ -187,28 +196,46 @@ const getRouteForNotification = () => {
   };
 
   const confirmDelete = async () => {
-    await deleteNotification(notification.id);
+    await deleteNotification(notification.id, notification.isGlobal);
     setShowDeleteDialog(false);
   };
 
   const timeAgo = NepaliDateService.formatTime((notification.created_at));
+  const imageUrl = notification.custom_data?.image_url as string | undefined;
 
   return (
     <>
       <Card
         className={cn(
-          "p-3 cursor-pointer transition-colors hover:bg-accent/50",
-          !notification.is_read && "border-l-4 border-l-primary bg-primary/5"
+          "cursor-pointer transition-colors hover:bg-accent/50 overflow-hidden",
+          !notification.is_read && notification.isGlobal && "border-l-4 border-l-orange-500 bg-orange-500/5",
+          !notification.is_read && !notification.isGlobal && "border-l-4 border-l-primary bg-primary/5"
         )}
         onClick={handleClick}
       >
-        <div className="flex gap-3">
+        {/* Banner image */}
+        {imageUrl && (
+          <div className="w-full h-36 bg-muted">
+            <img
+              src={imageUrl}
+              alt=""
+              className="w-full h-full object-cover"
+              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            />
+          </div>
+        )}
+
+        <div className="p-3 flex gap-3">
           {/* Icon */}
           <div className={cn(
             "flex h-8 w-8 shrink-0 items-center justify-center rounded-full",
-            notification.is_read ? "bg-muted" : "bg-primary/10"
+            notification.isGlobal
+              ? notification.is_read ? "bg-muted" : "bg-orange-500/10"
+              : notification.is_read ? "bg-muted" : "bg-primary/10"
           )}>
-            {notification.is_read ? (
+            {notification.isGlobal ? (
+              <Megaphone className={cn("h-4 w-4", notification.is_read ? "text-muted-foreground" : "text-orange-500")} />
+            ) : notification.is_read ? (
               <BellOff className="h-4 w-4 text-muted-foreground" />
             ) : (
               <Bell className="h-4 w-4 text-primary" />
@@ -239,12 +266,12 @@ const getRouteForNotification = () => {
                       Mark as read
                     </DropdownMenuItem>
                   )}
-                  <DropdownMenuItem 
+                  <DropdownMenuItem
                     onClick={handleDelete}
                     className="text-destructive focus:text-destructive"
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
+                    {notification.isGlobal ? 'Dismiss' : 'Delete'}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -261,13 +288,24 @@ const getRouteForNotification = () => {
         </div>
       </Card>
 
+      {/* Notification Detail Dialog */}
+      <NotificationDetailDialog
+        notification={notification}
+        open={showDetailDialog}
+        onClose={() => setShowDetailDialog(false)}
+      />
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Notification</AlertDialogTitle>
+            <AlertDialogTitle>
+              {notification.isGlobal ? 'Dismiss Notification' : 'Delete Notification'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this notification? This action cannot be undone.
+              {notification.isGlobal
+                ? 'This will dismiss the broadcast notification. You can still see it again if the admin resends it.'
+                : 'Are you sure you want to delete this notification? This action cannot be undone.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -278,7 +316,7 @@ const getRouteForNotification = () => {
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {notification.isGlobal ? 'Dismiss' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

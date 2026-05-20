@@ -14,6 +14,7 @@ import {
   XCircle,
   CreditCard,
   Heart,
+  Star,
   Users,
   Settings,
   User,
@@ -76,6 +77,14 @@ export function CustomerSidebar() {
       children: [
         { label: t.customer.sidebar.myFavorites, href: "/dashboard/favorites/my-favorites", icon: Heart },
         // { label: t.customer.sidebar.favProfessionals, href: "/dashboard/favorites/professionals", icon: Users },
+      ],
+    },
+    {
+      label: t.customer.sidebar.ratings,
+      href: "/dashboard/ratings",
+      icon: Star,
+      children: [
+        { label: t.customer.sidebar.myRatings, href: "/dashboard/ratings/my-ratings", icon: Star },
       ],
     },
     {

@@ -45,6 +45,8 @@ export interface ProfessionalService {
     sub_category_id: number;
   };
   prices: ProfessionalServicePrice[];
+  average_rating: number;
+  review_count: number;
 }
 
 export interface ProfessionalServicePrice {
