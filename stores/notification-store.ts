@@ -11,25 +11,25 @@ interface NotificationState {
   // Data
   notifications: Notification[];
   currentNotification: Notification | null;
-  
+
   // UI State
   isLoading: boolean;
   error: string | null;
-  lastFetched: number | null; 
-  
+  lastFetched: number | null;
+
   // Computed
-  unreadCount: number; 
+  unreadCount: number;
   hasOtherModeNotifications: (isProfessionalMode: boolean) => number;
-  
+
   // Actions
   loadNotifications: (force?: boolean) => Promise<void>;
   getNotificationById: (id: number) => Promise<void>;
-  markAsRead: (id: number) => Promise<void>;
+  markAsRead: (id: number, isGlobal?: boolean) => Promise<void>;
   markAllAsRead: () => Promise<void>;
-  deleteNotification: (id: number) => Promise<void>;
+  deleteNotification: (id: number, isGlobal?: boolean) => Promise<void>;
   createNotification: (data: any) => Promise<Notification | null>;
   clearError: () => void;
-  clearNotifications: () => void; 
+  clearNotifications: () => void;
   addNotification: (notification: Notification) => void;
 }
 
@@ -89,24 +89,26 @@ export const useNotificationStore = create<NotificationState>()(
         },
 
       hasOtherModeNotifications: (isProfessionalMode: boolean) => {
-  return get().notifications.filter(notif => {
-  
-    const isProNotif = 
-      notif.type === 'New Order' ||
-      notif.type === 'payment_received' ||
-      notif.type === 'withdrawal_approved' ||
-      notif.type === 'withdrawal_completed' ||
-      notif.type === 'withdrawal_rejected' ||
-      (notif.type === 'Order Update' && 
-       (notif.title === 'Inspection Approved' || 
-        notif.title === 'Inspection Rejected'|| notif.title === 'Order Cancelled'));
-    
+        return get().notifications.filter(notif => {
+          if (notif.isGlobal) {
+            return (notif.mode_channel ?? false) !== isProfessionalMode && !notif.is_read;
+          }
 
-    const isTargetMode = isProfessionalMode ? !isProNotif : isProNotif;
-    
-    return isTargetMode && !notif.is_read;
-  }).length;
-},
+          const isProNotif =
+            notif.type === 'New Order' ||
+            notif.type === 'payment_received' ||
+            notif.type === 'withdrawal_approved' ||
+            notif.type === 'withdrawal_completed' ||
+            notif.type === 'withdrawal_rejected' ||
+            (notif.type === 'Order Update' &&
+             (notif.title === 'Inspection Approved' ||
+              notif.title === 'Inspection Rejected' ||
+              notif.title === 'Order Cancelled'));
+
+          const isTargetMode = isProfessionalMode ? !isProNotif : isProNotif;
+          return isTargetMode && !notif.is_read;
+        }).length;
+      },
 
     
         addNotification: (notification: Notification) => {
@@ -144,24 +146,26 @@ export const useNotificationStore = create<NotificationState>()(
           }
 
           set({ isLoading: true, error: null });
-          
+
           try {
-            const notifications = await notificationApi.getMyNotifications();
-        
-            const sortedNotifications = sortNotificationsByDate(notifications);
-   
-          
-            
-            set({ 
-              notifications: sortedNotifications, 
+            const personal = await notificationApi.getMyNotifications();
+
+            let global: Notification[] = [];
+            try {
+              global = await notificationApi.getGlobalNotifications();
+            } catch {}
+
+            const merged = sortNotificationsByDate([...personal, ...global]);
+
+            set({
+              notifications: merged,
               lastFetched: now,
-              isLoading: false 
+              isLoading: false,
             });
-            
           } catch (error) {
-            set({ 
+            set({
               error: error instanceof Error ? error.message : 'Failed to load notifications',
-              isLoading: false 
+              isLoading: false,
             });
           }
         },
@@ -178,55 +182,68 @@ export const useNotificationStore = create<NotificationState>()(
           }
         },
 
-        // Mark as read
-        markAsRead: async (id: number) => {
+        markAsRead: async (id: number, isGlobal = false) => {
           try {
-            const updated = await notificationApi.patchNotification(id, { is_read: true });
-            
-            set((state) => {
-              const updatedNotifications = state.notifications.map(n => 
-                n.id === id ? updated : n
-              );
-              return {
-                notifications: sortNotificationsByDate(updatedNotifications)
-              };
-            });
-
-            const current = get().currentNotification;
-            if (current?.id === id) {
-              set({ currentNotification: updated });
+            if (isGlobal) {
+              await notificationApi.markGlobalAsRead(id);
+              set((state) => ({
+                notifications: sortNotificationsByDate(
+                  state.notifications.map(n =>
+                    n.id === id && n.isGlobal ? { ...n, is_read: true } : n
+                  )
+                ),
+              }));
+            } else {
+              const updated = await notificationApi.patchNotification(id, { is_read: true });
+              set((state) => ({
+                notifications: sortNotificationsByDate(
+                  state.notifications.map(n =>
+                    n.id === id && !n.isGlobal ? updated : n
+                  )
+                ),
+              }));
+              const current = get().currentNotification;
+              if (current?.id === id) set({ currentNotification: updated });
             }
           } catch (error) {
             set({ error: error instanceof Error ? error.message : 'Failed to mark as read' });
           }
         },
 
-        // Mark all as read
         markAllAsRead: async () => {
           try {
-            const unreadIds = get().notifications.filter(n => !n.is_read).map(n => n.id);
-            await Promise.all(unreadIds.map(id => 
-              notificationApi.patchNotification(id, { is_read: true })
-            ));
-            
-            set((state) => {
-              const updatedNotifications = state.notifications.map(n => ({ ...n, is_read: true }));
-              return {
-                notifications: sortNotificationsByDate(updatedNotifications)
-              };
-            });
+            const unread = get().notifications.filter(n => !n.is_read);
+            const personalUnread = unread.filter(n => !n.isGlobal);
+            const globalUnread = unread.filter(n => n.isGlobal);
+
+            await Promise.all([
+              ...personalUnread.map(n => notificationApi.patchNotification(n.id, { is_read: true })),
+              ...globalUnread.map(n => notificationApi.markGlobalAsRead(n.id)),
+            ]);
+
+            set((state) => ({
+              notifications: sortNotificationsByDate(
+                state.notifications.map(n => ({ ...n, is_read: true }))
+              ),
+            }));
           } catch (error) {
             set({ error: error instanceof Error ? error.message : 'Failed to mark all as read' });
           }
         },
 
-        // Delete notification
-        deleteNotification: async (id: number) => {
+        deleteNotification: async (id: number, isGlobal = false) => {
           try {
-            await notificationApi.deleteNotification(id);
+            if (isGlobal) {
+              await notificationApi.dismissGlobalNotification(id);
+            } else {
+              await notificationApi.deleteNotification(id);
+            }
             set((state) => ({
-              notifications: state.notifications.filter(n => n.id !== id),
-              currentNotification: state.currentNotification?.id === id ? null : state.currentNotification
+              notifications: state.notifications.filter(
+                n => !(n.id === id && (n.isGlobal ?? false) === isGlobal)
+              ),
+              currentNotification:
+                state.currentNotification?.id === id ? null : state.currentNotification,
             }));
           } catch (error) {
             set({ error: error instanceof Error ? error.message : 'Failed to delete notification' });

@@ -58,15 +58,15 @@ export default function PendingJobsPage() {
   const currentProfessionalId =currentProfessionalIdFromAuth||0;
 
   useEffect(() => {
-    loadJobs();
-  }, []);
+    if (currentProfessionalId > 0) loadJobs();
+  }, [currentProfessionalId]);
 
   const loadJobs = async () => {
     try {
       setIsRefreshing(true);
       await fetchOrders({
         professional_id: currentProfessionalId,
-        status: OrderStatus.PENDING,
+        per_page: 10000,
       });
     } catch (err) {
       toast({

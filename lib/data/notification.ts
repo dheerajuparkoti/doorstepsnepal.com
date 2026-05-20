@@ -10,10 +10,12 @@ export interface Notification {
   title: string;
   body: string;
   is_read: boolean;
+  mode_channel?: boolean;
   action_route?: string;
   custom_data?: Record<string, any>;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
+  isGlobal?: boolean;
 }
 
 export interface NotificationRequest {
@@ -135,16 +137,20 @@ export const groupNotificationsByDate = (
   
 
   const filteredNotifications = notifications.filter(notif => {
-    const isProNotif = 
+    if (notif.isGlobal) {
+      return (notif.mode_channel ?? false) === isProfessionalMode;
+    }
+
+    const isProNotif =
       notif.type === 'New Order' ||
       notif.type === 'payment_received' ||
       notif.type === 'withdrawal_approved' ||
       notif.type === 'withdrawal_completed' ||
       notif.type === 'withdrawal_rejected' ||
-      (notif.type === 'Order Update' && 
-       (notif.title === 'Inspection Approved' || 
+      (notif.type === 'Order Update' &&
+       (notif.title === 'Inspection Approved' ||
         notif.title === 'Inspection Rejected'));
-    
+
     return isProfessionalMode ? isProNotif : !isProNotif;
   });
 

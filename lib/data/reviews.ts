@@ -97,6 +97,7 @@ export interface FetchReviewsParams {
   professional_service_id?: number;
   professional_id?: number;
   service_id?: number;
+  customer_id?: number;
   page?: number;
   per_page?: number;
 }
@@ -106,6 +107,7 @@ export interface CreateReviewPayload {
   rating: number;
   review: string;
   professional_service_id: number;
+  order_id?: number;
 }
 
 export interface CreateReviewResponse {
